@@ -19,20 +19,22 @@
   <meta name="author" content="zl1nq">
   <meta name="keywords" content="">
   
-    <meta property="og:type" content="article">
-<meta property="og:title" content="Java并发编程02">
+    <meta name="description" content="Synchronized 关键字1、基本概念 synchronized 是 Java 内置的互斥锁，也叫对象锁或内置锁。 保证原子性：同一时刻只有一个线程能执行被 synchronized 保护的代码。 保证可见性：线程解锁时，会将共享变量刷新到主内存；加锁时，会从主内存重新读取。 保证有序性：通过互斥执行，消除指令重排序带来的问题。   核心作用：解决多线程并发访问共享资源时的线程安全问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java并发编程02：synchronized &amp; volatile">
 <meta property="og:url" content="http://zl1nq.github.io/2026/07/19/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B02/index.html">
 <meta property="og:site_name" content="Blog">
+<meta property="og:description" content="Synchronized 关键字1、基本概念 synchronized 是 Java 内置的互斥锁，也叫对象锁或内置锁。 保证原子性：同一时刻只有一个线程能执行被 synchronized 保护的代码。 保证可见性：线程解锁时，会将共享变量刷新到主内存；加锁时，会从主内存重新读取。 保证有序性：通过互斥执行，消除指令重排序带来的问题。   核心作用：解决多线程并发访问共享资源时的线程安全问题。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-07-19T13:49:03.000Z">
-<meta property="article:modified_time" content="2026-07-19T13:49:19.667Z">
+<meta property="article:modified_time" content="2026-07-21T04:55:26.588Z">
 <meta property="article:author" content="zl1nq">
 <meta property="article:tag" content="Java">
 <meta name="twitter:card" content="summary_large_image">
   
   
   
-  <title>Java并发编程02 - Blog</title>
+  <title>Java并发编程02：synchronized &amp; volatile - Blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -157,6 +159,18 @@
             </li>
           
         
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
         
         
           <li class="nav-item" id="color-toggle-btn">
@@ -232,6 +246,20 @@
             </div>
           
         
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
         
         
           <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
@@ -259,7 +287,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Java并发编程02"></span>
+            <span id="subtitle" data-typed-text="Java并发编程02：synchronized &amp; volatile"></span>
           
         </div>
 
@@ -282,7 +310,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          0 字
+          7.7k 字
         
       </span>
     
@@ -293,7 +321,7 @@
         
         
         
-          1 分钟
+          65 分钟
         
       </span>
     
@@ -332,12 +360,275 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">Java并发编程02</h1>
+            <h1 id="seo-header">Java并发编程02：synchronized &amp; volatile</h1>
             
             
               <div class="markdown-body">
                 
-                
+                <h2 id="Synchronized-关键字"><a href="#Synchronized-关键字" class="headerlink" title="Synchronized 关键字"></a>Synchronized 关键字</h2><h3 id="1、基本概念"><a href="#1、基本概念" class="headerlink" title="1、基本概念"></a>1、基本概念</h3><ul>
+<li><strong>synchronized</strong> 是 Java 内置的<strong>互斥锁</strong>，也叫<strong>对象锁</strong>或<strong>内置锁</strong>。</li>
+<li>保证<strong>原子性</strong>：同一时刻只有一个线程能执行被 synchronized 保护的代码。</li>
+<li>保证<strong>可见性</strong>：线程解锁时，会将共享变量刷新到主内存；加锁时，会从主内存重新读取。</li>
+<li>保证<strong>有序性</strong>：通过互斥执行，消除指令重排序带来的问题。</li>
+</ul>
+<blockquote>
+<p><strong>核心作用</strong>：解决多线程并发访问共享资源时的线程安全问题。</p>
+</blockquote>
+<h3 id="2、三种使用方式"><a href="#2、三种使用方式" class="headerlink" title="2、三种使用方式"></a>2、三种使用方式</h3><h4 id="方式一：修饰实例方法"><a href="#方式一：修饰实例方法" class="headerlink" title="方式一：修饰实例方法"></a>方式一：修饰实例方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SynchronizedDemo</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br><br>    <span class="hljs-comment">// 锁的是当前对象 this</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">synchronized</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">increment</span><span class="hljs-params">()</span> &#123;<br>        count++;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">synchronized</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">decrement</span><span class="hljs-params">()</span> &#123;<br>        count--;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="方式二：修饰静态方法"><a href="#方式二：修饰静态方法" class="headerlink" title="方式二：修饰静态方法"></a>方式二：修饰静态方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SynchronizedDemo</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-type">int</span> <span class="hljs-variable">staticCount</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br><br>    <span class="hljs-comment">// 锁的是当前类的 Class 对象（类锁）</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">synchronized</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">staticIncrement</span><span class="hljs-params">()</span> &#123;<br>        staticCount++;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="方式三：修饰代码块"><a href="#方式三：修饰代码块" class="headerlink" title="方式三：修饰代码块"></a>方式三：修饰代码块</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SynchronizedDemo</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">private</span> <span class="hljs-type">Object</span> <span class="hljs-variable">lock</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>();<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">increment</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 锁的是括号里的对象</span><br>        <span class="hljs-keyword">synchronized</span> (<span class="hljs-built_in">this</span>) &#123;<br>            count++;<br>        &#125;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doSomething</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 使用自定义锁对象，粒度更细</span><br>        <span class="hljs-keyword">synchronized</span> (lock) &#123;<br>            <span class="hljs-comment">// 临界区代码</span><br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="简单例子"><a href="#简单例子" class="headerlink" title="简单例子"></a>简单例子</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SynchronizedTest</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        <span class="hljs-type">Test</span> <span class="hljs-variable">t</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Test</span>();<br>        <span class="hljs-type">Test</span> <span class="hljs-variable">tt</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Test</span>();<br>        <span class="hljs-type">Thread</span> <span class="hljs-variable">t1</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(t);<br>        <span class="hljs-type">Thread</span> <span class="hljs-variable">t2</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(tt);<br>        t1.setName(<span class="hljs-string">&quot;t1&quot;</span>);<br>        t2.setName(<span class="hljs-string">&quot;t2&quot;</span>);<br>        t1.start();<br>        t2.start();<br>        System.out.println(<span class="hljs-string">&quot;done&quot;</span>);<br>    &#125;<br>&#125;<br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Test</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Runnable</span>&#123;<br>    <span class="hljs-comment">// 锁的是 lock 对象</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Object</span> <span class="hljs-variable">lock</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Object</span>();<br>    <span class="hljs-keyword">static</span> <span class="hljs-type">int</span> <span class="hljs-variable">count</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;i&lt;<span class="hljs-number">200</span>;i++)&#123;<br>            <span class="hljs-comment">// 只有拿到 lock 对象的线程才能执行同步代码块</span><br>            <span class="hljs-comment">// 其他线程必须等待，直到 lock 对象的线程释放锁</span><br>            <span class="hljs-comment">// 同步代码块内的代码会被线程互斥执行</span><br>            <span class="hljs-comment">// 例如，更新 count 变量时，需要确保只有一个线程能执行</span><br>            <span class="hljs-keyword">synchronized</span> (lock)&#123;<br>                <span class="hljs-comment">// 临界区代码,确保线程安全</span><br>                <span class="hljs-keyword">if</span>(count &lt; <span class="hljs-number">10</span>) count++;<br>                System.out.println(Thread.currentThread().getName()+<span class="hljs-string">&quot;is running&quot;</span>+i);<br>            &#125;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="3、锁的类型对比"><a href="#3、锁的类型对比" class="headerlink" title="3、锁的类型对比"></a>3、锁的类型对比</h3><table>
+<thead>
+<tr>
+<th>锁类型</th>
+<th>锁对象</th>
+<th>锁住的范围</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>实例方法锁</td>
+<td><code>this</code></td>
+<td>当前对象的所有实例方法</td>
+</tr>
+<tr>
+<td>静态方法锁</td>
+<td><code>类名.class</code></td>
+<td>当前类的所有静态方法</td>
+</tr>
+<tr>
+<td>代码块锁</td>
+<td>指定对象</td>
+<td>只有代码块内的代码</td>
+</tr>
+</tbody></table>
+<h3 id="4、核心特性"><a href="#4、核心特性" class="headerlink" title="4、核心特性"></a>4、核心特性</h3><ul>
+<li><strong>可重入性</strong>：同一个线程可以多次获得同一把锁，不会自己锁死自己。</li>
+<li><strong>排他性</strong>：同一时刻只能有一个线程持有锁（悲观锁）。</li>
+<li><strong>自动释放</strong>：线程执行完同步代码或发生异常时，会自动释放锁。</li>
+<li><strong>锁的是对象而非方法</strong>：关键看锁的是哪个对象。</li>
+</ul>
+<h3 id="5、底层原理"><a href="#5、底层原理" class="headerlink" title="5、底层原理"></a>5、底层原理</h3><h4 id="对象头（Object-Header）"><a href="#对象头（Object-Header）" class="headerlink" title="对象头（Object Header）"></a>对象头（Object Header）</h4><p>Java 对象在内存中分为三部分：</p>
+<ol>
+<li><strong>对象头</strong>：存储对象的元数据，包括 Mark Word、类指针等。</li>
+<li><strong>实例数据</strong>：对象的成员变量。</li>
+<li><strong>对齐填充</strong>：保证对象大小是 8 字节的倍数。</li>
+</ol>
+<p><strong>Mark Word</strong> 是 synchronized 实现锁的关键，它存储了锁的状态信息：</p>
+<table>
+<thead>
+<tr>
+<th>锁状态</th>
+<th>Mark Word 内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>无锁</td>
+<td>对象哈希码 + 分代年龄</td>
+</tr>
+<tr>
+<td>偏向锁</td>
+<td><strong>偏向线程 ID</strong> + Epoch + 分代年龄</td>
+</tr>
+<tr>
+<td>轻量级锁</td>
+<td>指向栈中锁记录的指针</td>
+</tr>
+<tr>
+<td>重量级锁</td>
+<td>指向 Monitor 对象的指针</td>
+</tr>
+</tbody></table>
+<h4 id="Monitor-对象"><a href="#Monitor-对象" class="headerlink" title="Monitor 对象"></a>Monitor 对象</h4><p>当锁升级为重量级锁时，JVM 会为对象分配一个 <strong>Monitor</strong>（管程）对象：</p>
+<ul>
+<li><strong>Entry Set</strong>：等待获取锁的线程队列。</li>
+<li><strong>Owner</strong>：当前持有锁的线程。</li>
+<li><strong>Wait Set</strong>：调用 wait() 等待的线程队列。</li>
+</ul>
+<h3 id="6、锁升级过程"><a href="#6、锁升级过程" class="headerlink" title="6、锁升级过程"></a>6、锁升级过程</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs">无锁 → 偏向锁 → 轻量级锁 → 重量级锁<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>锁状态是单向不可逆膨胀</strong></p>
+<ul>
+<li>偏向锁、轻量级锁完全不用 Monitor、不依赖操作系统内核阻塞，全程靠 CAS + MarkWord + 线程栈帧在用户态实现互斥；</li>
+<li>Monitor 只是重量级锁的”阻塞队列管理器”，前三级锁不靠它也能保证同一时间只有一个线程执行同步代码；</li>
+<li>互斥本质：通过 CAS 修改 MarkWord，抢占标记所有权，抢占失败就自旋重试（轻量级）或直接排队膨胀重量级锁。</li>
+</ul>
+</blockquote>
+<h4 id="CAS-是什么"><a href="#CAS-是什么" class="headerlink" title="CAS 是什么"></a>CAS 是什么</h4><ul>
+<li><strong>Compare and Swap</strong>（比较并交换）是一种原子操作，用于在多线程环境下更新共享变量。</li>
+<li>它通过将当前值与预期值进行比较，如果相等则更新为新值，否则保持当前值不变。</li>
+<li>该操作是原子的，确保了线程安全。</li>
+</ul>
+<p><strong>Compare And Swap</strong>：比较内存当前值和预期值，相等才修改，原子操作（CPU 硬件指令保证）。所有偏向&#x2F;轻量级锁的互斥根基就是 CAS。</p>
+<h4 id="6-1-偏向锁"><a href="#6-1-偏向锁" class="headerlink" title="6.1 偏向锁"></a>6.1 偏向锁</h4><ul>
+<li>适用于<strong>单线程重复获取锁</strong>的场景。</li>
+<li>第一次获取锁时，记录线程 ID，后续同一线程直接获取，无需 CAS 操作。</li>
+</ul>
+<p><strong>场景</strong>：始终只有 A 线程访问同步块</p>
+<ul>
+<li>对象初始是无锁，MarkWord 标记位 01（无锁&#x2F;偏向模式），偏向线程 ID&#x3D;0；</li>
+<li>A 线程第一次进入 synchronized(obj)：用 CAS 把 MarkWord 里的线程 ID 改成自己，同时开启偏向标记；</li>
+<li>后续 A 线程再次进入同步代码：直接读取 MarkWord，发现里面存的线程 ID &#x3D; 当前线程，不用任何 CAS，直接获取锁；</li>
+<li><strong>互斥保证</strong>：MarkWord 里记录了唯一持有线程，别的线程进来 CAS 修改线程 ID 会失败，触发偏向撤销升级轻量级锁。</li>
+</ul>
+<p><strong>没有其他线程时</strong>，全程偏向锁，MarkWord 永久记录 A 线程 ID，不会出现多线程同时进入同步块。</p>
+<p><strong>出现竞争的互斥逻辑</strong>：</p>
+<p>此时新开线程 B 抢锁：B 执行 CAS 修改 MarkWord 的线程 ID，CAS 失败 → JVM 发起偏向撤销，暂停 A 线程，清空 MarkWord 线程 ID，升级轻量级锁。</p>
+<h4 id="6-2-轻量级锁"><a href="#6-2-轻量级锁" class="headerlink" title="6.2 轻量级锁"></a>6.2 轻量级锁</h4><ul>
+<li>当有<strong>多个线程交替获取锁</strong>时，偏向锁升级为轻量级锁。</li>
+<li>使用 CAS 操作尝试获取锁，失败则自旋等待。</li>
+</ul>
+<p><strong>流程</strong>（两个线程交替执行，不并发争抢）：</p>
+<ol>
+<li>线程 A 进入同步块：在自己的虚拟机栈创建一块空间 Lock Record（锁记录），存储 MarkWord 的拷贝（displaced mark word）；用 CAS 把对象 MarkWord 改成「指向 A 栈锁记录的指针」。CAS 成功 → A 持有轻量级锁。</li>
+<li>A 没释放锁时，线程 B 来抢：B 同样创建锁记录，执行 CAS 尝试修改 MarkWord 指针 → CAS 失败；B 进入自旋循环：不断重试 CAS 抢锁（用户态，不切换内核、不用 Monitor）。</li>
+<li>A 执行完同步代码：通过 CAS 把对象 MarkWord 恢复成原来的拷贝，释放锁；B 自旋 CAS 成功，持有锁执行。</li>
+</ol>
+<p><strong>互斥关键点</strong>：同一时刻，MarkWord 只能存储一个栈锁记录的地址，CAS 原子操作保证只有一个线程修改成功；失败线程自旋等待，不会出现两个线程同时进入同步代码。</p>
+<p><strong>关于 Lock Record</strong>：</p>
+<ol>
+<li><strong>保存对象原始的 Mark Word（Displaced Mark Word）</strong>：轻量级锁加锁前，对象头里存着无锁&#x2F;偏向锁信息。线程先把这份原始数据拷贝到自己栈帧的 Lock Record 里。等同步代码执行完毕、释放锁时，再用 CAS 把 Lock Record 里保存的旧 MarkWord 写回对象头，完成解锁。如果没有 Lock Record，原始锁状态会丢失，没法恢复对象到无锁状态。</li>
+<li><strong>作为”持有锁凭证”，实现互斥与可重入</strong>：对象 Mark Word 里会存指向当前线程 Lock Record 的指针，代表锁被这条线程占有。其他线程 CAS 修改 MarkWord 必然失败，触发自旋；同一线程多次进入同步块（锁重入），会在线程栈新增多条 Lock Record，解锁时一一出栈匹配，保证重入次数对应，不会提前释放锁。</li>
+</ol>
+<h4 id="6-3-重量级锁"><a href="#6-3-重量级锁" class="headerlink" title="6.3 重量级锁"></a>6.3 重量级锁</h4><ul>
+<li>当<strong>自旋次数过多</strong>或<strong>线程阻塞</strong>时，升级为重量级锁。</li>
+<li>涉及操作系统内核态切换，性能开销较大。</li>
+</ul>
+<h5 id="触发时机"><a href="#触发时机" class="headerlink" title="触发时机"></a>触发时机</h5><p>轻量级锁大量自旋抢锁失败，JVM 判定竞争激烈，锁单向膨胀为重量级锁；只有到这一步，对象才会真正创建 Monitor 监视器。</p>
+<h5 id="底层核心结构：ObjectMonitor（监视器）"><a href="#底层核心结构：ObjectMonitor（监视器）" class="headerlink" title="底层核心结构：ObjectMonitor（监视器）"></a>底层核心结构：ObjectMonitor（监视器）</h5><p>每个膨胀后的对象绑定一个 Monitor，关键属性：</p>
+<ul>
+<li><strong>_owner</strong>：记录当前持有锁的线程，null &#x3D; 无线程占用</li>
+<li><strong>_EntryList</strong>：抢锁失败、阻塞等待锁的线程队列（没拿到锁，排队等）</li>
+<li><strong>_WaitSet</strong>：调用 wait() 释放锁后，等待唤醒的线程队列</li>
+</ul>
+<p>底层依托操作系统内核互斥量 mutex，线程阻塞会交给 OS 调度。</p>
+<p><strong>MarkWord 变化</strong>：膨胀后对象头 MarkWord 不再存线程 ID&#x2F;LockRecord 指针，而是直接存 Monitor 的内存地址。</p>
+<h5 id="重量级锁完整执行流程"><a href="#重量级锁完整执行流程" class="headerlink" title="重量级锁完整执行流程"></a>重量级锁完整执行流程</h5><ol>
+<li><p>线程执行 <code>monitorenter</code> 尝试抢占 <code>_owner</code>：</p>
+<ul>
+<li>如果 <code>_owner</code> 为空：当前线程持有锁，<code>_owner = 当前线程</code>；</li>
+<li>如果 <code>_owner</code> 被别的线程占用：线程不再自旋，进入 <code>_EntryList</code>，操作系统将该线程阻塞挂起，让出 CPU；</li>
+</ul>
+</li>
+<li><p>持有锁线程执行同步代码，执行完毕执行 <code>monitorexit</code>：</p>
+<ul>
+<li>清空 <code>_owner</code>；</li>
+<li>OS 唤醒 <code>_EntryList</code> 里等待的线程，重新竞争锁；</li>
+</ul>
+</li>
+<li><p>若线程在同步块内调用 <code>obj.wait()</code>：</p>
+<ul>
+<li>释放 <code>_owner</code> 锁；</li>
+<li>当前线程移入 <code>_WaitSet</code> 休眠；</li>
+</ul>
+</li>
+<li><p>调用 <code>notify()</code> &#x2F; <code>notifyAll()</code>：</p>
+<ul>
+<li>从 WaitSet 取出一条&#x2F;全部线程，移回 EntryList 重新抢锁。</li>
+</ul>
+</li>
+</ol>
+<h5 id="核心特征（对比偏向-轻量级锁）"><a href="#核心特征（对比偏向-轻量级锁）" class="headerlink" title="核心特征（对比偏向&#x2F;轻量级锁）"></a>核心特征（对比偏向&#x2F;轻量级锁）</h5><ul>
+<li><strong>进入内核态，开销巨大</strong>：自旋是用户态循环；重量级锁阻塞、唤醒线程需要操作系统切换上下文，保存寄存器、栈现场，切换成本高。</li>
+<li><strong>不再自旋，不浪费 CPU</strong>：竞争激烈场景下，不会空循环占用 CPU，适合大量线程同时争抢。</li>
+<li><strong>依赖 Monitor，支持 wait&#x2F;notify</strong>：偏向、轻量级锁没有等待队列，无法实现等待唤醒机制；只有重量级锁才能用 wait()。</li>
+<li><strong>非公平锁</strong>：新到来的线程可以直接竞争锁，不需要排队，可能导致队列里的线程长期拿不到锁（线程饥饿）。</li>
+<li><strong>支持可重入</strong>：Monitor 内部记录锁重入次数，多次加锁需要对应次数解锁才会释放。</li>
+</ul>
+<h5 id="什么时候一定会膨胀为重量级锁？"><a href="#什么时候一定会膨胀为重量级锁？" class="headerlink" title="什么时候一定会膨胀为重量级锁？"></a>什么时候一定会膨胀为重量级锁？</h5><ul>
+<li>多线程同一时刻疯狂争抢锁，轻量级锁自适应自旋多次全部失败；</li>
+<li>同步代码内调用 wait()，会直接膨胀成重量级锁（必须依靠 WaitSet 队列）。</li>
+</ul>
+<h3 id="7、常见误区"><a href="#7、常见误区" class="headerlink" title="7、常见误区"></a>7、常见误区</h3><ul>
+<li><strong>锁的是对象不是代码</strong>：两个方法如果锁的不是同一个对象，依然存在并发问题。</li>
+<li><strong>字符串常量池陷阱</strong>：<code>synchronized (&quot;abc&quot;)</code> 可能导致不同代码段意外地互相阻塞。</li>
+<li><strong>死锁</strong>：两个线程互相持有对方需要的锁，导致永久阻塞。</li>
+</ul>
+<h3 id="8、极简面试背诵版"><a href="#8、极简面试背诵版" class="headerlink" title="8、极简面试背诵版"></a>8、极简面试背诵版</h3><ul>
+<li>synchronized 是 Java 内置互斥锁，保证原子性、可见性、有序性；</li>
+<li>三种用法：修饰实例方法（锁 this）、静态方法（锁 Class）、代码块（锁指定对象）；</li>
+<li>锁可重入、自动释放、排他性；</li>
+<li>底层依赖对象头 Mark Word 和 Monitor；</li>
+<li>锁升级过程：无锁→偏向锁→轻量级锁→重量级锁。</li>
+</ul>
+<h2 id="Volatile-关键字"><a href="#Volatile-关键字" class="headerlink" title="Volatile 关键字"></a>Volatile 关键字</h2><blockquote>
+<p><strong>volatile 的作用：</strong></p>
+<ol>
+<li>确保多线程之间的<strong>可见性</strong>，防止缓存优化导致的可见性问题。</li>
+<li>禁止<strong>指令重排序</strong>，确保程序执行顺序。</li>
+</ol>
+</blockquote>
+<h3 id="1、可见性问题"><a href="#1、可见性问题" class="headerlink" title="1、可见性问题"></a>1、可见性问题</h3><p><strong>底层原理</strong>：CPU 有各级缓存，每个线程有自己的工作内存缓存变量副本。</p>
+<ul>
+<li><strong>不加 volatile</strong>：主线程修改变量写入主存时机不确定，其他线程看不到最新值；</li>
+<li><strong>加 volatile</strong>：写操作后强制刷新到主存；读操作强制从主存读取，不使用本地缓存。</li>
+</ul>
+<p>示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">//不用 volatile 死循环看不到修改</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">VisibilityDemo</span> &#123;<br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-type">boolean</span> <span class="hljs-variable">flag</span> <span class="hljs-operator">=</span> <span class="hljs-literal">false</span>;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> <span class="hljs-keyword">throws</span> InterruptedException &#123;<br>        <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(() -&gt; &#123;<br>            <span class="hljs-keyword">while</span> (!flag) &#123;<br>                <span class="hljs-comment">// 线程一直读取本地缓存的 flag=false，永远死循环</span><br>            &#125;<br>            System.out.println(<span class="hljs-string">&quot;线程退出&quot;</span>);<br>        &#125;).start();<br><br>        Thread.sleep(<span class="hljs-number">1000</span>);<br>        <span class="hljs-comment">/*</span><br><span class="hljs-comment">        不加 volatile，主线程修改 flag 为 true，子线程无法读取到最新值</span><br><span class="hljs-comment">        因为子线程的本地缓存中 flag 为 false，不会被刷新到主存</span><br><span class="hljs-comment">        */</span><br>       <span class="hljs-comment">// 加 volatile 后，主线程修改 flag 为 true，会强制刷新到主存，子线程立刻读到 true，循环结束</span><br>        flag = <span class="hljs-literal">true</span>; <br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>给 <code>flag</code> 加 <code>volatile</code> 后，子线程立刻读到 <code>true</code>，循环结束。</p>
+<h3 id="2、指令重排序"><a href="#2、指令重排序" class="headerlink" title="2、指令重排序"></a>2、指令重排序</h3><p><strong>指令重排序</strong>：CPU&#x2F;JVM 为提高执行效率，会在不影响单线程结果的前提下，调换代码执行顺序。</p>
+<h4 id="经典使用场景：双重检查锁-DCL-单例"><a href="#经典使用场景：双重检查锁-DCL-单例" class="headerlink" title="经典使用场景：双重检查锁 DCL 单例"></a>经典使用场景：双重检查锁 DCL 单例</h4><p>不加 <code>volatile</code> 会出现空指针问题：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Singleton</span> &#123;<br>    <span class="hljs-comment">// 必须加 volatile</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">volatile</span> Singleton instance;<br>    <span class="hljs-keyword">private</span> <span class="hljs-title function_">Singleton</span><span class="hljs-params">()</span>&#123;&#125;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> Singleton <span class="hljs-title function_">getInstance</span><span class="hljs-params">()</span>&#123;<br>        <span class="hljs-keyword">if</span>(instance == <span class="hljs-literal">null</span>)&#123;<br>            <span class="hljs-keyword">synchronized</span> (Singleton.class)&#123;<br>                <span class="hljs-keyword">if</span>(instance == <span class="hljs-literal">null</span>)&#123;<br>                    <span class="hljs-comment">// 不加volatile会重排：分配内存→赋值引用→初始化对象</span><br>                    <span class="hljs-comment">// 其他线程拿到半初始化对象，报错空指针</span><br>                    instance = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Singleton</span>();<br>                &#125;<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> instance;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="new-对象的三步操作"><a href="#new-对象的三步操作" class="headerlink" title="new 对象的三步操作"></a>new 对象的三步操作</h4><p><code>instance = new Singleton()</code> 这行代码底层拆成 3 个独立指令：</p>
+<ol>
+<li><strong>分配内存空间</strong>：分配一块堆内存，大小足够存 Singleton 对象；</li>
+<li><strong>初始化对象</strong>：执行构造方法，初始化对象成员变量；</li>
+<li><strong>赋值引用</strong>：把引用变量 <code>instance</code> 指向刚分配的内存地址。</li>
+</ol>
+<h4 id="无-volatile-时的问题"><a href="#无-volatile-时的问题" class="headerlink" title="无 volatile 时的问题"></a>无 volatile 时的问题</h4><p>指令重排可能导致执行顺序变为 <strong>1→3→2</strong>：分配内存 → 赋值引用 → 初始化对象。</p>
+<p><strong>并发场景复现</strong>：</p>
+<ol>
+<li>线程 A 进入同步块，执行 <code>instance = new Singleton()</code>，CPU 重排先走 1、3；</li>
+<li><code>instance</code> 已经有地址（此时 <code>instance</code> 不再是 <code>null</code>）；</li>
+<li>CPU 切换线程，A 暂停，对象还没执行初始化步骤；</li>
+<li>线程 B 进入外层判断 <code>if (instance == null)</code>，发现 <code>instance</code> 不为 <code>null</code>，直接返回；</li>
+</ol>
+<p><strong>出问题</strong>🤯：线程 B 拿着一个内存分配成功、但构造函数没走完、成员变量全是默认零值的残缺对象去使用。</p>
+<h4 id="volatile-如何解决🧐"><a href="#volatile-如何解决🧐" class="headerlink" title="volatile 如何解决🧐"></a>volatile 如何解决🧐</h4><p><code>volatile</code> 会在赋值操作前后插入 <strong>StoreLoad 内存屏障</strong>，硬性禁止初始化（步骤 2）跑到引用赋值（步骤 3）后面，强制执行顺序永远 <strong>1→2→3</strong>。</p>
+<p>只有对象完全初始化完毕，才会把地址赋值给 <code>instance</code>，其他线程拿到的一定是完整可用对象。</p>
+<h3 id="3、内存屏障（Memory-Barrier）完整讲解"><a href="#3、内存屏障（Memory-Barrier）完整讲解" class="headerlink" title="3、内存屏障（Memory Barrier）完整讲解"></a>3、内存屏障（Memory Barrier）完整讲解</h3><p><strong>核心前提</strong>：CPU、JVM 会做指令重排序优化，重排分四类，有四种对应屏障禁止对应重排。</p>
+<p>设两条操作：<code>Load = 读变量</code>、<code>Store = 写变量</code></p>
+<p>四种重排类型：</p>
+<ul>
+<li><code>Load1 → Load2</code>（读读重排）</li>
+<li><code>Load1 → Store2</code>（读写重排）</li>
+<li><code>Store1 → Load2</code>（写读重排）</li>
+<li><code>Store1 → Store2</code>（写写重排）</li>
+</ul>
+<p>四种内存屏障分别阻止上面某一类重排，<code>volatile</code> 底层就是靠这四类屏障实现可见性 + 有序性。</p>
+<h4 id="四种基础内存屏障"><a href="#四种基础内存屏障" class="headerlink" title="四种基础内存屏障"></a>四种基础内存屏障</h4><h5 id="1-StoreStore-写-写屏障"><a href="#1-StoreStore-写-写屏障" class="headerlink" title="1. StoreStore 写-写屏障"></a>1. StoreStore 写-写屏障</h5><p>作用：屏障前所有写操作，一定先于屏障后的写操作，禁止 <code>Store1</code> 重排到 <code>Store2</code> 后面。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Store1<br>StoreStore屏障<br>Store2<br></code></pre></td></tr></table></figure>
+
+<p>保证：<code>Store1</code> 数据刷新缓存完毕，才执行 <code>Store2</code> 写入。</p>
+<h5 id="2-LoadLoad-读-读屏障"><a href="#2-LoadLoad-读-读屏障" class="headerlink" title="2. LoadLoad 读-读屏障"></a>2. LoadLoad 读-读屏障</h5><p>作用：屏障前所有读操作，一定先于屏障后的读操作，禁止 <code>Load1</code> 重排到 <code>Load2</code> 后面。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Load1<br>LoadLoad屏障<br>Load2<br></code></pre></td></tr></table></figure>
+
+<p>保证：先读完 <code>Load1</code> 主存最新数据，再去读 <code>Load2</code>。</p>
+<h5 id="3-LoadStore-读-写屏障"><a href="#3-LoadStore-读-写屏障" class="headerlink" title="3. LoadStore 读-写屏障"></a>3. LoadStore 读-写屏障</h5><p>作用：屏障前读，屏障后写；禁止前面 <code>Load</code> 重排到后面 <code>Store</code> 之后。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Load1<br>LoadStore屏障<br>Store2<br></code></pre></td></tr></table></figure>
+
+<p>哪怕 CPU 想把 <code>Store2</code> 提前执行，屏障强制 <code>Load1</code> 先完成。</p>
+<h5 id="4-StoreLoad-写-读屏障（代价最大，volatile-核心屏障）"><a href="#4-StoreLoad-写-读屏障（代价最大，volatile-核心屏障）" class="headerlink" title="4. StoreLoad 写-读屏障（代价最大，volatile 核心屏障）"></a>4. StoreLoad 写-读屏障（代价最大，volatile 核心屏障）</h5><p>作用：屏障前所有写操作全部刷新到主存；屏障后所有读操作强制从主存读取。禁止 <code>Store1</code> 重排到 <code>Load2</code> 后面。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs plaintext">Store1<br>StoreLoad屏障<br>Load2<br></code></pre></td></tr></table></figure>
+
+<p>特点：开销最高，会同步缓存、清空本地缓存；<code>volatile</code> 写后面必然插入 <code>StoreLoad</code> 屏障，解决 DCL 单例重排问题靠的就是它。</p>
+<h4 id="volatile-变量的屏障插入规则（JMM-规范）"><a href="#volatile-变量的屏障插入规则（JMM-规范）" class="headerlink" title="volatile 变量的屏障插入规则（JMM 规范）"></a>volatile 变量的屏障插入规则（JMM 规范）</h4><h5 id="对-volatile-写（Store）"><a href="#对-volatile-写（Store）" class="headerlink" title="对 volatile 写（Store）"></a>对 volatile 写（Store）</h5><p>在这条 <code>volatile</code> 写指令前面插入 <code>StoreStore / LoadStore</code>，在这条 <code>volatile</code> 写指令后面插入 <code>StoreLoad</code> 屏障。</p>
+<p><strong>含义</strong>：</p>
+<ul>
+<li>前面所有读写必须全部完成、刷新主存，才能执行本次 <code>volatile</code> 写；</li>
+<li><code>volatile</code> 写完成后，强制把值刷入主存；后续任何读必须从主存拿最新数据；</li>
+<li>杜绝 <code>instance = new Object()</code> 1→3→2 重排。</li>
+</ul>
+<h5 id="对-volatile-读（Load）"><a href="#对-volatile-读（Load）" class="headerlink" title="对 volatile 读（Load）"></a>对 volatile 读（Load）</h5><p>在这条 <code>volatile</code> 读指令后面插入 <code>LoadLoad / LoadStore</code>。</p>
+<p><strong>含义</strong>：本次 <code>volatile</code> 读拿到主存最新值后，后面所有读写不能提前执行，保证可见性。</p>
+
                 
               </div>
             
@@ -382,7 +673,7 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Java并发编程02</div>
+      <div>Java并发编程02：synchronized &amp; volatile</div>
       <div>http://zl1nq.github.io/2026/07/19/Java并发编程02/</div>
     </div>
     <div class="license-meta">
