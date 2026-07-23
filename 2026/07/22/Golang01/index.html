@@ -19,15 +19,15 @@
   <meta name="author" content="zl1nq">
   <meta name="keywords" content="">
   
-    <meta name="description" content="第一个Golang程序与标准输出🤩12345678&#x2F;&#x2F;go 语言的程序必须从main包的main函数开始运行package mainimport &quot;fmt&quot;func main()&#123;	fmt.Println(&quot;Hello World!&quot;,19)	fmt.Printf(&quot;My name is %s \n&quot;,&quot;zlq&amp;qu">
+    <meta name="description" content="目录 第一个Golang程序与标准输出 变量的声明方式 常量 iota 数据类型 if 语句 switch 语句 结构体   第一个Golang程序与标准输出🤩12345678&#x2F;&#x2F;go 语言的程序必须从main包的main函数开始运行package mainimport &quot;fmt&quot;func main()&#123;	fmt.Println(&quot;Hello World!">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Golang01">
 <meta property="og:url" content="http://zl1nq.github.io/2026/07/22/Golang01/index.html">
 <meta property="og:site_name" content="Blog">
-<meta property="og:description" content="第一个Golang程序与标准输出🤩12345678&#x2F;&#x2F;go 语言的程序必须从main包的main函数开始运行package mainimport &quot;fmt&quot;func main()&#123;	fmt.Println(&quot;Hello World!&quot;,19)	fmt.Printf(&quot;My name is %s \n&quot;,&quot;zlq&amp;qu">
+<meta property="og:description" content="目录 第一个Golang程序与标准输出 变量的声明方式 常量 iota 数据类型 if 语句 switch 语句 结构体   第一个Golang程序与标准输出🤩12345678&#x2F;&#x2F;go 语言的程序必须从main包的main函数开始运行package mainimport &quot;fmt&quot;func main()&#123;	fmt.Println(&quot;Hello World!">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2026-07-22T13:39:01.000Z">
-<meta property="article:modified_time" content="2026-07-22T14:18:57.297Z">
+<meta property="article:modified_time" content="2026-07-23T13:27:18.162Z">
 <meta property="article:author" content="zl1nq">
 <meta property="article:tag" content="Golang">
 <meta property="article:tag" content="语言基础">
@@ -311,7 +311,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.5k 字
+          3.4k 字
         
       </span>
     
@@ -322,7 +322,7 @@
         
         
         
-          21 分钟
+          29 分钟
         
       </span>
     
@@ -366,54 +366,119 @@
             
               <div class="markdown-body">
                 
-                <h2 id="第一个Golang程序与标准输出🤩"><a href="#第一个Golang程序与标准输出🤩" class="headerlink" title="第一个Golang程序与标准输出🤩"></a>第一个Golang程序与标准输出🤩</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">//go 语言的程序必须从main包的main函数开始运行</span><br><span class="hljs-keyword">package</span> main<br><span class="hljs-keyword">import</span> <span class="hljs-string">&quot;fmt&quot;</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>&#123;<br>	fmt.Println(<span class="hljs-string">&quot;Hello World!&quot;</span>,<span class="hljs-number">19</span>)<br>	fmt.Printf(<span class="hljs-string">&quot;My name is %s \n&quot;</span>,<span class="hljs-string">&quot;zlq&quot;</span>)<br>	fmt.Printf(<span class="hljs-string">&quot;My age is %d&quot;</span>,<span class="hljs-string">&quot;20&quot;</span>)<br>&#125;<br></code></pre></td></tr></table></figure>
-<h2 id="变量的声明方式"><a href="#变量的声明方式" class="headerlink" title="变量的声明方式"></a>变量的声明方式</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">//声明时也说明类型</span><br><span class="hljs-keyword">var</span> age <span class="hljs-type">int</span> = <span class="hljs-number">20</span><br><br><span class="hljs-comment">//声明不说明类型，类型由编译器自动推断</span><br><span class="hljs-keyword">var</span> age = <span class="hljs-number">20</span><br><br><span class="hljs-keyword">var</span> age1,age2,age3<br>age1,age2,age3 = <span class="hljs-number">1</span>,<span class="hljs-number">2</span>,<span class="hljs-number">3</span><br><br><span class="hljs-comment">//:=</span><br>name := <span class="hljs-string">&quot;zlq&quot;</span><br><br></code></pre></td></tr></table></figure>
-<h3 id="全局变量-局部变量"><a href="#全局变量-局部变量" class="headerlink" title="全局变量 &amp; 局部变量"></a>全局变量 &amp; 局部变量</h3><ol>
-<li>全局变量</li>
-</ol>
-<p>声明位置：函数外面（包级别）<br>作用域：整个包内可用；首字母大写则包外其他包也能访问（导出变量）</p>
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E7%AC%AC%E4%B8%80%E4%B8%AAgolang%E7%A8%8B%E5%BA%8F%E4%B8%8E%E6%A0%87%E5%87%86%E8%BE%93%E5%87%BA">第一个Golang程序与标准输出</a></li>
+<li><a href="#%E5%8F%98%E9%87%8F%E7%9A%84%E5%A3%B0%E6%98%8E%E6%96%B9%E5%BC%8F">变量的声明方式</a></li>
+<li><a href="#%E5%B8%B8%E9%87%8F">常量</a></li>
+<li><a href="#iota">iota</a></li>
+<li><a href="#%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B">数据类型</a></li>
+<li><a href="#if-%E8%AF%AD%E5%8F%A5">if 语句</a></li>
+<li><a href="#switch-%E8%AF%AD%E5%8F%A5">switch 语句</a></li>
+<li><a href="#%E7%BB%93%E6%9E%84%E4%BD%93">结构体</a></li>
+</ul>
+<hr>
+<h2 id="第一个Golang程序与标准输出🤩"><a href="#第一个Golang程序与标准输出🤩" class="headerlink" title="第一个Golang程序与标准输出🤩"></a>第一个Golang程序与标准输出🤩</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">//go 语言的程序必须从main包的main函数开始运行</span><br><span class="hljs-keyword">package</span> main<br><span class="hljs-keyword">import</span> <span class="hljs-string">&quot;fmt&quot;</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span>&#123;<br>	fmt.Println(<span class="hljs-string">&quot;Hello World!&quot;</span>,<span class="hljs-number">19</span>)<br>	fmt.Printf(<span class="hljs-string">&quot;My name is %s \n&quot;</span>,<span class="hljs-string">&quot;zlq&quot;</span>)<br>	fmt.Printf(<span class="hljs-string">&quot;My age is %d&quot;</span>,<span class="hljs-string">&quot;20&quot;</span>)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="变量的声明方式"><a href="#变量的声明方式" class="headerlink" title="变量的声明方式"></a>变量的声明方式</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">//声明时也说明类型</span><br><span class="hljs-keyword">var</span> age <span class="hljs-type">int</span> = <span class="hljs-number">20</span><br><br><span class="hljs-comment">//声明不说明类型，类型由编译器自动推断</span><br><span class="hljs-keyword">var</span> age = <span class="hljs-number">20</span><br><br><span class="hljs-comment">//批量声明并赋值</span><br><span class="hljs-keyword">var</span> age1, age2, age3 <span class="hljs-type">int</span><br>age1, age2, age3 = <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span><br><br><span class="hljs-comment">//:= 短变量声明（只能用于局部变量）</span><br>name := <span class="hljs-string">&quot;zlq&quot;</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="全局变量-局部变量"><a href="#全局变量-局部变量" class="headerlink" title="全局变量 &amp; 局部变量"></a>全局变量 &amp; 局部变量</h3><h4 id="1-全局变量"><a href="#1-全局变量" class="headerlink" title="1. 全局变量"></a>1. 全局变量</h4><p><strong>声明位置</strong>：函数外面（包级别）</p>
+<p><strong>作用域</strong>：整个包内可用；首字母大写则包外其他包也能访问（导出变量）</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">package</span> main<br><span class="hljs-keyword">import</span> <span class="hljs-string">&quot;fmt&quot;</span><br><span class="hljs-comment">// 全局变量</span><br><span class="hljs-keyword">var</span> gNum <span class="hljs-type">int</span> = <span class="hljs-number">100</span><br><span class="hljs-keyword">var</span> gStr = <span class="hljs-string">&quot;全局字符串&quot;</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">test</span><span class="hljs-params">()</span></span> &#123;<br>	<span class="hljs-comment">// 函数内可以直接使用全局变量</span><br>	fmt.Println(gNum)<br>&#125;<br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> &#123;<br>	test()<br>	fmt.Println(gStr)<br>&#125;<br></code></pre></td></tr></table></figure>
-<p>特性：</p>
-<p>初始化时机：程序启动，main 执行之前完成初始化<br>允许只声明不使用，编译不会报错（和局部变量最大区别）<br>内存分配：堆 &#x2F; 栈由编译器优化，不一定都在堆<br>不可以使用短声明(:&#x3D;)定义全局变量<br>可以集中批量声明</p>
+
+<p><strong>特性</strong>：</p>
+<ul>
+<li><strong>初始化时机</strong>：程序启动，main 执行之前完成初始化</li>
+<li><strong>允许只声明不使用</strong>：编译不会报错（和局部变量最大区别）</li>
+<li><strong>内存分配</strong>：堆&#x2F;栈由编译器优化，不一定都在堆</li>
+<li><strong>不可以使用短声明</strong>：<code>:=</code> 不能定义全局变量</li>
+<li><strong>可以集中批量声明</strong></li>
+</ul>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> (<br>	a = <span class="hljs-number">1</span><br>	b = <span class="hljs-number">2</span><br>	c = <span class="hljs-number">3</span><br>)<br></code></pre></td></tr></table></figure>
 
-<ol start="2">
-<li>局部变量<br>声明位置：函数内部、代码块内部（for、if、{} 内部）<br>作用域：仅当前代码块有效</li>
-</ol>
+<h4 id="2-局部变量"><a href="#2-局部变量" class="headerlink" title="2. 局部变量"></a>2. 局部变量</h4><p><strong>声明位置</strong>：函数内部、代码块内部（for、if、{} 内部）</p>
+<p><strong>作用域</strong>：仅当前代码块有效</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> &#123;<br>	<span class="hljs-comment">// 函数内局部变量</span><br>	<span class="hljs-keyword">var</span> num <span class="hljs-type">int</span> = <span class="hljs-number">10</span><br>	name := <span class="hljs-string">&quot;局部变量&quot;</span> <span class="hljs-comment">// 短变量 := 只能用于局部</span><br>	<span class="hljs-keyword">if</span> <span class="hljs-literal">true</span> &#123;<br>		<span class="hljs-comment">// if块内局部变量，出&#123;&#125;失效</span><br>		blockVar := <span class="hljs-number">99</span><br>		fmt.Println(blockVar)<br>	&#125;<br>	<span class="hljs-comment">// fmt.Println(blockVar) // 报错！超出作用域</span><br>&#125;<br></code></pre></td></tr></table></figure>
-<p>关键规则：<br>Go 不允许声明局部变量但不使用，直接编译报错<br>:&#x3D; 短变量声明 不能在全局使用，只能局部<br>生命周期：代码块执行完毕，变量失效</p>
+
+<p><strong>关键规则</strong>：</p>
+<ul>
+<li>Go 不允许声明局部变量但不使用，直接编译报错</li>
+<li><code>:=</code> 短变量声明不能在全局使用，只能局部</li>
+<li><strong>生命周期</strong>：代码块执行完毕，变量失效</li>
+</ul>
 <blockquote>
-<p>就近：当局部变量和全局变量同名时，优先使用局部变量，全局变量被屏蔽</p>
+<p><strong>就近原则</strong>：当局部变量和全局变量同名时，优先使用局部变量，全局变量被屏蔽</p>
 </blockquote>
+<hr>
 <h2 id="常量"><a href="#常量" class="headerlink" title="常量"></a>常量</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">//变量类型可选</span><br><span class="hljs-keyword">const</span> LEN (<span class="hljs-type">int</span>) = <span class="hljs-number">10</span><br><br><span class="hljs-comment">//定义多个</span><br><span class="hljs-keyword">const</span>(<br>	a=<span class="hljs-number">1</span><br>	b=<span class="hljs-number">2</span><br>	c=<span class="hljs-number">3</span><br>)<br><br><span class="hljs-comment">//常量更多定义在全局</span><br></code></pre></td></tr></table></figure>
 
-<h2 id="iota"><a href="#iota" class="headerlink" title="iota"></a>iota</h2><h3 id="1-基础概念"><a href="#1-基础概念" class="headerlink" title="1. 基础概念"></a>1. 基础概念</h3><p>iota 是 Go 预定义标识符，只能用在 const 常量声明块中。<br>iota 初始值为 0<br>每新增一行常量声明，iota 自动 +1<br>遇到新的 const 块，iota 重置为 0</p>
+<hr>
+<h2 id="iota"><a href="#iota" class="headerlink" title="iota"></a>iota</h2><h3 id="1-基础概念"><a href="#1-基础概念" class="headerlink" title="1. 基础概念"></a>1. 基础概念</h3><p><code>iota</code> 是 Go 预定义标识符，只能用在 <code>const</code> 常量声明块中。</p>
+<ul>
+<li><strong>初始值为 0</strong></li>
+<li><strong>每新增一行常量声明，iota 自动 +1</strong></li>
+<li><strong>遇到新的 const 块，iota 重置为 0</strong></li>
+</ul>
 <blockquote>
-<p>本质：用来批量生成自增常量，常用来实现枚举。</p>
+<p><strong>本质</strong>：用来批量生成自增常量，常用来实现枚举。</p>
 </blockquote>
-<h3 id="2-示例"><a href="#2-示例" class="headerlink" title="2. 示例"></a>2. 示例</h3><p>示例 1：iota 基础使用</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">const</span> (<br>	a = <span class="hljs-literal">iota</span> <span class="hljs-comment">// 0</span><br>	b        <span class="hljs-comment">// 1（自动继承上一行表达式 = iota）</span><br>	c        <span class="hljs-comment">// 2</span><br>)<br>fmt.Println(a, b, c)<span class="hljs-comment">// 0 1 2</span><br></code></pre></td></tr></table></figure>
+<h3 id="2-示例"><a href="#2-示例" class="headerlink" title="2. 示例"></a>2. 示例</h3><h4 id="示例-1：iota-基础使用"><a href="#示例-1：iota-基础使用" class="headerlink" title="示例 1：iota 基础使用"></a>示例 1：iota 基础使用</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">const</span> (<br>	a = <span class="hljs-literal">iota</span> <span class="hljs-comment">// 0</span><br>	b        <span class="hljs-comment">// 1（自动继承上一行表达式 = iota）</span><br>	c        <span class="hljs-comment">// 2</span><br>)<br>fmt.Println(a, b, c)<span class="hljs-comment">// 0 1 2</span><br></code></pre></td></tr></table></figure>
 
-<p>示例 2：iota 参与运算</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">const</span> (<br>	_  = <span class="hljs-literal">iota</span>      <span class="hljs-comment">// 0，丢弃,用_表示不使用</span><br>	KB = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-literal">iota</span> <span class="hljs-comment">// 1 &lt;&lt; 1 = 2</span><br>	MB             <span class="hljs-comment">// 1 &lt;&lt; 2 = 4</span><br>	GB             <span class="hljs-comment">// 1 &lt;&lt; 3 = 8</span><br>	TB             <span class="hljs-comment">// 1 &lt;&lt; 4 = 16</span><br>)<br>fmt.Println(KB, MB, GB, TB)<span class="hljs-comment">// 2 4 8 16</span><br></code></pre></td></tr></table></figure>
+<h4 id="示例-2：iota-参与运算"><a href="#示例-2：iota-参与运算" class="headerlink" title="示例 2：iota 参与运算"></a>示例 2：iota 参与运算</h4><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">const</span> (<br>	_  = <span class="hljs-literal">iota</span>      <span class="hljs-comment">// 0，丢弃,用_表示不使用</span><br>	KB = <span class="hljs-number">1</span> &lt;&lt; <span class="hljs-literal">iota</span> <span class="hljs-comment">// 1 &lt;&lt; 1 = 2</span><br>	MB             <span class="hljs-comment">// 1 &lt;&lt; 2 = 4</span><br>	GB             <span class="hljs-comment">// 1 &lt;&lt; 3 = 8</span><br>	TB             <span class="hljs-comment">// 1 &lt;&lt; 4 = 16</span><br>)<br>fmt.Println(KB, MB, GB, TB)<span class="hljs-comment">// 2 4 8 16</span><br></code></pre></td></tr></table></figure>
 
-<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><h3 id="1-布尔类型"><a href="#1-布尔类型" class="headerlink" title="1. 布尔类型"></a>1. 布尔类型</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> isTrue <span class="hljs-type">bool</span> = <span class="hljs-literal">true</span><br><span class="hljs-keyword">var</span> isFalse <span class="hljs-type">bool</span> = <span class="hljs-literal">false</span><br><span class="hljs-keyword">var</span> isGreaterThan5 <span class="hljs-type">bool</span> = <span class="hljs-number">3</span> &gt; <span class="hljs-number">5</span><span class="hljs-comment">// false</span><br><span class="hljs-keyword">var</span> isLessThan5  <span class="hljs-type">bool</span> = <span class="hljs-number">3</span> &lt; <span class="hljs-number">5</span><span class="hljs-comment">// true</span><br></code></pre></td></tr></table></figure>
+<hr>
+<h2 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h2><h3 id="1-布尔类型"><a href="#1-布尔类型" class="headerlink" title="1. 布尔类型"></a>1. 布尔类型</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> isTrue <span class="hljs-type">bool</span> = <span class="hljs-literal">true</span><br><span class="hljs-keyword">var</span> isFalse <span class="hljs-type">bool</span> = <span class="hljs-literal">false</span><br><span class="hljs-keyword">var</span> isGreaterThan5 <span class="hljs-type">bool</span> = <span class="hljs-number">3</span> &gt; <span class="hljs-number">5</span><span class="hljs-comment">// false</span><br><span class="hljs-keyword">var</span> isLessThan5 <span class="hljs-type">bool</span> = <span class="hljs-number">3</span> &lt; <span class="hljs-number">5</span><span class="hljs-comment">// true</span><br></code></pre></td></tr></table></figure>
+
 <blockquote>
-<p>本质：只有 true 和 false 两个值，分别表示真和假\</p>
+<p><strong>本质</strong>：只有 <code>true</code> 和 <code>false</code> 两个值，分别表示真和假。</p>
 </blockquote>
-<h3 id="2-整数类型"><a href="#2-整数类型" class="headerlink" title="2. 整数类型"></a>2. 整数类型</h3><p>go语言中整数类型有int、int8、int16、int32、int64等<br>后面跟着的数字表示位数，默认位数会因为平台而不同</p>
+<h3 id="2-整数类型"><a href="#2-整数类型" class="headerlink" title="2. 整数类型"></a>2. 整数类型</h3><p>Go 语言中整数类型有 <code>int</code>、<code>int8</code>、<code>int16</code>、<code>int32</code>、<code>int64</code> 等，后面跟着的数字表示位数，默认位数会因为平台而不同。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> a <span class="hljs-type">int</span> = <span class="hljs-number">10</span><br><span class="hljs-keyword">var</span> b <span class="hljs-type">int8</span> = <span class="hljs-number">100</span><br><span class="hljs-keyword">var</span> c <span class="hljs-type">int16</span> = <span class="hljs-number">1000</span><br><span class="hljs-keyword">var</span> d <span class="hljs-type">int32</span> = <span class="hljs-number">10000</span><br><span class="hljs-keyword">var</span> e <span class="hljs-type">int64</span> = <span class="hljs-number">1000000</span><br></code></pre></td></tr></table></figure>
+
 <blockquote>
-<p>位数不同的变量之间不能直接转换，需要使用类型转换函数（强类型转换）</p>
+<p><strong>注意</strong>：位数不同的变量之间不能直接转换，需要使用类型转换函数（强类型转换）。</p>
 </blockquote>
-<h3 id="3-浮点数类型"><a href="#3-浮点数类型" class="headerlink" title="3. 浮点数类型"></a>3. 浮点数类型</h3><p>go语言中浮点数类型有float32、float64等</p>
+<h3 id="3-浮点数类型"><a href="#3-浮点数类型" class="headerlink" title="3. 浮点数类型"></a>3. 浮点数类型</h3><p>Go 语言中浮点数类型有 <code>float32</code>、<code>float64</code> 等。</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> a <span class="hljs-type">float32</span> = <span class="hljs-number">10.0</span><br><span class="hljs-keyword">var</span> b <span class="hljs-type">float64</span> = <span class="hljs-number">100.0</span><br></code></pre></td></tr></table></figure>
-<h3 id="4-字符和字符串"><a href="#4-字符和字符串" class="headerlink" title="4. 字符和字符串"></a>4. 字符和字符串</h3><h4 id="字符类型"><a href="#字符类型" class="headerlink" title="字符类型"></a>字符类型</h4><p>Go 没有单独的 char 类型<br>byte：uint8 的别名，代表 ASCII 字符（单字节）<br>rune：int32 的别名，代表 Unicode &#x2F; UTF-8 字符（可以存中文、emoji）</p>
-<p>byte<br>占用：1 字节<br>范围：0~255，只适合英文字母、数字、英文符号（ASCII）<br>字符串底层就是 []byte<br>rune<br>占用：4 字节<br>存储一个完整 Unicode 码点，支持中文、日文、emoji、各国文字</p>
+
+<h3 id="4-字符和字符串"><a href="#4-字符和字符串" class="headerlink" title="4. 字符和字符串"></a>4. 字符和字符串</h3><h4 id="字符类型"><a href="#字符类型" class="headerlink" title="字符类型"></a>字符类型</h4><p>Go 没有单独的 <code>char</code> 类型：</p>
+<ul>
+<li><strong>byte</strong>：<code>uint8</code> 的别名，代表 ASCII 字符（单字节）</li>
+<li><strong>rune</strong>：<code>int32</code> 的别名，代表 Unicode &#x2F; UTF-8 字符（可以存中文、emoji）</li>
+</ul>
+<p><strong>byte</strong>：</p>
+<ul>
+<li>占用：1 字节</li>
+<li>范围：0~255，只适合英文字母、数字、英文符号（ASCII）</li>
+<li>字符串底层就是 <code>[]byte</code></li>
+</ul>
+<p><strong>rune</strong>：</p>
+<ul>
+<li>占用：4 字节</li>
+<li>存储一个完整 Unicode 码点，支持中文、日文、emoji、各国文字</li>
+</ul>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> a <span class="hljs-type">rune</span> = <span class="hljs-string">&#x27;a&#x27;</span><br><span class="hljs-keyword">var</span> b <span class="hljs-type">byte</span> = <span class="hljs-string">&#x27;b&#x27;</span><br>fmt.Println(a, b)<span class="hljs-comment">// 97 98</span><br>fmt.Printf(<span class="hljs-string">&quot;%c %c\n&quot;</span>, a, b)<span class="hljs-comment">// a b</span><br></code></pre></td></tr></table></figure>
-<h4 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h4><p>1.基础</p>
-<p>string 底层是<strong>只读</strong>字节切片 []byte，本质存储 UTF-8 字节序列<br>不可变：不能通过 s[i] &#x3D; ‘x’ 修改字符串内字符<br>字面量：双引号 “hello”；反引号 `原始字符串` 🧐</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> str1 <span class="hljs-type">string</span> = <span class="hljs-string">&quot;Hello World\nNi Hao!&quot;</span><span class="hljs-comment">//普通字符串</span><br>fmt.Println(str1)<br><br><span class="hljs-keyword">var</span> str2 <span class="hljs-type">string</span> = <span class="hljs-string">`Hello World\nNi hao!`</span><br><span class="hljs-comment">//输出原始字符串，\失去特殊含义</span><br><span class="hljs-comment">//输出：Hello World\nNi hao!</span><br>fmt.Println(str2)<br><br></code></pre></td></tr></table></figure>
+
+<h4 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h4><p><strong>基础特性</strong>：</p>
+<ul>
+<li><code>string</code> 底层是<strong>只读</strong>字节切片 <code>[]byte</code>，本质存储 UTF-8 字节序列</li>
+<li><strong>不可变</strong>：不能通过 <code>s[i] = &#39;x&#39;</code> 修改字符串内字符</li>
+<li><strong>字面量</strong>：双引号 <code>&quot;hello&quot;</code>；反引号 <code>`原始字符串`</code> 🧐</li>
+</ul>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> str1 <span class="hljs-type">string</span> = <span class="hljs-string">&quot;Hello World\nNi Hao!&quot;</span><span class="hljs-comment">//普通字符串</span><br>fmt.Println(str1)<br><br><span class="hljs-keyword">var</span> str2 <span class="hljs-type">string</span> = <span class="hljs-string">`Hello World\nNi hao!`</span><br><span class="hljs-comment">//输出原始字符串，\失去特殊含义</span><br><span class="hljs-comment">//输出：Hello World\nNi hao!</span><br>fmt.Println(str2)<br></code></pre></td></tr></table></figure>
+
+<p><strong>关于 len 函数</strong>：</p>
+<p>Go 语言中 <code>len</code> 函数用在字符串时，用来获取字符串的字节数。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> str1 = <span class="hljs-string">&quot;four&quot;</span><span class="hljs-comment">//一个字母占用一个字节</span><br><span class="hljs-keyword">var</span> str2 = <span class="hljs-string">&quot;三&quot;</span><span class="hljs-comment">//一个中文占用三个字节</span><br>fmt.Println(<span class="hljs-built_in">len</span>(str1))<span class="hljs-comment">//4</span><br>fmt.Println(<span class="hljs-built_in">len</span>(str2))<span class="hljs-comment">//3</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="if-语句"><a href="#if-语句" class="headerlink" title="if 语句"></a>if 语句</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> age <span class="hljs-type">int</span><br>fmt.Scanf(<span class="hljs-string">&quot;%d&quot;</span>, &amp;age)<br><span class="hljs-keyword">if</span> age &gt;= <span class="hljs-number">18</span> &#123;<br>	fmt.Println(<span class="hljs-string">&quot;Over 18&quot;</span>)<br>&#125; <span class="hljs-keyword">else</span> &#123;<span class="hljs-comment">//else必须跟在if后面的&#123;&#125;后面，支持else if</span><br>	fmt.Println(<span class="hljs-string">&quot;Under 18&quot;</span>)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="switch-语句"><a href="#switch-语句" class="headerlink" title="switch 语句"></a>switch 语句</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> day <span class="hljs-type">int</span><br>fmt.Scanf(<span class="hljs-string">&quot;%d&quot;</span>, &amp;day)<br><span class="hljs-keyword">switch</span> day &#123;<br><span class="hljs-keyword">case</span> <span class="hljs-number">1</span>:<br>	<span class="hljs-comment">//不用写break</span><br>	fmt.Println(<span class="hljs-string">&quot;1&quot;</span>)<br><span class="hljs-keyword">case</span> <span class="hljs-number">2</span>:<br>	fmt.Println(<span class="hljs-string">&quot;2&quot;</span>)<br><span class="hljs-keyword">default</span>:<br>	fmt.Println(<span class="hljs-string">&quot;not 1 or 2&quot;</span>)<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">package</span> main<br><span class="hljs-keyword">import</span> <span class="hljs-string">&quot;fmt&quot;</span><br><span class="hljs-keyword">type</span> Student <span class="hljs-keyword">struct</span> &#123;<br>	<span class="hljs-comment">//大写开头，允许其他包访问</span><br>	<span class="hljs-comment">//小写开头，只能在本包内访问</span><br>	Name <span class="hljs-type">string</span><br>	Age  <span class="hljs-type">int</span><br>&#125;<br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> &#123;<br>	<span class="hljs-keyword">var</span> stu Student<br>	stu.Name = <span class="hljs-string">&quot;zlq&quot;</span><br>	stu.Age = <span class="hljs-number">21</span><br>	fmt.Println(stu)<span class="hljs-comment">// &#123;zlq 21&#125;</span><br>&#125;<br></code></pre></td></tr></table></figure>
                 
               </div>
             
@@ -509,8 +574,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/07/22/Redis02/" title="Redis02">
-                        <span class="hidden-mobile">Redis02</span>
+                      <a href="/2026/07/22/Redis02%E7%BC%93%E5%AD%98/" title="Redis02缓存">
+                        <span class="hidden-mobile">Redis02缓存</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
