@@ -1,0 +1,1191 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/z.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="zl1nq">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="目录 一、什么是魔法方法 二、对象生命周期（创建 &#x2F; 初始化 &#x2F; 销毁） 三、字符串表示（让对象「会说话」） 四、容器与迭代协议（让对象像列表&#x2F;字典） 五、运算符重载（让对象支持加减乘除） 六、综合示例：Book 类 七、魔法方法速查表 八、总结与速记   一、什么是魔法方法 ⭐ 核心特征：魔法方法是那些以双下划线开头和结尾的特殊方法，例如 __init__、__st">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python：魔法方法">
+<meta property="og:url" content="http://zl1nq.github.io/2026/07/29/Python06/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="目录 一、什么是魔法方法 二、对象生命周期（创建 &#x2F; 初始化 &#x2F; 销毁） 三、字符串表示（让对象「会说话」） 四、容器与迭代协议（让对象像列表&#x2F;字典） 五、运算符重载（让对象支持加减乘除） 六、综合示例：Book 类 七、魔法方法速查表 八、总结与速记   一、什么是魔法方法 ⭐ 核心特征：魔法方法是那些以双下划线开头和结尾的特殊方法，例如 __init__、__st">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-29T12:11:58.000Z">
+<meta property="article:modified_time" content="2026-07-29T12:18:52.312Z">
+<meta property="article:author" content="zl1nq">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="语言基础">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Python：魔法方法 - Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zl1nq.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Python：魔法方法"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-07-29 20:11" pubdate>
+          2026年7月29日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          38 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Python：魔法方法</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E4%BB%80%E4%B9%88%E6%98%AF%E9%AD%94%E6%B3%95%E6%96%B9%E6%B3%95">一、什么是魔法方法</a></li>
+<li><a href="#%E4%BA%8C%E5%AF%B9%E8%B1%A1%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%88%9B%E5%BB%BA--%E5%88%9D%E5%A7%8B%E5%8C%96--%E9%94%80%E6%AF%81">二、对象生命周期（创建 &#x2F; 初始化 &#x2F; 销毁）</a></li>
+<li><a href="#%E4%B8%89%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%A1%A8%E7%A4%BA%E8%AE%A9%E5%AF%B9%E8%B1%A1%E4%BC%9A%E8%AF%B4%E8%AF%9D">三、字符串表示（让对象「会说话」）</a></li>
+<li><a href="#%E5%9B%9B%E5%AE%B9%E5%99%A8%E4%B8%8E%E8%BF%AD%E4%BB%A3%E5%8D%8F%E8%AE%AE%E8%AE%A9%E5%AF%B9%E8%B1%A1%E5%83%8F%E5%88%97%E8%A1%A8%E5%AD%97%E5%85%B8">四、容器与迭代协议（让对象像列表&#x2F;字典）</a></li>
+<li><a href="#%E4%BA%94%E8%BF%90%E7%AE%97%E7%AC%A6%E9%87%8D%E8%BD%BD%E8%AE%A9%E5%AF%B9%E8%B1%A1%E6%94%AF%E6%8C%81%E5%8A%A0%E5%87%8F%E4%B9%98%E9%99%A4">五、运算符重载（让对象支持加减乘除）</a></li>
+<li><a href="#%E5%85%AD%E7%BB%BC%E5%90%88%E7%A4%BA%E4%BE%8Bbook-%E7%B1%BB">六、综合示例：Book 类</a></li>
+<li><a href="#%E4%B8%83%E9%AD%94%E6%B3%95%E6%96%B9%E6%B3%95%E9%80%9F%E6%9F%A5%E8%A1%A8">七、魔法方法速查表</a></li>
+<li><a href="#%E5%85%AB%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%9F%E8%AE%B0">八、总结与速记</a></li>
+</ul>
+<hr>
+<h2 id="一、什么是魔法方法"><a href="#一、什么是魔法方法" class="headerlink" title="一、什么是魔法方法"></a>一、什么是魔法方法</h2><blockquote>
+<p>⭐ <strong>核心特征</strong>：魔法方法是那些<strong>以双下划线开头和结尾</strong>的特殊方法，例如 <code>__init__</code>、<code>__str__</code>。<br><strong>不需要手动调用</strong>——当使用某些内置操作（如 <code>print()</code>、<code>len()</code>、<code>+</code> 运算符、<code>for</code> 循环等）时，Python 解释器会在后台<strong>自动触发</strong>它们。</p>
+</blockquote>
+<p>魔法方法的作用：<strong>让自定义类无缝融入 Python 的原生语法</strong>，让你的对象表现得像内置的列表、字典或数字一样自然。</p>
+<table>
+<thead>
+<tr>
+<th>你写的代码</th>
+<th>Python 自动调用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>obj = MyClass()</code></td>
+<td><code>obj.__new__()</code> → <code>obj.__init__()</code></td>
+</tr>
+<tr>
+<td><code>print(obj)</code> &#x2F; <code>str(obj)</code></td>
+<td><code>obj.__str__()</code></td>
+</tr>
+<tr>
+<td><code>len(obj)</code></td>
+<td><code>obj.__len__()</code></td>
+</tr>
+<tr>
+<td><code>obj[key]</code></td>
+<td><code>obj.__getitem__(key)</code></td>
+</tr>
+<tr>
+<td><code>a + b</code></td>
+<td><code>a.__add__(b)</code></td>
+</tr>
+<tr>
+<td><code>for x in obj</code></td>
+<td><code>obj.__iter__()</code> → <code>__next__()</code></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 类比 Java：类似 <code>toString()</code>、<code>equals()</code>、<code>Comparable</code> 接口等，但 Python 的魔法方法更丰富，支持运算符重载。</p>
+</blockquote>
+<hr>
+<h2 id="二、对象生命周期（创建-初始化-销毁）"><a href="#二、对象生命周期（创建-初始化-销毁）" class="headerlink" title="二、对象生命周期（创建 &#x2F; 初始化 &#x2F; 销毁）"></a>二、对象生命周期（创建 &#x2F; 初始化 &#x2F; 销毁）</h2><p>对应对象从创建到销毁的整个生命周期。</p>
+<h3 id="1-new-cls-—-真正的「构造器」"><a href="#1-new-cls-—-真正的「构造器」" class="headerlink" title="1. __new__(cls, ...) — 真正的「构造器」"></a>1. <code>__new__(cls, ...)</code> — 真正的「构造器」</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>作用</strong></td>
+<td>负责<strong>创建并返回</strong>一个实例对象（在内存中分配空间）</td>
+</tr>
+<tr>
+<td><strong>执行时机</strong></td>
+<td>在 <code>__init__</code> <strong>之前</strong>执行</td>
+</tr>
+<tr>
+<td><strong>第一个参数</strong></td>
+<td><code>cls</code>（类本身），不是 self</td>
+</tr>
+<tr>
+<td><strong>日常使用</strong></td>
+<td>业务代码极少重写，<strong>单例模式</strong>等特殊场景才用</td>
+</tr>
+</tbody></table>
+<h3 id="2-init-self-—-初始化器-⭐"><a href="#2-init-self-—-初始化器-⭐" class="headerlink" title="2. __init__(self, ...) — 初始化器 ⭐"></a>2. <code>__init__(self, ...)</code> — 初始化器 ⭐</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>作用</strong></td>
+<td>负责「初始化」，给创建好的对象<strong>设置初始属性</strong></td>
+</tr>
+<tr>
+<td><strong>执行时机</strong></td>
+<td>在 <code>__new__</code> 之后执行</td>
+</tr>
+<tr>
+<td><strong>第一个参数</strong></td>
+<td><code>self</code>（刚创建好的实例）</td>
+</tr>
+<tr>
+<td><strong>日常使用</strong></td>
+<td><strong>最常用</strong>，几乎每个类都写</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span>:<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, name, age</span>):<br>        <span class="hljs-variable language_">self</span>.name = name    <span class="hljs-comment"># 给实例挂属性</span><br>        <span class="hljs-variable language_">self</span>.age = age<br><br>u = User(<span class="hljs-string">&quot;张三&quot;</span>, <span class="hljs-number">25</span>)       <span class="hljs-comment"># 自动调用 __init__</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="3-del-self-—-析构函数"><a href="#3-del-self-—-析构函数" class="headerlink" title="3. __del__(self) — 析构函数"></a>3. <code>__del__(self)</code> — 析构函数</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>作用</strong></td>
+<td>对象即将被<strong>垃圾回收</strong>时触发</td>
+</tr>
+<tr>
+<td><strong>典型用途</strong></td>
+<td>清理资源（关闭文件、断开连接）</td>
+</tr>
+<tr>
+<td><strong>注意</strong></td>
+<td>触发时机不确定，<strong>不推荐依赖它做资源清理</strong>——优先用 <code>with</code> 上下文管理器</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 <strong>三者顺序</strong>：<code>__new__</code>（创建对象）→ <code>__init__</code>（初始化属性）→ 使用对象 → <code>__del__</code>（对象销毁）</p>
+</blockquote>
+<hr>
+<h2 id="三、字符串表示（让对象「会说话」）"><a href="#三、字符串表示（让对象「会说话」）" class="headerlink" title="三、字符串表示（让对象「会说话」）"></a>三、字符串表示（让对象「会说话」）</h2><p>两个魔法方法，让对象在被打印时能输出有意义的信息，而不是默认的 <code>&lt;__main__.P object at 0x...&gt;</code>。</p>
+<h3 id="1-str-self-—-面向用户"><a href="#1-str-self-—-面向用户" class="headerlink" title="1. __str__(self) — 面向用户"></a>1. <code>__str__(self)</code> — 面向用户</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>触发时机</strong></td>
+<td><code>print(obj)</code> 或 <code>str(obj)</code></td>
+</tr>
+<tr>
+<td><strong>目标读者</strong></td>
+<td>面向<strong>最终用户</strong>，返回友好、易读的字符串</td>
+</tr>
+</tbody></table>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">P</span>:<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self</span>):<br>        <span class="hljs-variable language_">self</span>.name = <span class="hljs-string">&#x27;P&#x27;</span><br>        <span class="hljs-variable language_">self</span>.data = <span class="hljs-number">1</span><br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__str__</span>(<span class="hljs-params">self</span>):<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;data:<span class="hljs-subst">&#123;self.data&#125;</span>, name:<span class="hljs-subst">&#123;self.name&#125;</span>&quot;</span><br><br>p = P()<br><span class="hljs-built_in">print</span>(p)        <span class="hljs-comment"># 自动调用 __str__ → data:1, name:P</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="2-repr-self-—-面向开发者"><a href="#2-repr-self-—-面向开发者" class="headerlink" title="2. __repr__(self) — 面向开发者"></a>2. <code>__repr__(self)</code> — 面向开发者</h3><table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>触发时机</strong></td>
+<td>交互式解释器输入对象名，或 <code>repr(obj)</code></td>
+</tr>
+<tr>
+<td><strong>目标读者</strong></td>
+<td>面向<strong>开发者</strong>，调试用</td>
+</tr>
+<tr>
+<td><strong>理想状态</strong></td>
+<td><code>eval(repr(obj))</code> 能<strong>重新生成该对象</strong></td>
+</tr>
+</tbody></table>
+<h3 id="str-vs-repr-对比"><a href="#str-vs-repr-对比" class="headerlink" title="__str__ vs __repr__ 对比"></a><code>__str__</code> vs <code>__repr__</code> 对比</h3><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>触发场景</th>
+<th>面向对象</th>
+<th>返回风格</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__str__</code></td>
+<td>print &#x2F; str</td>
+<td>终端用户</td>
+<td>友好易读</td>
+</tr>
+<tr>
+<td><code>__repr__</code></td>
+<td>交互模式 &#x2F; repr</td>
+<td>开发者</td>
+<td>精确、可重建对象</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 <strong>最佳实践</strong>：如果只写一个，优先写 <code>__repr__</code>。当 <code>__str__</code> 未定义时，Python 会 fallback 到 <code>__repr__</code>。</p>
+</blockquote>
+<hr>
+<h2 id="四、容器与迭代协议（让对象像列表-字典）"><a href="#四、容器与迭代协议（让对象像列表-字典）" class="headerlink" title="四、容器与迭代协议（让对象像列表&#x2F;字典）"></a>四、容器与迭代协议（让对象像列表&#x2F;字典）</h2><p>实现这些魔法方法后，你的自定义类就能像列表&#x2F;字典一样，支持 <code>len()</code>、索引、切片、<code>for</code> 循环等操作。</p>
+<h3 id="1-len-self-—-支持-len-obj"><a href="#1-len-self-—-支持-len-obj" class="headerlink" title="1. __len__(self) — 支持 len(obj)"></a>1. <code>__len__(self)</code> — 支持 len(obj)</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">S</span>:<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__len__</span>(<span class="hljs-params">self</span>):<br>        <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;__len__ 函数被调用&quot;</span>)<br>        <span class="hljs-keyword">return</span> <span class="hljs-number">9</span><br><br>s = S()<br><span class="hljs-built_in">print</span>(<span class="hljs-built_in">len</span>(s))    <span class="hljs-comment"># 自动调用 __len__</span><br><span class="hljs-comment"># 输出：</span><br><span class="hljs-comment"># __len__ 函数被调用</span><br><span class="hljs-comment"># 9</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="2-getitem-self-key-—-支持-obj-key-取值"><a href="#2-getitem-self-key-—-支持-obj-key-取值" class="headerlink" title="2. __getitem__(self, key) — 支持 obj[key] 取值"></a>2. <code>__getitem__(self, key)</code> — 支持 obj[key] 取值</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>效果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>obj[2]</code></td>
+<td>触发 <code>__getitem__(self, 2)</code></td>
+</tr>
+<tr>
+<td><code>obj[&quot;name&quot;]</code></td>
+<td>触发 <code>__getitem__(self, &quot;name&quot;)</code></td>
+</tr>
+<tr>
+<td><code>obj[1:5]</code>（切片）</td>
+<td>触发 <code>__getitem__(self, slice(1, 5, None))</code></td>
+</tr>
+</tbody></table>
+<h3 id="3-setitem-self-key-value-—-支持-obj-key-value-赋值"><a href="#3-setitem-self-key-value-—-支持-obj-key-value-赋值" class="headerlink" title="3. __setitem__(self, key, value) — 支持 obj[key] &#x3D; value 赋值"></a>3. <code>__setitem__(self, key, value)</code> — 支持 obj[key] &#x3D; value 赋值</h3><h3 id="4-delitem-self-key-—-支持-del-obj-key-删除"><a href="#4-delitem-self-key-—-支持-del-obj-key-删除" class="headerlink" title="4. __delitem__(self, key) — 支持 del obj[key] 删除"></a>4. <code>__delitem__(self, key)</code> — 支持 del obj[key] 删除</h3><h3 id="5-iter-self-next-self-—-支持-for-循环-⭐"><a href="#5-iter-self-next-self-—-支持-for-循环-⭐" class="headerlink" title="5. __iter__(self) + __next__(self) — 支持 for 循环 ⭐"></a>5. <code>__iter__(self)</code> + <code>__next__(self)</code> — 支持 for 循环 ⭐</h3><ul>
+<li><code>__iter__()</code>：返回迭代器对象（通常返回 <code>self</code>）</li>
+<li><code>__next__()</code>：每次返回下一个元素，没有元素时抛 <code>StopIteration</code> 异常</li>
+</ul>
+<p>这两个方法实现后，就能用 <code>for item in obj:</code> 遍历你的对象。</p>
+<hr>
+<h2 id="五、运算符重载（让对象支持加减乘除）"><a href="#五、运算符重载（让对象支持加减乘除）" class="headerlink" title="五、运算符重载（让对象支持加减乘除）"></a>五、运算符重载（让对象支持加减乘除）</h2><p>Python 允许自定义类的对象使用运算符（<code>+</code>, <code>-</code>, <code>*</code>, <code>==</code>, <code>&lt;</code> 等），其实质就是调用对应的魔法方法。</p>
+<h3 id="1-算术运算符"><a href="#1-算术运算符" class="headerlink" title="1. 算术运算符"></a>1. 算术运算符</h3><table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>魔法方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>a + b</code></td>
+<td><code>__add__(self, other)</code></td>
+<td>加法</td>
+</tr>
+<tr>
+<td><code>a - b</code></td>
+<td><code>__sub__(self, other)</code></td>
+<td>减法</td>
+</tr>
+<tr>
+<td><code>a * b</code></td>
+<td><code>__mul__(self, other)</code></td>
+<td>乘法</td>
+</tr>
+<tr>
+<td><code>a / b</code></td>
+<td><code>__truediv__(self, other)</code></td>
+<td>除法（Python 3）</td>
+</tr>
+</tbody></table>
+<h3 id="2-比较运算符-⭐"><a href="#2-比较运算符-⭐" class="headerlink" title="2. 比较运算符 ⭐"></a>2. 比较运算符 ⭐</h3><table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>魔法方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>a == b</code></td>
+<td><code>__eq__(self, other)</code></td>
+<td>相等判断</td>
+</tr>
+<tr>
+<td><code>a != b</code></td>
+<td><code>__ne__(self, other)</code></td>
+<td>不相等（未定义时自动用 <code>not __eq__</code>）</td>
+</tr>
+<tr>
+<td><code>a &lt; b</code></td>
+<td><code>__lt__(self, other)</code></td>
+<td>小于</td>
+</tr>
+<tr>
+<td><code>a &lt;= b</code></td>
+<td><code>__le__(self, other)</code></td>
+<td>小于等于</td>
+</tr>
+<tr>
+<td><code>a &gt; b</code></td>
+<td><code>__gt__(self, other)</code></td>
+<td>大于</td>
+</tr>
+<tr>
+<td><code>a &gt;= b</code></td>
+<td><code>__ge__(self, other)</code></td>
+<td>大于等于</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 <strong>偷懒技巧</strong>：配合 <code>@functools.total_ordering</code> 装饰器，只要定义 <code>__eq__</code> + 任意一个比较方法（如 <code>__lt__</code>），其余 4 个比较方法会<strong>自动补全</strong>！</p>
+</blockquote>
+<hr>
+<h2 id="六、综合示例：Book-类"><a href="#六、综合示例：Book-类" class="headerlink" title="六、综合示例：Book 类"></a>六、综合示例：Book 类</h2><p>下面用一个完整的例子，展示魔法方法如何让自定义类「活起来」：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Book</span>:<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__init__</span>(<span class="hljs-params">self, title, price</span>):<br>        <span class="hljs-variable language_">self</span>.title = title<br>        <span class="hljs-variable language_">self</span>.price = price<br><br>    <span class="hljs-comment"># 1. 字符串表示：让 print() 变得有意义</span><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__str__</span>(<span class="hljs-params">self</span>):<br>        <span class="hljs-keyword">return</span> <span class="hljs-string">f&quot;《<span class="hljs-subst">&#123;self.title&#125;</span>》，售价：<span class="hljs-subst">&#123;self.price&#125;</span>元&quot;</span><br><br>    <span class="hljs-comment"># 2. 运算符重载：让两本书可以「相加」（计算总价）</span><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__add__</span>(<span class="hljs-params">self, other</span>):<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.price + other.price<br><br>    <span class="hljs-comment"># 3. 比较操作：让书根据价格比较大小</span><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__eq__</span>(<span class="hljs-params">self, other</span>):<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.price == other.price<br><br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">__lt__</span>(<span class="hljs-params">self, other</span>):<br>        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">self</span>.price &lt; other.price<br></code></pre></td></tr></table></figure>
+
+<h3 id="使用效果"><a href="#使用效果" class="headerlink" title="使用效果"></a>使用效果</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 创建对象</span><br>book1 = Book(<span class="hljs-string">&quot;Python入门&quot;</span>, <span class="hljs-number">50</span>)<br>book2 = Book(<span class="hljs-string">&quot;Python进阶&quot;</span>, <span class="hljs-number">80</span>)<br><br><span class="hljs-comment"># 触发 __str__</span><br><span class="hljs-built_in">print</span>(book1)<br><span class="hljs-comment"># 输出：《Python入门》，售价：50元</span><br><br><span class="hljs-comment"># 触发 __add__</span><br>total = book1 + book2<br><span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;两本书总价: <span class="hljs-subst">&#123;total&#125;</span>元&quot;</span>)<br><span class="hljs-comment"># 输出：两本书总价: 130元</span><br><br><span class="hljs-comment"># 触发 __eq__</span><br><span class="hljs-built_in">print</span>(book1 == book2)<br><span class="hljs-comment"># 输出：False</span><br><br><span class="hljs-comment"># 触发 __lt__</span><br><span class="hljs-built_in">print</span>(book1 &lt; book2)<br><span class="hljs-comment"># 输出：True（50 &lt; 80）</span><br><br><span class="hljs-comment"># 配合 total_ordering 装饰器后，未定义的 &lt;= / &gt; / &gt;= 也自动可用（配合 @total_ordering）</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="七、魔法方法速查表"><a href="#七、魔法方法速查表" class="headerlink" title="七、魔法方法速查表"></a>七、魔法方法速查表</h2><h3 id="1-生命周期"><a href="#1-生命周期" class="headerlink" title="1. 生命周期"></a>1. 生命周期</h3><table>
+<thead>
+<tr>
+<th>魔法方法</th>
+<th>触发时机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__new__(cls)</code></td>
+<td>创建实例（极少重写）</td>
+</tr>
+<tr>
+<td><code>__init__(self)</code></td>
+<td>初始化实例属性</td>
+</tr>
+<tr>
+<td><code>__del__(self)</code></td>
+<td>实例被垃圾回收</td>
+</tr>
+</tbody></table>
+<h3 id="2-字符串表示"><a href="#2-字符串表示" class="headerlink" title="2. 字符串表示"></a>2. 字符串表示</h3><table>
+<thead>
+<tr>
+<th>魔法方法</th>
+<th>触发时机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__str__(self)</code></td>
+<td><code>print()</code> &#x2F; <code>str()</code>，面向用户</td>
+</tr>
+<tr>
+<td><code>__repr__(self)</code></td>
+<td><code>repr()</code> &#x2F; 交互模式，面向开发者</td>
+</tr>
+</tbody></table>
+<h3 id="3-容器与迭代"><a href="#3-容器与迭代" class="headerlink" title="3. 容器与迭代"></a>3. 容器与迭代</h3><table>
+<thead>
+<tr>
+<th>魔法方法</th>
+<th>触发时机</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__len__(self)</code></td>
+<td><code>len(obj)</code></td>
+</tr>
+<tr>
+<td><code>__getitem__(self, key)</code></td>
+<td><code>obj[key]</code> 取值 &#x2F; 切片</td>
+</tr>
+<tr>
+<td><code>__setitem__(self, key, val)</code></td>
+<td><code>obj[key] = val</code> 赋值</td>
+</tr>
+<tr>
+<td><code>__delitem__(self, key)</code></td>
+<td><code>del obj[key]</code> 删除</td>
+</tr>
+<tr>
+<td><code>__iter__(self)</code></td>
+<td><code>iter(obj)</code> &#x2F; <code>for</code> 循环开始</td>
+</tr>
+<tr>
+<td><code>__next__(self)</code></td>
+<td>迭代器取下一个值</td>
+</tr>
+<tr>
+<td><code>__contains__(self, val)</code></td>
+<td><code>val in obj</code> 成员判断</td>
+</tr>
+</tbody></table>
+<h3 id="4-运算符重载（常用）"><a href="#4-运算符重载（常用）" class="headerlink" title="4. 运算符重载（常用）"></a>4. 运算符重载（常用）</h3><table>
+<thead>
+<tr>
+<th>类别</th>
+<th>魔法方法</th>
+<th>对应运算符</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>算术</strong></td>
+<td><code>__add__</code> &#x2F; <code>__sub__</code> &#x2F; <code>__mul__</code> &#x2F; <code>__truediv__</code></td>
+<td><code>+</code> <code>-</code> <code>*</code> <code>/</code></td>
+</tr>
+<tr>
+<td><strong>比较</strong></td>
+<td><code>__eq__</code> &#x2F; <code>__ne__</code> &#x2F; <code>__lt__</code> &#x2F; <code>__le__</code> &#x2F; <code>__gt__</code> &#x2F; <code>__ge__</code></td>
+<td><code>==</code> <code>!=</code> <code>&lt;</code> <code>&lt;=</code> <code>&gt;</code> <code>&gt;=</code></td>
+</tr>
+<tr>
+<td><strong>位运算</strong></td>
+<td><code>__and__</code> &#x2F; <code>__or__</code> &#x2F; <code>__xor__</code></td>
+<td><code>&amp;</code> <code>|</code> <code>^</code></td>
+</tr>
+</tbody></table>
+<h3 id="5-可调用对象"><a href="#5-可调用对象" class="headerlink" title="5. 可调用对象"></a>5. 可调用对象</h3><table>
+<thead>
+<tr>
+<th>魔法方法</th>
+<th>触发时机</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__call__(self, *args)</code></td>
+<td><code>obj(args)</code></td>
+<td>让实例可以像函数一样被调用</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 <code>__call__</code> 的妙用：装饰器类（用类实现装饰器）、把复杂逻辑封装成可调用对象。</p>
+</blockquote>
+<hr>
+<h2 id="八、总结与速记"><a href="#八、总结与速记" class="headerlink" title="八、总结与速记"></a>八、总结与速记</h2><h3 id="魔法方法学习建议"><a href="#魔法方法学习建议" class="headerlink" title="魔法方法学习建议"></a>魔法方法学习建议</h3><ol>
+<li><strong>优先掌握高频 6 个</strong>：<code>__init__</code>、<code>__str__</code>、<code>__repr__</code>、<code>__len__</code>、<code>__eq__</code>、<code>__add__</code></li>
+<li><strong>理解核心思想</strong>：魔法方法 &#x3D; **让自定义类对接 Python 原生语法糖</li>
+<li><strong>配合标准库</strong>：<code>@total_ordering</code> 省一半比较代码</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Python/" class="category-chain-item">Python</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80/" class="print-no-link">#语言基础</a>
+      
+        <a href="/tags/Python/" class="print-no-link">#Python</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Python：魔法方法</div>
+      <div>http://zl1nq.github.io/2026/07/29/Python06/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zl1nq</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年7月29日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/07/29/Python05/" title="Python：装饰器">
+                        <span class="hidden-mobile">Python：装饰器</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Blog</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

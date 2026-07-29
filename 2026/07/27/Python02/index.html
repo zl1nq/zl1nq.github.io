@@ -1,0 +1,1080 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/z.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="zl1nq">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="目录 一、with 上下文管理 二、文件打开模式 三、读文件的几种方式 四、写文件的几种方式 五、二进制文件读写 六、文件与目录操作 七、拷贝 &#x2F; 移动 &#x2F; 删除 八、常见问题与总结   一、with 上下文管理 ⭐ 核心作用：确保代码块执行完毕后，自动执行清理&#x2F;收尾工作，即使发生异常也一定会执行。 最常见的用途就是自动关闭文件，避免忘记写 f.close() 导致资">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python：文件基础处理">
+<meta property="og:url" content="http://zl1nq.github.io/2026/07/27/Python02/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="目录 一、with 上下文管理 二、文件打开模式 三、读文件的几种方式 四、写文件的几种方式 五、二进制文件读写 六、文件与目录操作 七、拷贝 &#x2F; 移动 &#x2F; 删除 八、常见问题与总结   一、with 上下文管理 ⭐ 核心作用：确保代码块执行完毕后，自动执行清理&#x2F;收尾工作，即使发生异常也一定会执行。 最常见的用途就是自动关闭文件，避免忘记写 f.close() 导致资">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-27T14:09:31.000Z">
+<meta property="article:modified_time" content="2026-07-27T14:15:55.652Z">
+<meta property="article:author" content="zl1nq">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="语言基础">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Python：文件基础处理 - Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zl1nq.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Python：文件基础处理"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-07-27 22:09" pubdate>
+          2026年7月27日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.1k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          34 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Python：文件基础处理</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80with-%E4%B8%8A%E4%B8%8B%E6%96%87%E7%AE%A1%E7%90%86">一、with 上下文管理</a></li>
+<li><a href="#%E4%BA%8C%E6%96%87%E4%BB%B6%E6%89%93%E5%BC%80%E6%A8%A1%E5%BC%8F">二、文件打开模式</a></li>
+<li><a href="#%E4%B8%89%E8%AF%BB%E6%96%87%E4%BB%B6%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F">三、读文件的几种方式</a></li>
+<li><a href="#%E5%9B%9B%E5%86%99%E6%96%87%E4%BB%B6%E7%9A%84%E5%87%A0%E7%A7%8D%E6%96%B9%E5%BC%8F">四、写文件的几种方式</a></li>
+<li><a href="#%E4%BA%94%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99">五、二进制文件读写</a></li>
+<li><a href="#%E5%85%AD%E6%96%87%E4%BB%B6%E4%B8%8E%E7%9B%AE%E5%BD%95%E6%93%8D%E4%BD%9C">六、文件与目录操作</a></li>
+<li><a href="#%E4%B8%83%E6%8B%B7%E8%B4%9D--%E7%A7%BB%E5%8A%A8--%E5%88%A0%E9%99%A4">七、拷贝 &#x2F; 移动 &#x2F; 删除</a></li>
+<li><a href="#%E5%85%AB%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E6%80%BB%E7%BB%93">八、常见问题与总结</a></li>
+</ul>
+<hr>
+<h2 id="一、with-上下文管理"><a href="#一、with-上下文管理" class="headerlink" title="一、with 上下文管理"></a>一、with 上下文管理</h2><blockquote>
+<p>⭐ <strong>核心作用</strong>：确保代码块执行完毕后，<strong>自动执行清理&#x2F;收尾工作</strong>，即使发生异常也一定会执行。</p>
+<p>最常见的用途就是<strong>自动关闭文件</strong>，避免忘记写 <code>f.close()</code> 导致资源泄漏。</p>
+</blockquote>
+<p>在 Python 中，<code>with</code> 关键字用于实现<strong>上下文管理（Context Management）</strong>。</p>
+<h3 id="为什么要用-with？"><a href="#为什么要用-with？" class="headerlink" title="为什么要用 with？"></a>为什么要用 with？</h3><p>不用 <code>with</code> 时，需要手动关闭文件：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python">f = <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;test.txt&quot;</span>, <span class="hljs-string">&quot;r&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>)<br><span class="hljs-keyword">try</span>:<br>    content = f.read()<br>    <span class="hljs-built_in">print</span>(content)<br><span class="hljs-keyword">finally</span>:<br>    f.close()  <span class="hljs-comment"># 必须手动关闭，写起来麻烦</span><br></code></pre></td></tr></table></figure>
+
+<p>用 <code>with</code> 之后，自动关闭文件，代码更简洁：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;test.txt&quot;</span>, <span class="hljs-string">&quot;r&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>    content = f.read()<br>    <span class="hljs-built_in">print</span>(content)<br><span class="hljs-comment"># 离开 with 块后，文件自动关闭</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>✅ <strong>优势</strong>：</p>
+<ul>
+<li>自动管理资源，无需手动 close</li>
+<li>异常安全：即使代码块内报错，资源也会被正确释放</li>
+<li>代码更简洁、可读性更高</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="二、文件打开模式"><a href="#二、文件打开模式" class="headerlink" title="二、文件打开模式"></a>二、文件打开模式</h2><table>
+<thead>
+<tr>
+<th align="left">模式</th>
+<th align="left">说明</th>
+<th align="left">文件不存在时</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>&#39;r&#39;</code></td>
+<td align="left">只读模式（<strong>默认</strong>）</td>
+<td align="left">报错 <code>FileNotFoundError</code></td>
+</tr>
+<tr>
+<td align="left"><code>&#39;w&#39;</code></td>
+<td align="left">写入模式（<strong>会清空原文件内容</strong>）</td>
+<td align="left">自动创建新文件</td>
+</tr>
+<tr>
+<td align="left"><code>&#39;a&#39;</code></td>
+<td align="left">追加模式（在文件末尾写入，不覆盖）</td>
+<td align="left">自动创建新文件</td>
+</tr>
+<tr>
+<td align="left"><code>&#39;x&#39;</code></td>
+<td align="left">独占创建模式（仅当文件不存在时创建并写入）</td>
+<td align="left">自动创建新文件</td>
+</tr>
+<tr>
+<td align="left"><code>&#39;b&#39;</code></td>
+<td align="left">二进制模式（常与 r&#x2F;w&#x2F;a 组合，如 <code>rb</code>, <code>wb</code>）</td>
+<td align="left">-</td>
+</tr>
+<tr>
+<td align="left"><code>&#39;t&#39;</code></td>
+<td align="left">文本模式（<strong>默认</strong>，常与 r&#x2F;w&#x2F;a 组合，如 <code>rt</code>）</td>
+<td align="left">-</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>⚠️ <strong>注意</strong>：</p>
+<ul>
+<li><code>w</code> 模式会<strong>直接清空</strong>原文件内容，慎用！</li>
+<li>文本文件读写建议指定 <code>encoding=&quot;utf-8&quot;</code>，避免乱码</li>
+<li>二进制模式（<code>b</code>）不能指定 <code>encoding</code></li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="三、读文件的几种方式"><a href="#三、读文件的几种方式" class="headerlink" title="三、读文件的几种方式"></a>三、读文件的几种方式</h2><h3 id="1-一次性读取全部内容（适合小文件）"><a href="#1-一次性读取全部内容（适合小文件）" class="headerlink" title="1. 一次性读取全部内容（适合小文件）"></a>1. 一次性读取全部内容（适合小文件）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;test.txt&quot;</span>, <span class="hljs-string">&quot;r&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>    all_content = f.read()  <span class="hljs-comment"># 读取全部内容，包括换行符</span><br>    <span class="hljs-built_in">print</span>(all_content)<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>简单直接</td>
+<td>大文件会占满内存</td>
+</tr>
+</tbody></table>
+<h3 id="2-按行读取（最常用，内存友好）⭐"><a href="#2-按行读取（最常用，内存友好）⭐" class="headerlink" title="2. 按行读取（最常用，内存友好）⭐"></a>2. 按行读取（最常用，内存友好）⭐</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;test.txt&quot;</span>, <span class="hljs-string">&quot;r&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> f:  <span class="hljs-comment"># f 本身就是迭代器，每次读一行</span><br>        <span class="hljs-built_in">print</span>(line.strip())  <span class="hljs-comment"># strip() 去掉行尾换行符 \n</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 <strong>推荐方式</strong>：逐行读取，内存占用稳定，适合处理大文件。</p>
+</blockquote>
+<h3 id="3-读取为列表（每行作为一个元素）"><a href="#3-读取为列表（每行作为一个元素）" class="headerlink" title="3. 读取为列表（每行作为一个元素）"></a>3. 读取为列表（每行作为一个元素）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;test.txt&quot;</span>, <span class="hljs-string">&quot;r&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>    lines = f.readlines()<br>    <span class="hljs-built_in">print</span>(lines)<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：<code>readlines()</code> 会把所有行读入内存，大文件慎用。</p>
+</blockquote>
+<h3 id="4-读取指定字符数"><a href="#4-读取指定字符数" class="headerlink" title="4. 读取指定字符数"></a>4. 读取指定字符数</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;test.txt&quot;</span>, <span class="hljs-string">&quot;r&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>    chunk = f.read(<span class="hljs-number">10</span>)  <span class="hljs-comment"># 读 10 个字符</span><br>    <span class="hljs-built_in">print</span>(chunk)<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="四、写文件的几种方式"><a href="#四、写文件的几种方式" class="headerlink" title="四、写文件的几种方式"></a>四、写文件的几种方式</h2><h3 id="1-写入字符串（覆盖写入）"><a href="#1-写入字符串（覆盖写入）" class="headerlink" title="1. 写入字符串（覆盖写入）"></a>1. 写入字符串（覆盖写入）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;output.txt&quot;</span>, <span class="hljs-string">&quot;w&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>    f.write(<span class="hljs-string">&quot;第一行内容\n&quot;</span>)<br>    f.write(<span class="hljs-string">&quot;第二行内容\n&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ <code>w</code> 模式会<strong>清空原文件</strong>，之前的内容全部丢失！</p>
+</blockquote>
+<h3 id="2-追加写入"><a href="#2-追加写入" class="headerlink" title="2. 追加写入"></a>2. 追加写入</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;output.txt&quot;</span>, <span class="hljs-string">&quot;a&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>    f.write(<span class="hljs-string">&quot;这是追加的内容\n&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<p>在文件末尾追加，不会覆盖原有内容。</p>
+<h3 id="3-批量写入列表（高效）"><a href="#3-批量写入列表（高效）" class="headerlink" title="3. 批量写入列表（高效）"></a>3. 批量写入列表（高效）</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python">lines_to_write = [<span class="hljs-string">&quot;苹果\n&quot;</span>, <span class="hljs-string">&quot;香蕉\n&quot;</span>, <span class="hljs-string">&quot;橘子\n&quot;</span>]<br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;fruits.txt&quot;</span>, <span class="hljs-string">&quot;w&quot;</span>, encoding=<span class="hljs-string">&quot;utf-8&quot;</span>) <span class="hljs-keyword">as</span> f:<br>    f.writelines(lines_to_write)<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 <code>writelines()</code> 不会自动加换行符，需要自己在字符串里加 <code>\n</code>。</p>
+</blockquote>
+<hr>
+<h2 id="五、二进制文件读写"><a href="#五、二进制文件读写" class="headerlink" title="五、二进制文件读写"></a>五、二进制文件读写</h2><p>处理非文本文件（图片、视频、音频等）时，必须使用 <code>&#39;b&#39;</code> 模式，<strong>不能指定 encoding</strong>。</p>
+<h3 id="示例：复制一张图片"><a href="#示例：复制一张图片" class="headerlink" title="示例：复制一张图片"></a>示例：复制一张图片</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># 读取二进制</span><br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;123.png&quot;</span>, <span class="hljs-string">&quot;rb&quot;</span>) <span class="hljs-keyword">as</span> src:<br>    data = src.read()<br><br><span class="hljs-comment"># 写入二进制</span><br><span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;copy.png&quot;</span>, <span class="hljs-string">&quot;wb&quot;</span>) <span class="hljs-keyword">as</span> dst:<br>    dst.write(data)<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>文本模式 <code>&#39;t&#39;</code></th>
+<th>二进制模式 <code>&#39;b&#39;</code></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>读写单位</td>
+<td>字符（str）</td>
+<td>字节（bytes）</td>
+</tr>
+<tr>
+<td>编码处理</td>
+<td>自动编解码</td>
+<td>原始字节，不处理编码</td>
+</tr>
+<tr>
+<td>换行符</td>
+<td>平台自动转换</td>
+<td>原样读写</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>.txt, .py, .json 等文本文件</td>
+<td>图片、视频、音频、exe 等</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="六、文件与目录操作"><a href="#六、文件与目录操作" class="headerlink" title="六、文件与目录操作"></a>六、文件与目录操作</h2><p>Python 3 推荐使用 <strong><code>pathlib</code></strong> 模块，比传统的 <code>os.path</code> 更优雅、更面向对象。</p>
+<h3 id="1-pathlib-现代方式-⭐"><a href="#1-pathlib-现代方式-⭐" class="headerlink" title="1. pathlib 现代方式 ⭐"></a>1. pathlib 现代方式 ⭐</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">from</span> pathlib <span class="hljs-keyword">import</span> Path<br><br>p = Path(<span class="hljs-string">&quot;data/test.txt&quot;</span>)<br></code></pre></td></tr></table></figure>
+
+<h4 id="常用判断"><a href="#常用判断" class="headerlink" title="常用判断"></a>常用判断</h4><table>
+<thead>
+<tr>
+<th>方法&#x2F;属性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p.exists()</code></td>
+<td>文件&#x2F;目录是否存在</td>
+</tr>
+<tr>
+<td><code>p.is_file()</code></td>
+<td>是否是文件</td>
+</tr>
+<tr>
+<td><code>p.is_dir()</code></td>
+<td>是否是目录</td>
+</tr>
+</tbody></table>
+<h4 id="获取路径信息"><a href="#获取路径信息" class="headerlink" title="获取路径信息"></a>获取路径信息</h4><table>
+<thead>
+<tr>
+<th>属性</th>
+<th>示例结果</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p.name</code></td>
+<td><code>test.txt</code></td>
+<td>文件名（含后缀）</td>
+</tr>
+<tr>
+<td><code>p.stem</code></td>
+<td><code>test</code></td>
+<td>文件名（不含后缀）</td>
+</tr>
+<tr>
+<td><code>p.suffix</code></td>
+<td><code>.txt</code></td>
+<td>文件后缀</td>
+</tr>
+<tr>
+<td><code>p.parent</code></td>
+<td><code>data</code></td>
+<td>父目录</td>
+</tr>
+<tr>
+<td><code>p.absolute()</code></td>
+<td><code>/xxx/data/test.txt</code></td>
+<td>绝对路径</td>
+</tr>
+</tbody></table>
+<h4 id="创建目录"><a href="#创建目录" class="headerlink" title="创建目录"></a>创建目录</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-comment"># parents=True：自动创建不存在的父目录</span><br><span class="hljs-comment"># exist_ok=True：目录已存在也不报错</span><br>Path(<span class="hljs-string">&quot;new_folder/sub_folder&quot;</span>).mkdir(parents=<span class="hljs-literal">True</span>, exist_ok=<span class="hljs-literal">True</span>)<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-os-模块传统方式"><a href="#2-os-模块传统方式" class="headerlink" title="2. os 模块传统方式"></a>2. os 模块传统方式</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> os<br><br>os.mkdir(<span class="hljs-string">&#x27;new_dir&#x27;</span>)          <span class="hljs-comment"># 建目录（父目录必须存在）</span><br>os.makedirs(<span class="hljs-string">&#x27;a/b/c&#x27;</span>)         <span class="hljs-comment"># 递归建目录，等价 Java 的 mkdirs()</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="3-遍历目录"><a href="#3-遍历目录" class="headerlink" title="3. 遍历目录"></a>3. 遍历目录</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> os<br><br><span class="hljs-comment"># os.walk 递归遍历所有子目录</span><br><span class="hljs-keyword">for</span> root, dirs, files <span class="hljs-keyword">in</span> os.walk(<span class="hljs-string">&#x27;./&#x27;</span>):<br>    <span class="hljs-keyword">for</span> file <span class="hljs-keyword">in</span> files:<br>        <span class="hljs-built_in">print</span>(os.path.join(root, file))<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="七、拷贝-移动-删除"><a href="#七、拷贝-移动-删除" class="headerlink" title="七、拷贝 &#x2F; 移动 &#x2F; 删除"></a>七、拷贝 &#x2F; 移动 &#x2F; 删除</h2><p>需要使用 <strong><code>shutil</code></strong> 模块。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> shutil<br><span class="hljs-keyword">import</span> os<br><br>shutil.copy(<span class="hljs-string">&#x27;src.txt&#x27;</span>, <span class="hljs-string">&#x27;dst.txt&#x27;</span>)   <span class="hljs-comment"># 拷贝文件</span><br>shutil.move(<span class="hljs-string">&#x27;a.txt&#x27;</span>, <span class="hljs-string">&#x27;b.txt&#x27;</span>)       <span class="hljs-comment"># 移动 / 重命名</span><br>os.remove(<span class="hljs-string">&#x27;del.txt&#x27;</span>)                <span class="hljs-comment"># 删除文件</span><br>os.rmdir(<span class="hljs-string">&#x27;empty_dir&#x27;</span>)               <span class="hljs-comment"># 删除空目录</span><br>shutil.rmtree(<span class="hljs-string">&#x27;non_empty_dir&#x27;</span>)      <span class="hljs-comment"># ⚠️ 递归删除非空目录（危险！）</span><br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>函数</th>
+<th>注意事项</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>拷贝文件</td>
+<td><code>shutil.copy()</code></td>
+<td>目标是目录则拷贝到目录下</td>
+</tr>
+<tr>
+<td>移动&#x2F;重命名</td>
+<td><code>shutil.move()</code></td>
+<td>既可移动也可重命名</td>
+</tr>
+<tr>
+<td>删除文件</td>
+<td><code>os.remove()</code></td>
+<td>只能删文件，不能删目录</td>
+</tr>
+<tr>
+<td>删除空目录</td>
+<td><code>os.rmdir()</code></td>
+<td>目录非空会报错</td>
+</tr>
+<tr>
+<td>递归删除目录</td>
+<td><code>shutil.rmtree()</code></td>
+<td>⚠️ 直接删除，不进回收站，慎用！</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="八、常见问题与总结"><a href="#八、常见问题与总结" class="headerlink" title="八、常见问题与总结"></a>八、常见问题与总结</h2><h3 id="1-为什么我的文件读写乱码？"><a href="#1-为什么我的文件读写乱码？" class="headerlink" title="1. 为什么我的文件读写乱码？"></a>1. 为什么我的文件读写乱码？</h3><ul>
+<li>读写时没有指定 <code>encoding=&quot;utf-8&quot;</code>，用了系统默认编码</li>
+<li>读写编码不一致（写用 gbk，读用 utf-8）</li>
+</ul>
+<blockquote>
+<p>✅ <strong>最佳实践</strong>：所有文本文件操作都显式指定 <code>encoding=&quot;utf-8&quot;</code>。</p>
+</blockquote>
+<h3 id="2-with-语句只能用在文件操作吗？"><a href="#2-with-语句只能用在文件操作吗？" class="headerlink" title="2. with 语句只能用在文件操作吗？"></a>2. with 语句只能用在文件操作吗？</h3><p>不是。任何实现了<strong>上下文管理器协议</strong>（<code>__enter__</code> 和 <code>__exit__</code> 方法）的对象都可以用 <code>with</code>。</p>
+<p>常见的有：</p>
+<ul>
+<li>文件操作：<code>open()</code></li>
+<li>线程锁：<code>threading.Lock()</code></li>
+<li>数据库连接</li>
+<li>临时文件：<code>tempfile</code></li>
+</ul>
+<h3 id="3-read-readline-readlines-区别"><a href="#3-read-readline-readlines-区别" class="headerlink" title="3. read &#x2F; readline &#x2F; readlines 区别"></a>3. read &#x2F; readline &#x2F; readlines 区别</h3><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>返回类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>read()</code></td>
+<td>str</td>
+<td>一次性读全部内容</td>
+</tr>
+<tr>
+<td><code>readline()</code></td>
+<td>str</td>
+<td>读一行</td>
+</tr>
+<tr>
+<td><code>readlines()</code></td>
+<td>list</td>
+<td>读所有行，返回列表</td>
+</tr>
+</tbody></table>
+<h3 id="4-速记总结"><a href="#4-速记总结" class="headerlink" title="4. 速记总结"></a>4. 速记总结</h3><ul>
+<li><strong>读文件优先</strong>：<code>for line in f:</code> 逐行读，内存友好</li>
+<li><strong>写文件注意</strong>：<code>w</code> 清空、<code>a</code> 追加，别搞混</li>
+<li><strong>路径操作</strong>：优先用 <code>pathlib.Path</code>，现代优雅</li>
+<li><strong>删目录小心</strong>：<code>shutil.rmtree()</code> 不可逆，慎用</li>
+<li><strong>编码问题</strong>：永远指定 <code>encoding=&quot;utf-8&quot;</code></li>
+</ul>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Python/" class="category-chain-item">Python</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80/" class="print-no-link">#语言基础</a>
+      
+        <a href="/tags/Python/" class="print-no-link">#Python</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Python：文件基础处理</div>
+      <div>http://zl1nq.github.io/2026/07/27/Python02/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zl1nq</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年7月27日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/07/27/Python03/" title="Python：函数 &amp; 参数相关">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Python：函数 &amp; 参数相关</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/07/27/Python01/" title="Python：常用容器">
+                        <span class="hidden-mobile">Python：常用容器</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Blog</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

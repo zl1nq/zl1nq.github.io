@@ -1,0 +1,1327 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/z.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="zl1nq">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="目录 一、什么是阻塞队列 二、核心方法：四组 API 对比 三、六大实现类详解 四、实现类横向对比 五、生产者消费者模型 六、底层原理 七、常见问题与注意事项 八、面试背诵版   一、什么是阻塞队列BlockingQueue 位于 java.util.concurrent 包，继承自 Queue 接口，是线程安全的队列。  ⭐ 核心价值：在并发场景下，自动处理线程的阻塞与唤醒，开发者无需手动写 w">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java并发编程05：阻塞队列">
+<meta property="og:url" content="http://zl1nq.github.io/2026/07/25/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B05/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="目录 一、什么是阻塞队列 二、核心方法：四组 API 对比 三、六大实现类详解 四、实现类横向对比 五、生产者消费者模型 六、底层原理 七、常见问题与注意事项 八、面试背诵版   一、什么是阻塞队列BlockingQueue 位于 java.util.concurrent 包，继承自 Queue 接口，是线程安全的队列。  ⭐ 核心价值：在并发场景下，自动处理线程的阻塞与唤醒，开发者无需手动写 w">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-07-25T14:09:58.000Z">
+<meta property="article:modified_time" content="2026-07-27T12:16:06.692Z">
+<meta property="article:author" content="zl1nq">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>Java并发编程05：阻塞队列 - Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zl1nq.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="Java并发编程05：阻塞队列"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-07-25 22:09" pubdate>
+          2026年7月25日 晚上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          8.5k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          71 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">Java并发编程05：阻塞队列</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E4%BB%80%E4%B9%88%E6%98%AF%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97">一、什么是阻塞队列</a></li>
+<li><a href="#%E4%BA%8C%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95%E5%9B%9B%E7%BB%84-api-%E5%AF%B9%E6%AF%94">二、核心方法：四组 API 对比</a></li>
+<li><a href="#%E4%B8%89%E5%85%AD%E5%A4%A7%E5%AE%9E%E7%8E%B0%E7%B1%BB%E8%AF%A6%E8%A7%A3">三、六大实现类详解</a></li>
+<li><a href="#%E5%9B%9B%E5%AE%9E%E7%8E%B0%E7%B1%BB%E6%A8%AA%E5%90%91%E5%AF%B9%E6%AF%94">四、实现类横向对比</a></li>
+<li><a href="#%E4%BA%94%E7%94%9F%E4%BA%A7%E8%80%85%E6%B6%88%E8%B4%B9%E8%80%85%E6%A8%A1%E5%9E%8B">五、生产者消费者模型</a></li>
+<li><a href="#%E5%85%AD%E5%BA%95%E5%B1%82%E5%8E%9F%E7%90%86">六、底层原理</a></li>
+<li><a href="#%E4%B8%83%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">七、常见问题与注意事项</a></li>
+<li><a href="#%E5%85%AB%E9%9D%A2%E8%AF%95%E8%83%8C%E8%AF%B5%E7%89%88">八、面试背诵版</a></li>
+</ul>
+<hr>
+<h2 id="一、什么是阻塞队列"><a href="#一、什么是阻塞队列" class="headerlink" title="一、什么是阻塞队列"></a>一、什么是阻塞队列</h2><p><code>BlockingQueue</code> 位于 <code>java.util.concurrent</code> 包，继承自 <code>Queue</code> 接口，是<strong>线程安全</strong>的队列。</p>
+<blockquote>
+<p>⭐ <strong>核心价值</strong>：在并发场景下，自动处理线程的阻塞与唤醒，开发者无需手动写 wait&#x2F;notify 逻辑。</p>
+</blockquote>
+<h3 id="1-两大阻塞特性"><a href="#1-两大阻塞特性" class="headerlink" title="1. 两大阻塞特性"></a>1. 两大阻塞特性</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>队列满时</strong></td>
+<td>往队列添加元素的线程阻塞，直到队列有空位</td>
+</tr>
+<tr>
+<td><strong>队列空时</strong></td>
+<td>从队列获取元素的线程阻塞，直到队列有数据</td>
+</tr>
+</tbody></table>
+<h3 id="2-核心规则"><a href="#2-核心规则" class="headerlink" title="2. 核心规则"></a>2. 核心规则</h3><ul>
+<li>❌ <strong>不允许 null 元素</strong>，插入 null 直接抛出 <code>NullPointerException</code></li>
+<li>✅ <strong>线程安全</strong>：所有操作都是原子的、线程安全的</li>
+<li>🎯 <strong>典型场景</strong>：生产者 - 消费者模型</li>
+</ul>
+<h3 id="3-接口定义"><a href="#3-接口定义" class="headerlink" title="3. 接口定义"></a>3. 接口定义</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">BlockingQueue</span>&lt;E&gt; <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Queue</span>&lt;E&gt;<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="二、核心方法：四组-API-对比"><a href="#二、核心方法：四组-API-对比" class="headerlink" title="二、核心方法：四组 API 对比"></a>二、核心方法：四组 API 对比</h2><p>根据队列满&#x2F;空时的行为分为四类，极易混淆，整理如下：</p>
+<table>
+<thead>
+<tr>
+<th>操作类型</th>
+<th>抛出异常</th>
+<th>返回特殊值</th>
+<th>阻塞等待</th>
+<th>超时等待</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>添加</strong></td>
+<td><code>add(e)</code></td>
+<td><code>offer(e)</code></td>
+<td><code>put(e)</code></td>
+<td><code>offer(e, time, unit)</code></td>
+</tr>
+<tr>
+<td><strong>获取（删除）</strong></td>
+<td><code>remove()</code></td>
+<td><code>poll()</code></td>
+<td><code>take()</code></td>
+<td><code>poll(time, unit)</code></td>
+</tr>
+<tr>
+<td><strong>查看队首</strong></td>
+<td><code>element()</code></td>
+<td><code>peek()</code></td>
+<td>——</td>
+<td>——</td>
+</tr>
+</tbody></table>
+<h3 id="1-抛出异常组"><a href="#1-抛出异常组" class="headerlink" title="1. 抛出异常组"></a>1. 抛出异常组</h3><p>队列满&#x2F;空时直接抛出异常，<strong>不推荐在并发场景使用</strong>。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>异常场景</th>
+<th>异常类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>add(e)</code></td>
+<td>队列满时调用</td>
+<td><code>IllegalStateException</code></td>
+</tr>
+<tr>
+<td><code>remove()</code></td>
+<td>队列空时调用</td>
+<td><code>NoSuchElementException</code></td>
+</tr>
+<tr>
+<td><code>element()</code></td>
+<td>队列空时调用</td>
+<td><code>NoSuchElementException</code></td>
+</tr>
+</tbody></table>
+<h3 id="2-返回特殊值组（非阻塞）"><a href="#2-返回特殊值组（非阻塞）" class="headerlink" title="2. 返回特殊值组（非阻塞）"></a>2. 返回特殊值组（非阻塞）</h3><p>立即返回结果，不会阻塞线程，适合尝试性操作。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>成功返回</th>
+<th>失败返回</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>offer(e)</code></td>
+<td><code>true</code></td>
+<td><code>false</code>（队列满）</td>
+</tr>
+<tr>
+<td><code>poll()</code></td>
+<td>队首元素</td>
+<td><code>null</code>（队列空）</td>
+</tr>
+<tr>
+<td><code>peek()</code></td>
+<td>队首元素</td>
+<td><code>null</code>（队列空）</td>
+</tr>
+</tbody></table>
+<h3 id="3-阻塞等待组（生产者消费者最常用）⭐"><a href="#3-阻塞等待组（生产者消费者最常用）⭐" class="headerlink" title="3. 阻塞等待组（生产者消费者最常用）⭐"></a>3. 阻塞等待组（生产者消费者最常用）⭐</h3><p>队列不满足条件时，线程<strong>无限阻塞</strong>，直到条件满足或被中断。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>行为</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>put(e)</code></td>
+<td>队列满，线程无限阻塞，直到有空位 &#x2F; 线程中断</td>
+</tr>
+<tr>
+<td><code>take()</code></td>
+<td>队列空，线程无限阻塞，直到有元素 &#x2F; 线程中断</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 <strong>开发建议</strong>：实现生产者消费者模型，首选 <code>put()</code> &#x2F; <code>take()</code> 组合。</p>
+</blockquote>
+<h3 id="4-超时等待组（限时等待）"><a href="#4-超时等待组（限时等待）" class="headerlink" title="4. 超时等待组（限时等待）"></a>4. 超时等待组（限时等待）</h3><p>阻塞一段时间，超时后返回失败，不会无限等待。</p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>offer(e, long timeout, TimeUnit unit)</code></td>
+<td>等待指定时长，放不进去返回 <code>false</code></td>
+</tr>
+<tr>
+<td><code>poll(long timeout, TimeUnit unit)</code></td>
+<td>等待指定时长，取不到返回 <code>null</code></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>⚠️ <strong>重要提醒</strong>：阻塞方法（put&#x2F;take&#x2F;超时版本）被线程 <code>interrupt()</code> 中断时，会抛出 <code>InterruptedException</code>，必须捕获处理。</p>
+</blockquote>
+<hr>
+<h2 id="三、六大实现类详解"><a href="#三、六大实现类详解" class="headerlink" title="三、六大实现类详解"></a>三、六大实现类详解</h2><h3 id="1-ArrayBlockingQueue"><a href="#1-ArrayBlockingQueue" class="headerlink" title="1. ArrayBlockingQueue"></a>1. ArrayBlockingQueue</h3><blockquote>
+<p><strong>基于数组的有界阻塞队列</strong></p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 创建固定容量队列</span><br>ArrayBlockingQueue&lt;String&gt; queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayBlockingQueue</span>&lt;&gt;(<span class="hljs-number">10</span>);<br><br><span class="hljs-comment">// 可选参数：fair 是否公平锁（默认 false，非公平）</span><br>ArrayBlockingQueue&lt;String&gt; queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayBlockingQueue</span>&lt;&gt;(<span class="hljs-number">10</span>, <span class="hljs-literal">true</span>);<br></code></pre></td></tr></table></figure>
+
+<p><strong>核心特点：</strong></p>
+<ul>
+<li>📦 <strong>有界队列</strong>：初始化必须指定容量，后续不能扩容</li>
+<li>🔒 <strong>一把锁</strong>：使用一把 <code>ReentrantLock</code>，生产者、消费者共用同一把锁，<strong>无法并发读写</strong></li>
+<li>📊 <strong>FIFO</strong>：先进先出</li>
+<li>⚖️ <strong>公平锁可选</strong>：开启后等待线程按顺序获取资源，吞吐量略低</li>
+</ul>
+<hr>
+<h3 id="2-LinkedBlockingQueue"><a href="#2-LinkedBlockingQueue" class="headerlink" title="2. LinkedBlockingQueue"></a>2. LinkedBlockingQueue</h3><blockquote>
+<p><strong>基于单向链表，可选有界 &#x2F; 无界阻塞队列</strong></p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 无界（最大容量 Integer.MAX_VALUE）</span><br>LinkedBlockingQueue&lt;String&gt; queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LinkedBlockingQueue</span>&lt;&gt;();<br><br><span class="hljs-comment">// 有界</span><br>LinkedBlockingQueue&lt;String&gt; queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LinkedBlockingQueue</span>&lt;&gt;(<span class="hljs-number">100</span>);<br></code></pre></td></tr></table></figure>
+
+<p><strong>核心特点：</strong></p>
+<ul>
+<li>⚠️ <strong>默认无界</strong>：不指定容量时，最大为 <code>Integer.MAX_VALUE</code>，无限添加会造成 <strong>OOM</strong></li>
+<li>🔐 <strong>两把锁</strong>：<code>putLock</code>（入队锁）、<code>takeLock</code>（出队锁）</li>
+<li>✅ <strong>高并发</strong>：生产者和消费者可以并发执行，并发性能优于 <code>ArrayBlockingQueue</code></li>
+<li>📊 <strong>FIFO</strong>：先进先出</li>
+<li>🧵 <strong>线程池应用</strong>：<code>Executors.newFixedThreadPool()</code> 底层使用该队列</li>
+</ul>
+<hr>
+<h3 id="3-PriorityBlockingQueue"><a href="#3-PriorityBlockingQueue" class="headerlink" title="3. PriorityBlockingQueue"></a>3. PriorityBlockingQueue</h3><blockquote>
+<p><strong>支持优先级的无界阻塞队列</strong></p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">PriorityBlockingQueue&lt;Integer&gt; queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">PriorityBlockingQueue</span>&lt;&gt;();<br></code></pre></td></tr></table></figure>
+
+<p><strong>核心特点：</strong></p>
+<ul>
+<li>📈 <strong>无界队列</strong>：内部数组自动扩容</li>
+<li>🏆 <strong>优先级排序</strong>：元素必须实现 <code>Comparable</code> 接口，或者构造时传入 <code>Comparator</code></li>
+<li>❓ <strong>同优先级无序</strong>：不保证同优先级元素的顺序</li>
+<li>🔀 <strong>非 FIFO</strong>：获取元素按优先级排序，不是先进先出</li>
+<li>➡️ <strong>只有出队阻塞</strong>：队列永远不会满，<code>put()</code> 永远不会阻塞</li>
+</ul>
+<hr>
+<h3 id="4-DelayQueue"><a href="#4-DelayQueue" class="headerlink" title="4. DelayQueue"></a>4. DelayQueue</h3><blockquote>
+<p><strong>延时无界阻塞队列</strong></p>
+</blockquote>
+<p>存放实现 <code>Delayed</code> 接口的对象，元素<strong>到期之后才能被取出</strong>。</p>
+<p><strong>适用场景：</strong></p>
+<ul>
+<li>⏰ 定时任务调度</li>
+<li>📦 订单超时自动取消</li>
+<li>🗑️ 缓存过期清理</li>
+</ul>
+<p><strong>核心特点：</strong></p>
+<ul>
+<li><code>take()</code> 只会获取<strong>已经过期</strong>的元素</li>
+<li>元素未到期时，线程阻塞等待</li>
+<li>底层基于 <code>PriorityQueue</code> 实现，按过期时间排序</li>
+</ul>
+<hr>
+<h3 id="5-SynchronousQueue"><a href="#5-SynchronousQueue" class="headerlink" title="5. SynchronousQueue"></a>5. SynchronousQueue</h3><blockquote>
+<p><strong>不存储元素的阻塞队列，容量 &#x3D; 0</strong></p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs java">SynchronousQueue&lt;String&gt; queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">SynchronousQueue</span>&lt;&gt;(<span class="hljs-literal">true</span>); <span class="hljs-comment">// 公平模式</span><br></code></pre></td></tr></table></figure>
+
+<p><strong>核心机制：put 和 take 必须配对</strong></p>
+<ul>
+<li>生产者 <code>put</code> 之后阻塞，直到有消费者 <code>take</code></li>
+<li>消费者 <code>take</code> 之后阻塞，直到有生产者 <code>put</code></li>
+<li>没有内部缓冲区，相当于<strong>线程之间直接传递任务</strong></li>
+</ul>
+<p><strong>典型应用：</strong></p>
+<ul>
+<li><code>Executors.newCachedThreadPool()</code> 底层使用它</li>
+</ul>
+<hr>
+<h3 id="6-LinkedTransferQueue（较少使用）"><a href="#6-LinkedTransferQueue（较少使用）" class="headerlink" title="6. LinkedTransferQueue（较少使用）"></a>6. LinkedTransferQueue（较少使用）</h3><blockquote>
+<p><code>TransferQueue</code> 子接口，无界链表队列</p>
+</blockquote>
+<p><strong>新增 <code>transfer()</code> 方法：</strong></p>
+<p>生产者尝试直接转交元素给消费者，没有消费者则阻塞；性能较强。</p>
+<hr>
+<h2 id="四、实现类横向对比"><a href="#四、实现类横向对比" class="headerlink" title="四、实现类横向对比"></a>四、实现类横向对比</h2><table>
+<thead>
+<tr>
+<th>实现类</th>
+<th>是否有界</th>
+<th>数据结构</th>
+<th>锁机制</th>
+<th>特点</th>
+<th>典型场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ArrayBlockingQueue</strong></td>
+<td>✅ 有界</td>
+<td>数组</td>
+<td>一把锁</td>
+<td>初始化必须指定容量，不可扩容，并发一般</td>
+<td>固定容量的任务队列</td>
+</tr>
+<tr>
+<td><strong>LinkedBlockingQueue</strong></td>
+<td>⚠️ 可选</td>
+<td>单向链表</td>
+<td>两把锁（读写分离）</td>
+<td>默认无界，并发性能好，注意 OOM 风险</td>
+<td>线程池任务队列</td>
+</tr>
+<tr>
+<td><strong>PriorityBlockingQueue</strong></td>
+<td>❌ 无界</td>
+<td>数组（堆）</td>
+<td>一把锁</td>
+<td>按优先级出队，非 FIFO</td>
+<td>优先级任务调度</td>
+</tr>
+<tr>
+<td><strong>DelayQueue</strong></td>
+<td>❌ 无界</td>
+<td>优先级队列</td>
+<td>一把锁</td>
+<td>按延迟时间出队，元素需实现 Delayed</td>
+<td>定时任务、缓存过期</td>
+</tr>
+<tr>
+<td><strong>SynchronousQueue</strong></td>
+<td>✅ 容量为0</td>
+<td>无（直接传递）</td>
+<td>CAS + 锁</td>
+<td>不存储元素，直接交接</td>
+<td>缓存线程池</td>
+</tr>
+<tr>
+<td><strong>LinkedTransferQueue</strong></td>
+<td>❌ 无界</td>
+<td>链表</td>
+<td>CAS</td>
+<td>transfer 直接转交，性能强</td>
+<td>高并发消息传递</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 <strong>选型建议</strong>：</p>
+<ul>
+<li>大多数场景用 <code>ArrayBlockingQueue</code> 或 <code>LinkedBlockingQueue</code></li>
+<li>需要排序用 <code>PriorityBlockingQueue</code></li>
+<li>需要延迟用 <code>DelayQueue</code></li>
+<li>直接传递任务用 <code>SynchronousQueue</code></li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="五、生产者消费者模型"><a href="#五、生产者消费者模型" class="headerlink" title="五、生产者消费者模型"></a>五、生产者消费者模型</h2><p>阻塞队列最经典的应用就是<strong>生产者消费者模式</strong>。</p>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">BlockingQueueDemo</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> &#123;<br>        BlockingQueue&lt;String&gt; queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArrayBlockingQueue</span>&lt;&gt;(<span class="hljs-number">3</span>);<br><br>        <span class="hljs-comment">// 生产者</span><br>        <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(() -&gt; &#123;<br>            <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>; i &lt;= <span class="hljs-number">5</span>; i++) &#123;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    queue.put(<span class="hljs-string">&quot;商品&quot;</span> + i);<br>                    System.out.println(<span class="hljs-string">&quot;生产：商品&quot;</span> + i);<br>                &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                    Thread.currentThread().interrupt();<br>                &#125;<br>            &#125;<br>        &#125;, <span class="hljs-string">&quot;生产者&quot;</span>).start();<br><br>        <span class="hljs-comment">// 消费者</span><br>        <span class="hljs-keyword">new</span> <span class="hljs-title class_">Thread</span>(() -&gt; &#123;<br>            <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) &#123;<br>                <span class="hljs-keyword">try</span> &#123;<br>                    <span class="hljs-type">String</span> <span class="hljs-variable">take</span> <span class="hljs-operator">=</span> queue.take();<br>                    System.out.println(<span class="hljs-string">&quot;消费：&quot;</span> + take);<br>                &#125; <span class="hljs-keyword">catch</span> (InterruptedException e) &#123;<br>                    Thread.currentThread().interrupt();<br>                &#125;<br>            &#125;<br>        &#125;, <span class="hljs-string">&quot;消费者&quot;</span>).start();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="执行流程说明"><a href="#执行流程说明" class="headerlink" title="执行流程说明"></a>执行流程说明</h3><ol>
+<li>生产者生产 5 个商品，队列容量为 3</li>
+<li>生产到第 4 个时，队列满，生产者阻塞</li>
+<li>消费者消费商品后，队列有空位，生产者被唤醒继续生产</li>
+<li>整个过程无需手动写 wait&#x2F;notify，<code>BlockingQueue</code> 自动处理</li>
+</ol>
+<blockquote>
+<p>✅ <strong>优势</strong>：</p>
+<ul>
+<li>解耦：生产者和消费者互不依赖</li>
+<li>削峰：队列缓冲，防止消费者被打垮</li>
+<li>简单：无需手动维护线程同步</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="六、底层原理"><a href="#六、底层原理" class="headerlink" title="六、底层原理"></a>六、底层原理</h2><blockquote>
+<p>⭐ <strong>核心总纲</strong>：所有阻塞队列底层都依托 <strong>AQS → ReentrantLock + Condition</strong> 实现线程阻塞与唤醒；<br>不同实现类（数组 &#x2F; 链表 &#x2F; 优先级）只是<strong>存储结构不同</strong>，阻塞机制的核心思想完全一致。</p>
+<p>下面以面试最高频的 <code>ArrayBlockingQueue</code> 源码为例讲解，再对比 <code>LinkedBlockingQueue</code>。</p>
+</blockquote>
+<h3 id="1-核心基础：Lock-Condition"><a href="#1-核心基础：Lock-Condition" class="headerlink" title="1. 核心基础：Lock + Condition"></a>1. 核心基础：Lock + Condition</h3><p><code>Condition</code> 是显式锁的等待队列，等价于 <code>synchronized</code> 的 wait&#x2F;notify，但<strong>功能更强</strong>：<br><strong>一把锁可以创建多个独立的等待条件</strong>（生产者等待队列、消费者等待队列相互隔离）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// ArrayBlockingQueue 核心成员</span><br><span class="hljs-keyword">final</span> ReentrantLock lock;<br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Condition notEmpty;  <span class="hljs-comment">// 消费者等待条件：队列不为空才能取</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Condition notFull;   <span class="hljs-comment">// 生产者等待条件：队列不满才能放</span><br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>作用</th>
+<th>谁等待</th>
+<th>谁唤醒</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>notEmpty</strong></td>
+<td>队列空时，消费者等待</td>
+<td>消费者 <code>await()</code></td>
+<td>生产者 <code>signal()</code></td>
+</tr>
+<tr>
+<td><strong>notFull</strong></td>
+<td>队列满时，生产者等待</td>
+<td>生产者 <code>await()</code></td>
+<td>消费者 <code>signal()</code></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 <strong>对比 synchronized</strong>：<br><code>wait() / notify()</code> 只能有<strong>一个</strong>等待集合，所有线程混在一起，容易产生虚假唤醒；<br><code>Condition</code> 可以<strong>精准分类</strong>等待线程，唤醒更高效。</p>
+</blockquote>
+<h3 id="2-await-signal-工作流程"><a href="#2-await-signal-工作流程" class="headerlink" title="2. await() &#x2F; signal() 工作流程"></a>2. await() &#x2F; signal() 工作流程</h3><h4 id="condition-await"><a href="#condition-await" class="headerlink" title="condition.await()"></a>condition.await()</h4><ol>
+<li>当前线程<strong>释放持有的锁</strong></li>
+<li>线程进入 Condition 的等待队列，阻塞休眠（<code>LockSupport.park()</code>）</li>
+<li>被唤醒后，<strong>重新竞争锁</strong>，拿到锁之后才从 <code>await()</code> 返回，继续执行后续代码</li>
+</ol>
+<h4 id="condition-signal"><a href="#condition-signal" class="headerlink" title="condition.signal()"></a>condition.signal()</h4><ol>
+<li>从条件等待队列取出<strong>头部</strong>一个线程节点</li>
+<li>把该节点<strong>移入 AQS 同步队列</strong>（锁的等待队列）</li>
+<li>线程在同步队列中等待竞争锁，被调度到后才真正执行</li>
+</ol>
+<blockquote>
+<p>⚠️ <strong>重要规则</strong>：<code>await()</code> 和 <code>signal()</code> <strong>必须在持有锁时调用</strong>，否则直接抛出 <code>IllegalMonitorStateException</code>，和 <code>wait/notify</code> 规则一致。</p>
+</blockquote>
+<h3 id="3-ArrayBlockingQueue-源码解析"><a href="#3-ArrayBlockingQueue-源码解析" class="headerlink" title="3. ArrayBlockingQueue 源码解析"></a>3. ArrayBlockingQueue 源码解析</h3><h4 id="核心成员变量"><a href="#核心成员变量" class="headerlink" title="核心成员变量"></a>核心成员变量</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 存储元素的数组</span><br><span class="hljs-keyword">final</span> Object[] items;<br><span class="hljs-comment">// 取元素的索引（队首）</span><br><span class="hljs-type">int</span> takeIndex;<br><span class="hljs-comment">// 放元素的索引（队尾）</span><br><span class="hljs-type">int</span> putIndex;<br><span class="hljs-comment">// 队列中元素数量</span><br><span class="hljs-type">int</span> count;<br><br><span class="hljs-comment">// 锁 + 两个条件队列</span><br><span class="hljs-keyword">final</span> ReentrantLock lock;<br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Condition notEmpty;<br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Condition notFull;<br></code></pre></td></tr></table></figure>
+
+<h4 id="put-入队流程"><a href="#put-入队流程" class="headerlink" title="put() 入队流程"></a>put() 入队流程</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">put</span><span class="hljs-params">(E e)</span> <span class="hljs-keyword">throws</span> InterruptedException &#123;<br>    checkNotNull(e);<br>    <span class="hljs-keyword">final</span> <span class="hljs-type">ReentrantLock</span> <span class="hljs-variable">lock</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.lock;<br>    lock.lockInterruptibly();      <span class="hljs-comment">// 1. 加锁（响应中断）</span><br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-keyword">while</span> (count == items.length)  <span class="hljs-comment">// 2. 队列满，循环等待</span><br>            notFull.await();           <span class="hljs-comment">// 3. 释放锁，阻塞在 notFull</span><br>        enqueue(e);                    <span class="hljs-comment">// 4. 有空位，入队</span><br>    &#125; <span class="hljs-keyword">finally</span> &#123;<br>        lock.unlock();                 <span class="hljs-comment">// 5. 释放锁</span><br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">enqueue</span><span class="hljs-params">(E x)</span> &#123;<br>    <span class="hljs-keyword">final</span> Object[] items = <span class="hljs-built_in">this</span>.items;<br>    items[putIndex] = x;<br>    <span class="hljs-keyword">if</span> (++putIndex == items.length) putIndex = <span class="hljs-number">0</span>; <span class="hljs-comment">// 环形数组</span><br>    count++;<br>    notEmpty.signal();  <span class="hljs-comment">// ⭐ 入队后，唤醒等待的消费者</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键步骤总结：</strong></p>
+<ol>
+<li>加锁 → 保证线程安全</li>
+<li>while 判断队列是否满 → 防虚假唤醒</li>
+<li>满则 <code>notFull.await()</code> → 释放锁，生产者阻塞</li>
+<li>有空位则入队 → 环形数组操作</li>
+<li><code>notEmpty.signal()</code> → 唤醒等待的消费者</li>
+</ol>
+<h4 id="take-出队流程"><a href="#take-出队流程" class="headerlink" title="take() 出队流程"></a>take() 出队流程</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> E <span class="hljs-title function_">take</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> InterruptedException &#123;<br>    <span class="hljs-keyword">final</span> <span class="hljs-type">ReentrantLock</span> <span class="hljs-variable">lock</span> <span class="hljs-operator">=</span> <span class="hljs-built_in">this</span>.lock;<br>    lock.lockInterruptibly();      <span class="hljs-comment">// 1. 加锁</span><br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-keyword">while</span> (count == <span class="hljs-number">0</span>)         <span class="hljs-comment">// 2. 队列空，循环等待</span><br>            notEmpty.await();      <span class="hljs-comment">// 3. 释放锁，阻塞在 notEmpty</span><br>        <span class="hljs-keyword">return</span> dequeue();          <span class="hljs-comment">// 4. 有元素，出队</span><br>    &#125; <span class="hljs-keyword">finally</span> &#123;<br>        lock.unlock();             <span class="hljs-comment">// 5. 释放锁</span><br>    &#125;<br>&#125;<br><br><span class="hljs-keyword">private</span> E <span class="hljs-title function_">dequeue</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-keyword">final</span> Object[] items = <span class="hljs-built_in">this</span>.items;<br>    <span class="hljs-type">E</span> <span class="hljs-variable">x</span> <span class="hljs-operator">=</span> (E) items[takeIndex];<br>    items[takeIndex] = <span class="hljs-literal">null</span>;       <span class="hljs-comment">// help GC</span><br>    <span class="hljs-keyword">if</span> (++takeIndex == items.length) takeIndex = <span class="hljs-number">0</span>; <span class="hljs-comment">// 环形数组</span><br>    count--;<br>    notFull.signal();   <span class="hljs-comment">// ⭐ 出队后，唤醒等待的生产者</span><br>    <span class="hljs-keyword">return</span> x;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>关键步骤总结：</strong></p>
+<ol>
+<li>加锁 → 保证线程安全</li>
+<li>while 判断队列是否空 → 防虚假唤醒</li>
+<li>空则 <code>notEmpty.await()</code> → 释放锁，消费者阻塞</li>
+<li>有元素则出队 → 环形数组操作</li>
+<li><code>notFull.signal()</code> → 唤醒等待的生产者</li>
+</ol>
+<h3 id="4-LinkedBlockingQueue-双锁机制"><a href="#4-LinkedBlockingQueue-双锁机制" class="headerlink" title="4. LinkedBlockingQueue 双锁机制"></a>4. LinkedBlockingQueue 双锁机制</h3><p><code>LinkedBlockingQueue</code> 用<strong>两把锁</strong>实现更高并发：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 入队锁</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ReentrantLock</span> <span class="hljs-variable">putLock</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ReentrantLock</span>();<br><span class="hljs-comment">// 出队锁</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">ReentrantLock</span> <span class="hljs-variable">takeLock</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ReentrantLock</span>();<br><br><span class="hljs-comment">// 入队条件（队列不满）</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Condition</span> <span class="hljs-variable">notFull</span> <span class="hljs-operator">=</span> putLock.newCondition();<br><span class="hljs-comment">// 出队条件（队列不空）</span><br><span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">Condition</span> <span class="hljs-variable">notEmpty</span> <span class="hljs-operator">=</span> takeLock.newCondition();<br></code></pre></td></tr></table></figure>
+
+<p><strong>为什么两把锁并发更高？</strong></p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>ArrayBlockingQueue（一把锁）</th>
+<th>LinkedBlockingQueue（两把锁）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>入队 + 出队</td>
+<td>互斥，不能同时进行</td>
+<td>✅ 可以并发执行</td>
+</tr>
+<tr>
+<td>入队 + 入队</td>
+<td>互斥</td>
+<td>互斥（同一把 putLock）</td>
+</tr>
+<tr>
+<td>出队 + 出队</td>
+<td>互斥</td>
+<td>互斥（同一把 takeLock）</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 <strong>双锁的代价</strong>：代码复杂度更高，需要同时操作两把锁时（如 <code>remove(Object)</code>）要按顺序加锁，防止死锁。</p>
+</blockquote>
+<h3 id="5-底层机制总结"><a href="#5-底层机制总结" class="headerlink" title="5. 底层机制总结"></a>5. 底层机制总结</h3><figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mathematica"><span class="hljs-variable">BlockingQueue</span> 阻塞 <span class="hljs-operator">=</span> <span class="hljs-variable">ReentrantLock</span>（互斥） <span class="hljs-operator">+</span> <span class="hljs-built_in">Condition</span>（等待唤醒）<br>                         ↓<br>                   <span class="hljs-variable">AQS</span> 同步队列 <span class="hljs-operator">+</span> <span class="hljs-built_in">Condition</span> 条件队列<br>                         ↓<br>                <span class="hljs-variable">LockSupport</span><span class="hljs-operator">.</span><span class="hljs-variable">park</span><span class="hljs-punctuation">(</span><span class="hljs-punctuation">)</span> <span class="hljs-operator">/</span> <span class="hljs-variable">unpark</span><span class="hljs-punctuation">(</span><span class="hljs-punctuation">)</span>（底层原语）<br></code></pre></td></tr></table></figure>
+
+<p>阻塞队列的线程安全和阻塞唤醒，<strong>最终都落到 AQS 和 LockSupport 上</strong>。</p>
+<hr>
+<h2 id="七、常见问题与注意事项"><a href="#七、常见问题与注意事项" class="headerlink" title="七、常见问题与注意事项"></a>七、常见问题与注意事项</h2><h3 id="1-为什么不允许-null-元素？"><a href="#1-为什么不允许-null-元素？" class="headerlink" title="1. 为什么不允许 null 元素？"></a>1. 为什么不允许 null 元素？</h3><p>因为 <code>poll()</code> 等方法用 <code>null</code> 作为<strong>特殊返回值</strong>表示队列空。<br>如果允许存 null，就无法区分「取出的元素是 null」还是「队列空」。</p>
+<h3 id="2-ArrayBlockingQueue-vs-LinkedBlockingQueue-怎么选？"><a href="#2-ArrayBlockingQueue-vs-LinkedBlockingQueue-怎么选？" class="headerlink" title="2. ArrayBlockingQueue vs LinkedBlockingQueue 怎么选？"></a>2. ArrayBlockingQueue vs LinkedBlockingQueue 怎么选？</h3><table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>ArrayBlockingQueue</th>
+<th>LinkedBlockingQueue</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>容量</td>
+<td>必须指定，有界</td>
+<td>可选，默认无界</td>
+</tr>
+<tr>
+<td>数据结构</td>
+<td>数组</td>
+<td>链表</td>
+</tr>
+<tr>
+<td>锁</td>
+<td>一把锁（读写共用）</td>
+<td>两把锁（读写分离）</td>
+</tr>
+<tr>
+<td>并发性能</td>
+<td>一般</td>
+<td>较高</td>
+</tr>
+<tr>
+<td>内存占用</td>
+<td>预分配，固定</td>
+<td>动态创建节点，按需分配</td>
+</tr>
+<tr>
+<td>GC 压力</td>
+<td>低（无节点创建回收）</td>
+<td>高（频繁创建回收节点）</td>
+</tr>
+</tbody></table>
+<p><strong>选择建议：</strong></p>
+<ul>
+<li>容量固定、追求低 GC → <code>ArrayBlockingQueue</code></li>
+<li>高并发、不确定容量 → <code>LinkedBlockingQueue</code>（记得设上限，防 OOM）</li>
+</ul>
+<h3 id="3-阻塞队列如何保证线程安全？"><a href="#3-阻塞队列如何保证线程安全？" class="headerlink" title="3. 阻塞队列如何保证线程安全？"></a>3. 阻塞队列如何保证线程安全？</h3><ul>
+<li>入队、出队操作都有锁保护（<code>ReentrantLock</code>）</li>
+<li>队列满&#x2F;空时，通过 <code>Condition</code> 实现线程的等待与唤醒</li>
+<li>类似 AQS 的 <code>Condition.await() / signal()</code> 机制</li>
+</ul>
+<h3 id="4-常见使用陷阱"><a href="#4-常见使用陷阱" class="headerlink" title="4. 常见使用陷阱"></a>4. 常见使用陷阱</h3><table>
+<thead>
+<tr>
+<th>陷阱</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>⚠️ LinkedBlockingQueue 默认无界</td>
+<td>不指定容量会导致 OOM，一定要设容量</td>
+</tr>
+<tr>
+<td>⚠️ 阻塞方法不处理中断</td>
+<td>put&#x2F;take 会抛 InterruptedException，必须捕获</td>
+</tr>
+<tr>
+<td>⚠️ 误用 add&#x2F;remove</td>
+<td>并发下抛异常影响业务，优先用 put&#x2F;take</td>
+</tr>
+<tr>
+<td>⚠️ PriorityBlockingQueue 元素不可比较</td>
+<td>元素必须实现 Comparable 或传 Comparator</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="八、面试背诵版"><a href="#八、面试背诵版" class="headerlink" title="八、面试背诵版"></a>八、面试背诵版</h2><ol>
+<li><p><strong>阻塞队列是什么</strong>：<code>BlockingQueue</code> 是线程安全的队列，队列满时入队阻塞，队列空时出队阻塞，常用于生产者消费者模型。</p>
+</li>
+<li><p><strong>四组核心方法</strong>：</p>
+<ul>
+<li>抛出异常：add &#x2F; remove &#x2F; element</li>
+<li>返回特殊值：offer &#x2F; poll &#x2F; peek</li>
+<li>阻塞等待：put &#x2F; take</li>
+<li>超时等待：offer(timeout) &#x2F; poll(timeout)</li>
+</ul>
+</li>
+<li><p><strong>六大实现类</strong>：</p>
+<ul>
+<li><code>ArrayBlockingQueue</code>：数组有界，一把锁</li>
+<li><code>LinkedBlockingQueue</code>：链表可选有界，两把锁并发高</li>
+<li><code>PriorityBlockingQueue</code>：优先级无界，非 FIFO</li>
+<li><code>DelayQueue</code>：延迟无界，元素到期才能取</li>
+<li><code>SynchronousQueue</code>：容量为 0，直接交接</li>
+<li><code>LinkedTransferQueue</code>：transfer 直接转交</li>
+</ul>
+</li>
+<li><p><strong>Array vs Linked</strong>：Array 有界固定容量、一把锁、低 GC；Linked 可选无界、两把锁、并发高但注意 OOM。</p>
+</li>
+<li><p><strong>底层原理</strong>：</p>
+<ul>
+<li>核心 &#x3D; <strong>ReentrantLock + Condition</strong>（依托 AQS）</li>
+<li>ArrayBlockingQueue：<strong>一把锁 + 两个 Condition</strong>（notEmpty、notFull）</li>
+<li>LinkedBlockingQueue：<strong>两把锁</strong>（putLock + takeLock），读写分离并发高</li>
+<li>put 满了 await notFull，入队后 signal notEmpty</li>
+<li>take 空了 await notEmpty，出队后 signal notFull</li>
+</ul>
+</li>
+<li><p><strong>await&#x2F;signal 流程</strong>：</p>
+<ul>
+<li>await：释放锁 → 进条件队列阻塞 → 被唤醒后重新抢锁</li>
+<li>signal：条件队列头节点 → 移入 AQS 同步队列 → 等待抢锁</li>
+</ul>
+</li>
+<li><p><strong>经典应用</strong>：线程池的任务队列、生产者消费者模式、消息队列、限流削峰。</p>
+</li>
+<li><p><strong>为什么不允许 null</strong>：因为 poll&#x2F;peek 用 null 表示队列空，存 null 会导致语义混淆。</p>
+</li>
+</ol>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/Java/" class="print-no-link">#Java</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>Java并发编程05：阻塞队列</div>
+      <div>http://zl1nq.github.io/2026/07/25/Java并发编程05/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zl1nq</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年7月25日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/07/25/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06/" title="Java并发编程06：线程池">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">Java并发编程06：线程池</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/07/24/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B04/" title="Java并发编程04：等待唤醒与AQS底层">
+                        <span class="hidden-mobile">Java并发编程04：等待唤醒与AQS底层</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Blog</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

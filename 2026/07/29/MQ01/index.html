@@ -19,31 +19,25 @@
   <meta name="author" content="zl1nq">
   <meta name="keywords" content="">
   
-    <meta name="description" content="目录 Redis简介 Redis命令 启动Redis客户端 Redis 键(key) Redis 字符串(String) Redis Hash Redis List Redis Set   Java中操作Redis   Redis简介Redis 本质上是一个由 Salvatore Sanfilippo 写的 key-value 存储系统，是跨平台的非关系型数据库。也是开源的使用 ANSI C 语言">
+    <meta name="description" content="目录 一、什么是消息队列（MQ） 二、同步通讯 vs 异步通讯 三、异步通讯三角色 四、消息队列的四大优势 五、消息队列的三大缺点 六、主流 MQ 产品对比 七、总结与速记   一、什么是消息队列（MQ） ⭐ 一句话理解：MQ &#x3D; Message Queue，消息队列 &#x3D; 存储消息的队列数据结构 &#x3D; 服务间通信的中转站。 本质：把同步调用改成「发消息 → Broker">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Redis01入门">
-<meta property="og:url" content="http://zl1nq.github.io/2026/07/19/Redis01%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:title" content="MQ基础">
+<meta property="og:url" content="http://zl1nq.github.io/2026/07/29/MQ01/index.html">
 <meta property="og:site_name" content="Blog">
-<meta property="og:description" content="目录 Redis简介 Redis命令 启动Redis客户端 Redis 键(key) Redis 字符串(String) Redis Hash Redis List Redis Set   Java中操作Redis   Redis简介Redis 本质上是一个由 Salvatore Sanfilippo 写的 key-value 存储系统，是跨平台的非关系型数据库。也是开源的使用 ANSI C 语言">
+<meta property="og:description" content="目录 一、什么是消息队列（MQ） 二、同步通讯 vs 异步通讯 三、异步通讯三角色 四、消息队列的四大优势 五、消息队列的三大缺点 六、主流 MQ 产品对比 七、总结与速记   一、什么是消息队列（MQ） ⭐ 一句话理解：MQ &#x3D; Message Queue，消息队列 &#x3D; 存储消息的队列数据结构 &#x3D; 服务间通信的中转站。 本质：把同步调用改成「发消息 → Broker">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="http://zl1nq.github.io/images/redis_string1.png">
-<meta property="og:image" content="http://zl1nq.github.io/images/redis_hash1.png">
-<meta property="og:image" content="http://zl1nq.github.io/images/redis_hashorder.png">
-<meta property="og:image" content="http://zl1nq.github.io/images/redis_list1.png">
-<meta property="og:image" content="http://zl1nq.github.io/images/redis_listorder.png">
-<meta property="og:image" content="http://zl1nq.github.io/images/redis_list2.png">
-<meta property="og:image" content="http://zl1nq.github.io/images/redis_set1.png">
-<meta property="article:published_time" content="2026-07-19T09:35:55.000Z">
-<meta property="article:modified_time" content="2026-07-29T12:26:19.193Z">
+<meta property="og:image" content="http://zl1nq.github.io/images/mq.png">
+<meta property="article:published_time" content="2026-07-29T09:21:58.000Z">
+<meta property="article:modified_time" content="2026-07-29T12:26:28.925Z">
 <meta property="article:author" content="zl1nq">
-<meta property="article:tag" content="Redis">
 <meta property="article:tag" content="中间件">
+<meta property="article:tag" content="消息队列">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://zl1nq.github.io/images/redis_string1.png">
+<meta name="twitter:image" content="http://zl1nq.github.io/images/mq.png">
   
   
   
-  <title>Redis01入门 - Blog</title>
+  <title>MQ基础 - Blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -296,7 +290,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Redis01入门"></span>
+            <span id="subtitle" data-typed-text="MQ基础"></span>
           
         </div>
 
@@ -307,8 +301,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-07-19 17:35" pubdate>
-          2026年7月19日 下午
+        <time datetime="2026-07-29 17:21" pubdate>
+          2026年7月29日 下午
         </time>
       </span>
     
@@ -319,7 +313,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2.4k 字
+          2k 字
         
       </span>
     
@@ -330,7 +324,7 @@
         
         
         
-          21 分钟
+          17 分钟
         
       </span>
     
@@ -369,93 +363,229 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">Redis01入门</h1>
+            <h1 id="seo-header">MQ基础</h1>
             
             
               <div class="markdown-body">
                 
                 <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
-<li><a href="#redis%E7%AE%80%E4%BB%8B">Redis简介</a></li>
-<li><a href="#redis%E5%91%BD%E4%BB%A4">Redis命令</a><ul>
-<li><a href="#%E5%90%AF%E5%8A%A8redis%E5%AE%A2%E6%88%B7%E7%AB%AF">启动Redis客户端</a></li>
-<li><a href="#redis-%E9%94%AEkey">Redis 键(key)</a></li>
-<li><a href="#redis-%E5%AD%97%E7%AC%A6%E4%B8%B2string">Redis 字符串(String)</a></li>
-<li><a href="#redis-hash">Redis Hash</a></li>
-<li><a href="#redis-list">Redis List</a></li>
-<li><a href="#redis-set">Redis Set</a></li>
-</ul>
-</li>
-<li><a href="#java%E4%B8%AD%E6%93%8D%E4%BD%9Credis">Java中操作Redis</a></li>
+<li><a href="#%E4%B8%80%E4%BB%80%E4%B9%88%E6%98%AF%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97mq">一、什么是消息队列（MQ）</a></li>
+<li><a href="#%E4%BA%8C%E5%90%8C%E6%AD%A5%E9%80%9A%E8%AE%AF-vs-%E5%BC%82%E6%AD%A5%E9%80%9A%E8%AE%AF">二、同步通讯 vs 异步通讯</a></li>
+<li><a href="#%E4%B8%89%E5%BC%82%E6%AD%A5%E9%80%9A%E8%AE%AF%E4%B8%89%E8%A7%92%E8%89%B2">三、异步通讯三角色</a></li>
+<li><a href="#%E5%9B%9B%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E5%9B%9B%E5%A4%A7%E4%BC%98%E5%8A%BF">四、消息队列的四大优势</a></li>
+<li><a href="#%E4%BA%94%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E4%B8%89%E5%A4%A7%E7%BC%BA%E7%82%B9">五、消息队列的三大缺点</a></li>
+<li><a href="#%E5%85%AD%E4%B8%BB%E6%B5%81-mq-%E4%BA%A7%E5%93%81%E5%AF%B9%E6%AF%94">六、主流 MQ 产品对比</a></li>
+<li><a href="#%E4%B8%83%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%9F%E8%AE%B0">七、总结与速记</a></li>
 </ul>
 <hr>
-<h2 id="Redis简介"><a href="#Redis简介" class="headerlink" title="Redis简介"></a>Redis简介</h2><p>Redis 本质上是一个由 Salvatore Sanfilippo 写的 key-value 存储系统，是跨平台的非关系型数据库。也是开源的使用 ANSI C 语言编写、遵守 BSD 协议、支持网络、可基于内存、分布式、可选持久性的键值对(Key-Value)存储数据库，并提供多种语言的 API。</p>
-<p>Redis 通常被称为数据结构服务器，因为值（value）可以是字符串(String)、哈希(Hash)、列表(list)、集合(sets)和有序集合(sorted sets)等类型。</p>
+<h2 id="一、什么是消息队列（MQ）"><a href="#一、什么是消息队列（MQ）" class="headerlink" title="一、什么是消息队列（MQ）"></a>一、什么是消息队列（MQ）</h2><blockquote>
+<p>⭐ <strong>一句话理解</strong>：MQ &#x3D; Message Queue，消息队列 &#x3D; 存储消息的<strong>队列数据结构</strong> &#x3D; 服务间通信的<strong>中转站</strong>。</p>
+<p>本质：把同步调用改成「<strong>发消息 → Broker 暂存 → 按需消费</strong>」，实现服务之间的解耦。</p>
+</blockquote>
+<p>消息队列是分布式系统中最重要的中间件之一，核心解决的问题是：<strong>如何让服务之间高效、可靠、低耦合地通信</strong>。</p>
+<p><img src="/images/mq.png" srcset="/img/loading.gif" lazyload alt="mq架构图"></p>
 <hr>
-<h2 id="Redis命令"><a href="#Redis命令" class="headerlink" title="Redis命令"></a>Redis命令</h2><h3 id="启动Redis客户端"><a href="#启动Redis客户端" class="headerlink" title="启动Redis客户端"></a>启动Redis客户端</h3><ol>
-<li><p>redis-cli</p>
-<p>启动redis客户端。在redis客户端中：输入 auth [password]验证，然后输入ping检测redis服务是否在正常运行</p>
-</li>
-<li><p>远程 redis 服务上执行命令，同样我们使用的也是 <strong>redis-cli</strong> 命令</p>
-</li>
-</ol>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">redis-cli -h host -p port -a password<br></code></pre></td></tr></table></figure>
-
-<p>连接到主机为 127.0.0.1，端口为 6379 ，密码为 mypass 的 redis 服务上</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs bash">redis-cli -h 127.0.0.1 -p 6379 -a <span class="hljs-string">&quot;mypass&quot;</span><br>redis 127.0.0.1:6379&gt;<br>redis 127.0.0.1:6379&gt; PING<br>PONG<br></code></pre></td></tr></table></figure>
-
-<h3 id="Redis-键-key"><a href="#Redis-键-key" class="headerlink" title="Redis 键(key)"></a>Redis 键(key)</h3><p>redis存储的是”key:value”形式的数据，通过键的相关命令来操作键。下面给出了与 Redis 键相关的基本命令：</p>
-<ol>
-<li>DEL key 删除已存在的key</li>
-<li>EXISTS key 判断一个key是否存在</li>
-<li>EXPIRE key seconds 给key设置一个过期时间</li>
-<li>PEXPIRE key milliseconds 设置key的过期时间亿以毫秒计</li>
-</ol>
-<p>key运行有多个单词形成层级结构，多个单词之间用”:”隔开，例如：<code>project:type:id</code></p>
-<h3 id="Redis-字符串-String"><a href="#Redis-字符串-String" class="headerlink" title="Redis 字符串(String)"></a>Redis 字符串(String)</h3><p>String是Redis中最基础、最简单的数据类型，其特点有：</p>
+<h2 id="二、同步通讯-vs-异步通讯"><a href="#二、同步通讯-vs-异步通讯" class="headerlink" title="二、同步通讯 vs 异步通讯"></a>二、同步通讯 vs 异步通讯</h2><p>这是理解 MQ 价值的基础。</p>
+<h3 id="1-同步通讯"><a href="#1-同步通讯" class="headerlink" title="1. 同步通讯"></a>1. 同步通讯</h3><blockquote>
+<p>如同<strong>打视频电话</strong>——双方实时交互，同一时刻只能跟一个人打，必须等对方响应。</p>
+</blockquote>
+<p><strong>特点：</strong></p>
 <ul>
-<li>可以存：普通文本、数字、二进制图片 &#x2F; 视频 &#x2F; 序列化字符串；</li>
-<li>数字格式字符串支持自增自减；</li>
-<li>单 key 单 value，一对一存储；</li>
-<li>过期时间、原子操作都支持。</li>
+<li>调用方需要<strong>实时等待</strong>被调用方返回结果</li>
+<li>一方挂了，整个调用链都受影响</li>
+<li>串行调用，吞吐量受限</li>
 </ul>
-<p>相关的常用命令：</p>
-<ol>
-<li>SET key value — 设置键值，可加：ex seconds设置过期时间</li>
-<li>GET key — 获取键对应的值</li>
-<li>GETSET key value — 获取旧值，设置新值</li>
-<li>MSET — 批量操作</li>
-<li>MGET — 批量操作</li>
-<li>SETNX key value — 不存在时才设置</li>
-<li>INCR key — 数值+1</li>
-<li>INCRBY key incrment — 增加指定数值</li>
-<li>DECR — 数值-1</li>
-<li>DECRBY — 减少指定数值</li>
-<li>ttl key — 查看过期时间</li>
-</ol>
-<p><img src="/../images/redis_string1.png" srcset="/img/loading.gif" lazyload alt="redis_string1|535"></p>
-<h3 id="Redis-Hash"><a href="#Redis-Hash" class="headerlink" title="Redis Hash"></a>Redis Hash</h3><p>Hash类型，也叫散列表，其value是一个无序字典，类似Java中的HashMap。</p>
-<p>简单理解：Hash里面存的又是一个键值对。</p>
-<p><img src="/../images/redis_hash1.png" srcset="/img/loading.gif" lazyload alt="redis_hash1|535"></p>
-<p>Hash常见命令：</p>
-<p><img src="/../images/redis_hashorder.png" srcset="/img/loading.gif" lazyload alt="hashorder"></p>
-<h3 id="Redis-List"><a href="#Redis-List" class="headerlink" title="Redis List"></a>Redis List</h3><p><img src="/../images/redis_list1.png" srcset="/img/loading.gif" lazyload alt="redis_list1.png"></p>
-<p><img src="/../images/redis_listorder.png" srcset="/img/loading.gif" lazyload alt="redisorder"></p>
-<p><img src="/../images/redis_list2.png" srcset="/img/loading.gif" lazyload alt="redis_list1.png"></p>
-<h3 id="Redis-Set"><a href="#Redis-Set" class="headerlink" title="Redis Set"></a>Redis Set</h3><p>Set类似Java中的HashSet，可以看作是一个value为null的HashMap。因为也是hash表，因此具备一下特性：</p>
+<p><strong>例子</strong>：服务 A 调用服务 B 的 HTTP&#x2F;RPC 接口。</p>
+<h3 id="2-异步通讯"><a href="#2-异步通讯" class="headerlink" title="2. 异步通讯"></a>2. 异步通讯</h3><blockquote>
+<p>如同<strong>发微信聊天</strong>——不需要对方立刻回复，你可以同时跟多人聊天。</p>
+</blockquote>
+<p><strong>特点：</strong></p>
 <ul>
-<li>无序</li>
-<li>元素不可重复</li>
-<li>查找快</li>
-<li>支持交、并等等功能</li>
+<li>调用方发送消息后<strong>立刻返回</strong>，不需要等待结果</li>
+<li>接收方<strong>按需</strong>从 Broker 拉取消息处理</li>
+<li>可以一条消息同时通知多个服务</li>
 </ul>
-<p><img src="/../images/redis_set1.png" srcset="/img/loading.gif" lazyload alt="setorder"></p>
+<h3 id="3-对比表"><a href="#3-对比表" class="headerlink" title="3. 对比表"></a>3. 对比表</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>同步通讯</th>
+<th>异步通讯（MQ）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>类比</strong></td>
+<td>视频电话</td>
+<td>微信聊天</td>
+</tr>
+<tr>
+<td><strong>实时性</strong></td>
+<td>✅ 实时等待返回</td>
+<td>❌ 非实时，延后处理</td>
+</tr>
+<tr>
+<td><strong>耦合度</strong></td>
+<td>❌ 强耦合（服务相互依赖）</td>
+<td>✅ 解耦（通过 Broker 中转）</td>
+</tr>
+<tr>
+<td><strong>吞吐量</strong></td>
+<td>串行，低</td>
+<td>并行，高</td>
+</tr>
+<tr>
+<td><strong>故障影响</strong></td>
+<td>一个挂，全链路受影响</td>
+<td>发送&#x2F;接收方互不影响</td>
+</tr>
+<tr>
+<td><strong>并发能力</strong></td>
+<td>单线程同时只能等一个请求</td>
+<td>可同时处理大量消息</td>
+</tr>
+</tbody></table>
 <hr>
-<h2 id="Java中操作Redis"><a href="#Java中操作Redis" class="headerlink" title="Java中操作Redis"></a>Java中操作Redis</h2><p>可以使用<strong>SpringDataRedis</strong>来操作Redis。</p>
-<h3 id="1-在pom中引入依赖"><a href="#1-在pom中引入依赖" class="headerlink" title="1. 在pom中引入依赖"></a>1. 在pom中引入依赖</h3><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!--引入redis--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-data-redis<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><span class="hljs-comment">&lt;!--引入连接池依赖--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.apache.commons<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>commons-pool2<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br><span class="hljs-comment">&lt;!--引入测试依赖--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-data-redis-test<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br>   <span class="hljs-tag">&lt;<span class="hljs-name">scope</span>&gt;</span>test<span class="hljs-tag">&lt;/<span class="hljs-name">scope</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+<h2 id="三、异步通讯三角色"><a href="#三、异步通讯三角色" class="headerlink" title="三、异步通讯三角色"></a>三、异步通讯三角色</h2><p>异步调用基于<strong>消息通知</strong>的方式，一般包含三个核心角色：</p>
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>英文</th>
+<th>职责</th>
+<th>类比微信</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>消息发送者</strong></td>
+<td>Publisher &#x2F; Producer</td>
+<td>投递消息的人，也就是原来的调用方</td>
+<td>发消息的人</td>
+</tr>
+<tr>
+<td><strong>消息 Broker</strong></td>
+<td>MQ 中间件</td>
+<td>管理、暂存、转发消息，你可以把它理解成<strong>微信服务器</strong></td>
+<td>微信服务器</td>
+</tr>
+<tr>
+<td><strong>消息接收者</strong></td>
+<td>Subscriber &#x2F; Consumer</td>
+<td>接收和处理消息的人，也就是原来的服务提供方</td>
+<td>收消息的人</td>
+</tr>
+</tbody></table>
+<h3 id="工作流程"><a href="#工作流程" class="headerlink" title="工作流程"></a>工作流程</h3><ol>
+<li>发送者不再直接同步调用接收者的业务接口，而是<strong>发送一条消息</strong>投递给消息 Broker</li>
+<li>Broker 暂存消息，等待接收者消费</li>
+<li>接收者根据自己的需求<strong>从 Broker 订阅消息</strong></li>
+<li>每当发送方发消息后，接收者都能获取消息并处理</li>
+</ol>
+<blockquote>
+<p>💡 这样，发送消息的人和接收消息的人就<strong>完全解耦</strong>了——谁也不依赖谁，甚至不知道对方的存在。</p>
+</blockquote>
+<hr>
+<h2 id="四、消息队列的四大优势-⭐"><a href="#四、消息队列的四大优势-⭐" class="headerlink" title="四、消息队列的四大优势 ⭐"></a>四、消息队列的四大优势 ⭐</h2><h3 id="1-服务解耦-✅"><a href="#1-服务解耦-✅" class="headerlink" title="1. 服务解耦 ✅"></a>1. 服务解耦 ✅</h3><p>原来服务 A 直接调服务 B&#x2F;C&#x2F;D，A 需要知道所有下游服务的地址和接口。<br>用了 MQ 后：A 只管发消息，B&#x2F;C&#x2F;D 想接收就自己订阅。A 不需要知道下游有几个服务、叫什么、挂了没挂。</p>
+<h3 id="2-异步提速-⚡"><a href="#2-异步提速-⚡" class="headerlink" title="2. 异步提速 ⚡"></a>2. 异步提速 ⚡</h3><p>同步调用下，A 调 B + C + D &#x3D; 三个服务的时间累加。<br>用了 MQ 后：A 发完三条消息就立刻返回，耗时≈发送消息的时间，消费者并行处理。</p>
+<h3 id="3-削峰填谷-🏔️"><a href="#3-削峰填谷-🏔️" class="headerlink" title="3. 削峰填谷 🏔️"></a>3. 削峰填谷 🏔️</h3><p>瞬时流量洪峰（比如秒杀）直接打过来，数据库扛不住会挂。<br>用 MQ 当缓冲：请求先存进队列，系统按自己的消费能力慢慢处理，洪峰过去后再处理积压的消息。</p>
+<h3 id="4-广播通知-📢"><a href="#4-广播通知-📢" class="headerlink" title="4. 广播通知 📢"></a>4. 广播通知 📢</h3><p>一条消息可以同时被多个消费者订阅和处理，比如「用户下单」这条消息：</p>
+<ul>
+<li>库存服务：扣库存</li>
+<li>支付服务：发起支付</li>
+<li>积分服务：加积分</li>
+<li>通知服务：发短信通知</li>
+</ul>
+<p>同步调用需要 A 分别调 4 个服务，用 MQ 发一条消息搞定。</p>
+<hr>
+<h2 id="五、消息队列的三大缺点-⚠️"><a href="#五、消息队列的三大缺点-⚠️" class="headerlink" title="五、消息队列的三大缺点 ⚠️"></a>五、消息队列的三大缺点 ⚠️</h2><p>引入 MQ 会带来新的问题：</p>
+<h3 id="1-系统可用性降低-❌"><a href="#1-系统可用性降低-❌" class="headerlink" title="1. 系统可用性降低 ❌"></a>1. 系统可用性降低 ❌</h3><p>多了一个中间件，就多了一个故障点。MQ 挂了，整个消息流转都断了。</p>
+<blockquote>
+<p>对策：集群部署、高可用配置、持久化存储。</p>
+</blockquote>
+<h3 id="2-系统复杂度提高-🧠"><a href="#2-系统复杂度提高-🧠" class="headerlink" title="2. 系统复杂度提高 🧠"></a>2. 系统复杂度提高 🧠</h3><p>原来一个 HTTP 调用就搞定的事，现在要考虑：</p>
+<ul>
+<li>消息会不会丢？（可靠性）</li>
+<li>消息会不会重复消费？（幂等性）</li>
+<li>消息积压了怎么办？（消费能力）</li>
+<li>消息顺序乱了怎么办？（顺序性）</li>
+</ul>
+<h3 id="3-数据一致性问题-🧩"><a href="#3-数据一致性问题-🧩" class="headerlink" title="3. 数据一致性问题 🧩"></a>3. 数据一致性问题 🧩</h3><p>A 发消息成功，B 消费成功，但 C 消费失败——此时业务状态不一致，需要考虑<strong>分布式事务</strong>或最终一致性方案。</p>
+<blockquote>
+<p>💡 <strong>引入 MQ 的权衡</strong>：</p>
+<ul>
+<li>适合：高并发、大流量、服务多、解耦需求强</li>
+<li>不适合：业务简单、服务少、强实时性+强一致性要求</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="六、主流-MQ-产品对比"><a href="#六、主流-MQ-产品对比" class="headerlink" title="六、主流 MQ 产品对比"></a>六、主流 MQ 产品对比</h2><table>
+<thead>
+<tr>
+<th>产品</th>
+<th>开发语言</th>
+<th>协议支持</th>
+<th>特点</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>RabbitMQ</strong></td>
+<td>Erlang</td>
+<td>AMQP 等</td>
+<td>轻量级、功能丰富、路由能力强、管理控制台友好</td>
+<td>中小型项目、复杂路由场景、快速上手</td>
+</tr>
+<tr>
+<td><strong>Kafka</strong></td>
+<td>Java &amp; Scala</td>
+<td>自定义二进制</td>
+<td>超高吞吐量、持久化强、生态完善（配合大数据）</td>
+<td>日志收集、大数据、超高并发场景</td>
+</tr>
+<tr>
+<td><strong>RocketMQ</strong></td>
+<td>Java</td>
+<td>自定义</td>
+<td>阿里出品、功能全面、事务消息、顺序消息好</td>
+<td>电商、金融等 Java 生态大型项目</td>
+</tr>
+<tr>
+<td><strong>ActiveMQ</strong></td>
+<td>Java</td>
+<td>AMQP 等</td>
+<td>老牌 MQ，功能多但性能一般</td>
+<td>老系统兼容</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七、总结与速记"><a href="#七、总结与速记" class="headerlink" title="七、总结与速记"></a>七、总结与速记</h2><h3 id="MQ-核心概念速记"><a href="#MQ-核心概念速记" class="headerlink" title="MQ 核心概念速记"></a>MQ 核心概念速记</h3><table>
+<thead>
+<tr>
+<th>关键点</th>
+<th>一句话</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>本质</strong></td>
+<td>服务间异步通信的中转站</td>
+</tr>
+<tr>
+<td><strong>三角色</strong></td>
+<td>发送者 → Broker 暂存 → 接收者</td>
+</tr>
+<tr>
+<td><strong>四大优势</strong></td>
+<td>解耦、异步、削峰、广播</td>
+</tr>
+<tr>
+<td><strong>三大缺点</strong></td>
+<td>可用性降低、复杂度提高、一致性问题</td>
+</tr>
+<tr>
+<td><strong>选型</strong></td>
+<td>RabbitMQ 入门友好，Kafka 吞吐量高，RocketMQ 功能全面</td>
+</tr>
+</tbody></table>
 
-<h3 id="2-在application-yml中配置"><a href="#2-在application-yml中配置" class="headerlink" title="2. 在application.yml中配置"></a>2. 在application.yml中配置</h3><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">spring:</span><br>   <span class="hljs-attr">application:</span><br>      <span class="hljs-attr">name:</span> <span class="hljs-string">redisdemo</span><br>   <span class="hljs-attr">data:</span><br>      <span class="hljs-attr">redis:</span><br>         <span class="hljs-attr">host:</span> <span class="hljs-string">ip地址</span><br>         <span class="hljs-attr">port:</span> <span class="hljs-number">6379</span><br>         <span class="hljs-attr">password:</span> <span class="hljs-number">123456</span><br>         <span class="hljs-attr">lettuce:</span><br>         <span class="hljs-attr">pool:</span><br>            <span class="hljs-attr">max-active:</span> <span class="hljs-number">8</span><br>            <span class="hljs-attr">max-idle:</span> <span class="hljs-number">8</span><br>            <span class="hljs-attr">min-idle:</span> <span class="hljs-number">2</span><br>         <span class="hljs-attr">database:</span> <span class="hljs-number">0</span><br></code></pre></td></tr></table></figure>
-
-<h3 id="3-相关代码"><a href="#3-相关代码" class="headerlink" title="3. 相关代码"></a>3. 相关代码</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Resource</span><br><span class="hljs-keyword">private</span> RedisTemplate&lt;String,Object&gt; redisTemplate;<br><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">void</span> <span class="hljs-title function_">testString</span><span class="hljs-params">()</span>&#123;<br>    <span class="hljs-comment">//opsForValue用来操作字符串</span><br>    redisTemplate.opsForValue().set(<span class="hljs-string">&quot;name&quot;</span>,<span class="hljs-string">&quot;zlq&quot;</span>);<br>    <span class="hljs-type">Object</span> <span class="hljs-variable">name</span> <span class="hljs-operator">=</span> redisTemplate.opsForValue().get(<span class="hljs-string">&quot;name&quot;</span>);<br>    System.out.println(name);  <span class="hljs-comment">//zlq</span><br>&#125;<br></code></pre></td></tr></table></figure>
                 
               </div>
             
@@ -488,9 +618,9 @@
     <div class="post-meta">
       <i class="iconfont icon-tags"></i>
       
-        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="print-no-link">#中间件</a>
+        <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="print-no-link">#消息队列</a>
       
-        <a href="/tags/Redis/" class="print-no-link">#Redis</a>
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="print-no-link">#中间件</a>
       
     </div>
   
@@ -502,8 +632,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Redis01入门</div>
-      <div>http://zl1nq.github.io/2026/07/19/Redis01入门/</div>
+      <div>MQ基础</div>
+      <div>http://zl1nq.github.io/2026/07/29/MQ01/</div>
     </div>
     <div class="license-meta">
       
@@ -515,7 +645,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2026年7月19日</div>
+          <div>2026年7月29日</div>
         </div>
       
       
@@ -547,9 +677,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/07/19/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B01/" title="Java并发编程01">
+                      <a href="/2026/07/29/RabbitMQ01/" title="RabbitMQ01入门">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">Java并发编程01</span>
+                        <span class="hidden-mobile">RabbitMQ01入门</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -557,8 +687,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/07/19/Git/" title="Git">
-                        <span class="hidden-mobile">Git</span>
+                      <a href="/2026/07/29/Python04/" title="Python：类与对象">
+                        <span class="hidden-mobile">Python：类与对象</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
