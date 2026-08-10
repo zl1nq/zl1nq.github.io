@@ -1,0 +1,1089 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/z.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="zl1nq">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="目录 一、消息转换器的作用与流程 二、默认转换器：JDK 序列化的三大问题 三、实战：默认 JDK 序列化效果 四、替换：Jackson2JsonMessageConverter 配置 五、实战：JSON 序列化消息收发 六、核心机制详解：TypeId 与 MessageId 七、常见坑与注意事项 八、总结与速记   一、消息转换器的作用与流程 ⭐ 消息转换器 &#x3D; 「Java 对象 ⇄">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ06：消息转换器">
+<meta property="og:url" content="http://zl1nq.github.io/2026/08/08/RabbitMQ06/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="目录 一、消息转换器的作用与流程 二、默认转换器：JDK 序列化的三大问题 三、实战：默认 JDK 序列化效果 四、替换：Jackson2JsonMessageConverter 配置 五、实战：JSON 序列化消息收发 六、核心机制详解：TypeId 与 MessageId 七、常见坑与注意事项 八、总结与速记   一、消息转换器的作用与流程 ⭐ 消息转换器 &#x3D; 「Java 对象 ⇄">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://zl1nq.github.io/images/jdk%E6%B6%88%E6%81%AF%E8%BD%AC%E6%8D%A2%E5%99%A8.png">
+<meta property="og:image" content="http://zl1nq.github.io/images/json%E6%B6%88%E6%81%AF%E8%BD%AC%E6%8D%A2%E5%99%A8.png">
+<meta property="article:published_time" content="2026-08-08T00:13:25.000Z">
+<meta property="article:modified_time" content="2026-08-09T02:33:26.893Z">
+<meta property="article:author" content="zl1nq">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="消息队列">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://zl1nq.github.io/images/jdk%E6%B6%88%E6%81%AF%E8%BD%AC%E6%8D%A2%E5%99%A8.png">
+  
+  
+  
+  <title>RabbitMQ06：消息转换器 - Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zl1nq.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="RabbitMQ06：消息转换器"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-08-08 08:13" pubdate>
+          2026年8月8日 早上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.9k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          58 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">RabbitMQ06：消息转换器</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E6%B6%88%E6%81%AF%E8%BD%AC%E6%8D%A2%E5%99%A8%E7%9A%84%E4%BD%9C%E7%94%A8%E4%B8%8E%E6%B5%81%E7%A8%8B">一、消息转换器的作用与流程</a></li>
+<li><a href="#%E4%BA%8C%E9%BB%98%E8%AE%A4%E8%BD%AC%E6%8D%A2%E5%99%A8jdk-%E5%BA%8F%E5%88%97%E5%8C%96%E7%9A%84%E4%B8%89%E5%A4%A7%E9%97%AE%E9%A2%98">二、默认转换器：JDK 序列化的三大问题</a></li>
+<li><a href="#%E4%B8%89%E5%AE%9E%E6%88%98%E9%BB%98%E8%AE%A4-jdk-%E5%BA%8F%E5%88%97%E5%8C%96%E6%95%88%E6%9E%9C">三、实战：默认 JDK 序列化效果</a></li>
+<li><a href="#%E5%9B%9B%E6%9B%BF%E6%8D%A2jackson2jsonmessageconverter-%E9%85%8D%E7%BD%AE">四、替换：Jackson2JsonMessageConverter 配置</a></li>
+<li><a href="#%E4%BA%94%E5%AE%9E%E6%88%98json-%E5%BA%8F%E5%88%97%E5%8C%96%E6%B6%88%E6%81%AF%E6%94%B6%E5%8F%91">五、实战：JSON 序列化消息收发</a></li>
+<li><a href="#%E5%85%AD%E6%A0%B8%E5%BF%83%E6%9C%BA%E5%88%B6%E8%AF%A6%E8%A7%A3__typeid__-%E4%B8%8E-messageid">六、核心机制详解：<strong>TypeId</strong> 与 MessageId</a></li>
+<li><a href="#%E4%B8%83%E5%B8%B8%E8%A7%81%E5%9D%91%E4%B8%8E%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">七、常见坑与注意事项</a></li>
+<li><a href="#%E5%85%AB%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%9F%E8%AE%B0">八、总结与速记</a></li>
+</ul>
+<hr>
+<h2 id="一、消息转换器的作用与流程"><a href="#一、消息转换器的作用与流程" class="headerlink" title="一、消息转换器的作用与流程"></a>一、消息转换器的作用与流程</h2><blockquote>
+<p>⭐ <strong>消息转换器 &#x3D; 「Java 对象 ⇄ 字节数组」的翻译官</strong>，因为 RabbitMQ Broker 只认 bytes，传输层不能直接存 Java 对象。</p>
+</blockquote>
+<h3 id="1-发送与接收的完整流转"><a href="#1-发送与接收的完整流转" class="headerlink" title="1. 发送与接收的完整流转"></a>1. 发送与接收的完整流转</h3><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">📤 生产者侧 convertAndSend(Object msg):<br>    <span class="hljs-keyword">Java对象 </span>→ MessageConverter.toMessage(...) → <span class="hljs-keyword">byte[] </span>→ 发送到 MQ <span class="hljs-keyword">Broker</span><br><span class="hljs-keyword"></span><br>📥 消费者侧 @RabbitListener:<br>    MQ <span class="hljs-keyword">Broker </span>返回 <span class="hljs-keyword">byte[] </span>→ MessageConverter.fromMessage(...) → <span class="hljs-keyword">Java对象 </span>→ 传给业务方法<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-Spring-AMQP-默认-MessageConverter"><a href="#2-Spring-AMQP-默认-MessageConverter" class="headerlink" title="2. Spring AMQP 默认 MessageConverter"></a>2. Spring AMQP 默认 MessageConverter</h3><p>Spring AMQP 中 <code>RabbitTemplate</code> 和 <code>@RabbitListener</code> 都依赖 <code>MessageConverter</code> 接口，其默认实现是：</p>
+<table>
+<thead>
+<tr>
+<th>默认实现类</th>
+<th>序列化方式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>SimpleMessageConverter</code></td>
+<td><strong>JDK 原生序列化</strong></td>
+<td>对于 String 传文本、<code>byte[]</code> 原样传、其他 Object 一律走 JDK <code>ObjectOutputStream</code></td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>🧠 <strong>为什么需要自定义？</strong> 默认 JDK 序列化问题太多（见下章），生产 99% 场景都要替换成 JSON 序列化方案。</p>
+</blockquote>
+<hr>
+<h2 id="二、默认转换器：JDK-序列化的三大问题"><a href="#二、默认转换器：JDK-序列化的三大问题" class="headerlink" title="二、默认转换器：JDK 序列化的三大问题"></a>二、默认转换器：JDK 序列化的三大问题</h2><blockquote>
+<p>⚠️ <strong>JDK 序列化 &#x3D; 默认但不可用</strong>：三个核心缺陷决定了它只适合 demo，绝对不能上生产。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>严重程度</th>
+<th>具体说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>📦 数据体积过大</strong></td>
+<td>🟡 中</td>
+<td>JDK 序列化不仅写数据本身，还要写整个类的全限定名、字段描述符、继承链、序列化版本号 UID 等元信息，一般比 JSON 大 <strong>3~10 倍</strong>，浪费 Broker 磁盘和网络带宽</td>
+</tr>
+<tr>
+<td><strong>🛡️ 有安全漏洞</strong></td>
+<td>🔴 高危</td>
+<td>反序列化时自动执行 <code>readObject()</code> 恶意 payload，经典 <strong>Java 反序列化漏洞</strong>（CVE 系列），一旦 Broker 被投毒消息，消费者反序列化即 RCE 远程执行命令</td>
+</tr>
+<tr>
+<td><strong>👓 可读性差</strong></td>
+<td>🟡 中</td>
+<td>控制台看到的是乱码字节（<code>\xAC\xED\x00\x05</code> 开头的 JDK 魔数），排障时没法直接看内容，调试体验极差</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>🌰 <strong>直观对比</strong>：发送一个 <code>{name: &quot;Jack&quot;, age: 21}</code> 的 Map：</p>
+<ul>
+<li>JDK 序列化：约 <strong>300+ 字节</strong>乱码，控制台完全不可读</li>
+<li>JSON 序列化：约 <strong>30 字节</strong>的 <code>{&quot;name&quot;:&quot;Jack&quot;,&quot;age&quot;:21}</code>，清晰可读</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="三、实战：默认-JDK-序列化效果"><a href="#三、实战：默认-JDK-序列化效果" class="headerlink" title="三、实战：默认 JDK 序列化效果"></a>三、实战：默认 JDK 序列化效果</h2><h3 id="1-发送-Object-消息测试"><a href="#1-发送-Object-消息测试" class="headerlink" title="1. 发送 Object 消息测试"></a>1. 发送 Object 消息测试</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testSendObject</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">// 构造一个简单的 Map 对象</span><br>    HashMap&lt;String, Object&gt; msg = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashMap</span>&lt;&gt;(<span class="hljs-number">2</span>);<br>    msg.put(<span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-string">&quot;Jack&quot;</span>);<br>    msg.put(<span class="hljs-string">&quot;age&quot;</span>, <span class="hljs-number">21</span>);<br>    <span class="hljs-comment">// 发送到 object.queue（注意：需要提前声明队列）</span><br>    rabbitTemplate.convertAndSend(<span class="hljs-string">&quot;object.queue&quot;</span>, msg);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-默认-JDK-消息体（控制台截图）"><a href="#2-默认-JDK-消息体（控制台截图）" class="headerlink" title="2. 默认 JDK 消息体（控制台截图）"></a>2. 默认 JDK 消息体（控制台截图）</h3><p><img src="/../images/jdk%E6%B6%88%E6%81%AF%E8%BD%AC%E6%8D%A2%E5%99%A8.png" srcset="/img/loading.gif" lazyload alt="jdk消息转换器"></p>
+<blockquote>
+<p>💡 观察点：</p>
+<ul>
+<li>Payload 是十六进制乱码，<strong>人类完全不可读</strong></li>
+<li>Headers 中能看到 <code>content_type: application/x-java-serialized-object</code> 标识</li>
+<li>首字节通常是 <code>AC ED 00 05</code>（JDK 序列化魔数）</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="四、替换：Jackson2JsonMessageConverter-配置"><a href="#四、替换：Jackson2JsonMessageConverter-配置" class="headerlink" title="四、替换：Jackson2JsonMessageConverter 配置"></a>四、替换：Jackson2JsonMessageConverter 配置</h2><blockquote>
+<p>⭐ <strong>生产标配</strong>：用 JSON 序列化替代 JDK，体积小 + 可读 + 无反序列化 RCE 漏洞。</p>
+</blockquote>
+<h3 id="1-依赖说明"><a href="#1-依赖说明" class="headerlink" title="1. 依赖说明"></a>1. 依赖说明</h3><p>Spring Boot AMQP 起步依赖一般已经传递引入了 Jackson：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs xml"><span class="hljs-comment">&lt;!-- spring-boot-starter-amqp 默认就带 jackson-databind，一般无需额外引入 --&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-amqp<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ 若报 ClassNotFoundException: Jackson2JsonMessageConverter → 手动补 <code>spring-boot-starter-json</code> 或 <code>jackson-databind</code>。</p>
+</blockquote>
+<h3 id="2-配置-Bean（两种写法）"><a href="#2-配置-Bean（两种写法）" class="headerlink" title="2. 配置 Bean（两种写法）"></a>2. 配置 Bean（两种写法）</h3><blockquote>
+<p>🧠 <strong>关键约束：生产者和消费者服务两边都必须配同一个转换器！</strong> 否则一边发 JSON 另一边按 JDK 反序列化直接报错。</p>
+</blockquote>
+<h4 id="写法-A：最简版（够用）"><a href="#写法-A：最简版（够用）" class="headerlink" title="写法 A：最简版（够用）"></a>写法 A：最简版（够用）</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RabbitConfig</span> &#123;<br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 声明 JSON 消息转换器</span><br><span class="hljs-comment">     * Spring AMQP 会自动将其注入 RabbitTemplate 和 <span class="hljs-doctag">@RabbitListener</span></span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> Jackson2JsonMessageConverter <span class="hljs-title function_">jackson2JsonMessageConverter</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Jackson2JsonMessageConverter</span>();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="写法-B：推荐版（开-MessageId-便于追踪）"><a href="#写法-B：推荐版（开-MessageId-便于追踪）" class="headerlink" title="写法 B：推荐版（开 MessageId 便于追踪）"></a>写法 B：推荐版（开 MessageId 便于追踪）</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">RabbitConfig</span> &#123;<br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> MessageConverter <span class="hljs-title function_">messageConverter</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-type">Jackson2JsonMessageConverter</span> <span class="hljs-variable">converter</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Jackson2JsonMessageConverter</span>();<br>        <span class="hljs-comment">// 生成唯一 messageId 写入消息头（便于日志追踪/幂等去重）</span><br>        converter.setCreateMessageIds(<span class="hljs-literal">true</span>);<br>        <span class="hljs-keyword">return</span> converter;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 <strong>两种写法不冲突</strong>，Spring 会按类型 <code>MessageConverter</code> 优先注入，但<strong>推荐只用一种即可</strong>，避免容器中多个转换器造成歧义。</p>
+</blockquote>
+<h3 id="3-生效时机"><a href="#3-生效时机" class="headerlink" title="3. 生效时机"></a>3. 生效时机</h3><p>配置后：</p>
+<ul>
+<li>生产者的 <code>RabbitTemplate.convertAndSend()</code> 会自动使用该 Bean</li>
+<li>消费者的 <code>@RabbitListener</code> 也会自动使用该 Bean 反序列化</li>
+<li><strong>无需其他任何改代码调用</strong>，Spring 自动装配的</li>
+</ul>
+<hr>
+<h2 id="五、实战：JSON-序列化消息收发"><a href="#五、实战：JSON-序列化消息收发" class="headerlink" title="五、实战：JSON 序列化消息收发"></a>五、实战：JSON 序列化消息收发</h2><h3 id="1-生产者：同样的发送代码，效果天差地别"><a href="#1-生产者：同样的发送代码，效果天差地别" class="headerlink" title="1. 生产者：同样的发送代码，效果天差地别"></a>1. 生产者：同样的发送代码，效果天差地别</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testSendObjectJson</span><span class="hljs-params">()</span> &#123;<br>    HashMap&lt;String, Object&gt; msg = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashMap</span>&lt;&gt;(<span class="hljs-number">2</span>);<br>    msg.put(<span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-string">&quot;Jack&quot;</span>);<br>    msg.put(<span class="hljs-string">&quot;age&quot;</span>, <span class="hljs-number">21</span>);<br>    <span class="hljs-comment">// 发送代码没变！只是 MessageConverter Bean 变了</span><br>    rabbitTemplate.convertAndSend(<span class="hljs-string">&quot;object.queue&quot;</span>, msg);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-JSON-消息体（控制台截图）"><a href="#2-JSON-消息体（控制台截图）" class="headerlink" title="2. JSON 消息体（控制台截图）"></a>2. JSON 消息体（控制台截图）</h3><p><img src="/../images/json%E6%B6%88%E6%81%AF%E8%BD%AC%E6%8D%A2%E5%99%A8.png" srcset="/img/loading.gif" lazyload alt="json消息转换器"></p>
+<blockquote>
+<p>💡 观察点：</p>
+<ul>
+<li>Payload 变成了人类可读的 <code>{&quot;name&quot;:&quot;Jack&quot;,&quot;age&quot;:21}</code></li>
+<li>Headers 中 <code>content_type: application/json</code></li>
+<li>Headers 中多了 <code>__TypeId__: java.util.HashMap</code>（反序列化的关键，下章详解）</li>
+<li>如果配置了 <code>setCreateMessageIds(true)</code>，Headers 有 <code>messageId</code> 唯一 ID</li>
+</ul>
+</blockquote>
+<h3 id="3-消费者：接收并自动反序列化"><a href="#3-消费者：接收并自动反序列化" class="headerlink" title="3. 消费者：接收并自动反序列化"></a>3. 消费者：接收并自动反序列化</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Component</span><br><span class="hljs-meta">@RabbitListener(queues = &quot;object.queue&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ObjectConsumer</span> &#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 直接用 Map&lt;String, Object&gt; 接收，Spring 自动反序列化到位</span><br><span class="hljs-comment">     * 不需要手动 new ObjectMapper().readValue(...)</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@RabbitHandler</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenObjectQueue</span><span class="hljs-params">(Map&lt;String, Object&gt; message)</span> &#123;<br>        log.info(<span class="hljs-string">&quot;消费者1接收到object.queue消息:&#123;&#125;, 日期:&#123;&#125;&quot;</span>,<br>                message, LocalDateTime.now());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-运行输出"><a href="#4-运行输出" class="headerlink" title="4. 运行输出"></a>4. 运行输出</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">消费者1接收到object.queue消息:&#123;name=Jack, age=21&#125;, 日期:2026-08-08T08:38:12.745018500<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>✅ <strong>完美收工</strong>：<code>name=Jack, age=21</code> 成功还原为 Map，字段、类型都正确。</p>
+</blockquote>
+<hr>
+<h2 id="六、核心机制详解：TypeId-与-MessageId"><a href="#六、核心机制详解：TypeId-与-MessageId" class="headerlink" title="六、核心机制详解：TypeId 与 MessageId"></a>六、核心机制详解：<strong>TypeId</strong> 与 MessageId</h2><blockquote>
+<p>🧠 这两个是使用 JSON 转换器时最容易被忽略、但出问题最难排查的「幕后机制」。</p>
+</blockquote>
+<h3 id="1-TypeId-：反序列化的「导航地图」"><a href="#1-TypeId-：反序列化的「导航地图」" class="headerlink" title="1. __TypeId__：反序列化的「导航地图」"></a>1. <code>__TypeId__</code>：反序列化的「导航地图」</h3><h4 id="机制流程"><a href="#机制流程" class="headerlink" title="机制流程"></a>机制流程</h4><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">生产者发送时：<br>  <span class="hljs-keyword">Jackson2JsonMessageConverter </span>会把 <span class="hljs-keyword">Java </span>类的「全限定名」<br>  写到消息头 __TypeId__ 里。<br><br>消费者接收时：<br>  先读消息头的 __TypeId__ 值，用 Class.forName(...) 加载到 Class 对象，<br>  然后 ObjectMapper.readValue(<span class="hljs-keyword">json, </span>clazz) 反序列化成这个类型。<br></code></pre></td></tr></table></figure>
+
+<h4 id="示例对照表"><a href="#示例对照表" class="headerlink" title="示例对照表"></a>示例对照表</h4><table>
+<thead>
+<tr>
+<th>发送的 Java 对象</th>
+<th>消息头 <strong>TypeId</strong> 写的值</th>
+<th>消费者反序列化成</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>new HashMap()</code></td>
+<td><code>java.util.HashMap</code></td>
+<td>HashMap</td>
+</tr>
+<tr>
+<td><code>com.example.pojo.User</code></td>
+<td><code>com.example.pojo.User</code></td>
+<td>User 类</td>
+</tr>
+<tr>
+<td><code>List&lt;User&gt;</code>（通过 TypeReference）</td>
+<td><code>java.util.ArrayList</code></td>
+<td>ArrayList（内部元素按 User 字段还原为 LinkedHashMap，这是另一个坑）</td>
+</tr>
+</tbody></table>
+<h3 id="2-跨服务时的-TypeId-陷阱-❓"><a href="#2-跨服务时的-TypeId-陷阱-❓" class="headerlink" title="2. 跨服务时的 TypeId 陷阱 ❓"></a>2. 跨服务时的 <strong>TypeId</strong> 陷阱 ❓</h3><blockquote>
+<p>⚠️ <strong>问题</strong>：A 服务包名是 <code>com.order.pojo.OrderDTO</code>，B 服务包名是 <code>com.pay.dto.OrderDTO</code>。</p>
+<p>A 发送时写入 <code>__TypeId__=com.order.pojo.OrderDTO</code>，但 B 服务 classpath 下根本没这个类 → <code>ClassNotFoundException</code>！</p>
+</blockquote>
+<h4 id="解决方案：自定义类型映射（常用）"><a href="#解决方案：自定义类型映射（常用）" class="headerlink" title="解决方案：自定义类型映射（常用）"></a>解决方案：自定义类型映射（常用）</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Bean</span><br><span class="hljs-keyword">public</span> MessageConverter <span class="hljs-title function_">messageConverter</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-type">Jackson2JsonMessageConverter</span> <span class="hljs-variable">converter</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Jackson2JsonMessageConverter</span>();<br>    converter.setCreateMessageIds(<span class="hljs-literal">true</span>);<br><br>    <span class="hljs-comment">// 自定义类型映射：键 = 消息头里写的逻辑名，值 = 本服务对应 Class</span><br>    <span class="hljs-comment">// 发送端和消费端都配同样的键名，就摆脱了全限定包名必须一致的束缚</span><br>    converter.setIdClassMapping(Map.of(<br>        <span class="hljs-string">&quot;OrderDTO&quot;</span>, OrderDTO.class,           <span class="hljs-comment">// key 只要生产者/消费者两边约定一致</span><br>        <span class="hljs-string">&quot;UserDTO&quot;</span>, UserDTO.class<br>    ));<br><br>    <span class="hljs-keyword">return</span> converter;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>🎯 关键点：<strong>生产者和消费者两侧都配置相同的 setIdClassMapping</strong>，发送侧写 key 字符串，消费侧用 key 映射到本地 Class，完美解耦包名。</p>
+</blockquote>
+<h3 id="3-setCreateMessageIds-true-：消息追踪的神器"><a href="#3-setCreateMessageIds-true-：消息追踪的神器" class="headerlink" title="3. setCreateMessageIds(true)：消息追踪的神器"></a>3. <code>setCreateMessageIds(true)</code>：消息追踪的神器</h3><table>
+<thead>
+<tr>
+<th>效果</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>自动生成唯一 ID</strong></td>
+<td>每条消息头 <code>messageId</code>（如 <code>a1b2c3d4-e5f6-7890-abcd-ef1234567890</code> UUID）</td>
+</tr>
+<tr>
+<td><strong>日志追踪</strong></td>
+<td>打日志时把 messageId 带上，跨 producer→Broker→consumer 全链路串起来</td>
+</tr>
+<tr>
+<td><strong>幂等去重</strong></td>
+<td>消费者可以把 messageId 存入 Redis 去重表，处理过的消息直接跳过，防止重复消费</td>
+</tr>
+<tr>
+<td><strong>死信排查</strong></td>
+<td>消息进死信队列时，凭 messageId 反查是哪条出的问题</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="七、常见坑与注意事项"><a href="#七、常见坑与注意事项" class="headerlink" title="七、常见坑与注意事项"></a>七、常见坑与注意事项</h2><h3 id="坑-1：只在生产者-消费者一边配-JSON-转换器-❌"><a href="#坑-1：只在生产者-消费者一边配-JSON-转换器-❌" class="headerlink" title="坑 1：只在生产者&#x2F;消费者一边配 JSON 转换器 ❌"></a>坑 1：只在生产者&#x2F;消费者一边配 JSON 转换器 ❌</h3><blockquote>
+<p>⚠️ 两边必须都配！</p>
+<ul>
+<li>✅ 两边都用 Jackson2JsonMessageConverter → 正常收发 JSON</li>
+<li>❌ 生产者用 JSON，消费者用默认 Simple → 消费者收到的是乱码 bytes 或抛 <code>MessageConversionException</code></li>
+<li>❌ 生产者默认 JDK，消费者用 JSON → JSON 反序列化 JDK 字节直接报错</li>
+</ul>
+</blockquote>
+<h3 id="坑-2：消费者参数类型与-TypeId-不匹配-❌"><a href="#坑-2：消费者参数类型与-TypeId-不匹配-❌" class="headerlink" title="坑 2：消费者参数类型与 TypeId 不匹配 ❌"></a>坑 2：消费者参数类型与 <strong>TypeId</strong> 不匹配 ❌</h3><table>
+<thead>
+<tr>
+<th>发送对象</th>
+<th><strong>TypeId</strong></th>
+<th>消费方法参数</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HashMap</td>
+<td><code>java.util.HashMap</code></td>
+<td><code>Map&lt;String, Object&gt;</code></td>
+<td>✅ 接口兼容，正常</td>
+</tr>
+<tr>
+<td><code>com.order.OrderDTO</code></td>
+<td><code>com.order.OrderDTO</code></td>
+<td><code>com.pay.OrderDTO</code>（包名不同）</td>
+<td>❌ ClassNotFoundException</td>
+</tr>
+<tr>
+<td>User POJO</td>
+<td><code>com.example.User</code></td>
+<td><code>String msg</code></td>
+<td>✅ Spring 会把 JSON 整个当字符串传（不经过 fromMessage 反序列化对象，但可以用）</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>最安全：<strong>跨服务传递尽量用 Map&lt;String,Object&gt;，或两边都依赖同一个公共 DTO jar，或自定义 setIdClassMapping 映射。</strong></p>
+</blockquote>
+<h3 id="坑-3：用-List-接收泛型擦除导致元素是-LinkedHashMap-❓"><a href="#坑-3：用-List-接收泛型擦除导致元素是-LinkedHashMap-❓" class="headerlink" title="坑 3：用 List 接收泛型擦除导致元素是 LinkedHashMap ❓"></a>坑 3：用 List 接收泛型擦除导致元素是 LinkedHashMap ❓</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">// 这样写 list 内元素往往被还原成 LinkedHashMap，而非 POJO</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listen</span><span class="hljs-params">(List&lt;User&gt; users)</span> &#123; ... &#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>解决方案：</p>
+<ol>
+<li>用<strong>数组</strong>代替 List：<code>public void listen(User[] users)</code>，数组类型保留不擦除</li>
+<li>或消费者侧先用 <code>String json</code> 接收，再手动 <code>objectMapper.readValue(json, new TypeReference&lt;List&lt;User&gt;&gt;(){})</code></li>
+</ol>
+</blockquote>
+<h3 id="坑-4：DTO-没加无参构造函数-❌"><a href="#坑-4：DTO-没加无参构造函数-❌" class="headerlink" title="坑 4：DTO 没加无参构造函数 ❌"></a>坑 4：DTO 没加无参构造函数 ❌</h3><p>Jackson 反序列化默认需要类有<strong>无参构造函数</strong>（或用 @AllArgsConstructor 配合 @Builder 再额外加 @NoArgsConstructor）。否则抛 <code>InvalidDefinitionException: Cannot construct instance of ...</code>。</p>
+<h3 id="坑-5：日期-时间字段序列化格式不一致-❌"><a href="#坑-5：日期-时间字段序列化格式不一致-❌" class="headerlink" title="坑 5：日期&#x2F;时间字段序列化格式不一致 ❌"></a>坑 5：日期&#x2F;时间字段序列化格式不一致 ❌</h3><p>LocalDateTime 默认序列化成 <code>[2026,8,8,10,30,0]</code> 数组，消费者期望 <code>&quot;2026-08-08 10:30:00&quot;</code> 字符串。</p>
+<blockquote>
+<p>统一方案：公共依赖中配置全局 <code>jackson-datatype-jsr310</code> + <code>spring.jackson.date-format</code>，保证两端一致。</p>
+</blockquote>
+<hr>
+<h2 id="八、总结与速记"><a href="#八、总结与速记" class="headerlink" title="八、总结与速记"></a>八、总结与速记</h2><h3 id="1-默认-JDK-序列化三大问题表"><a href="#1-默认-JDK-序列化三大问题表" class="headerlink" title="1. 默认 JDK 序列化三大问题表"></a>1. 默认 JDK 序列化三大问题表</h3><table>
+<thead>
+<tr>
+<th>问题</th>
+<th>一句话总结</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>体积大</td>
+<td>比 JSON 大 3~10 倍，浪费带宽存储</td>
+</tr>
+<tr>
+<td>有漏洞</td>
+<td>RCE 反序列化漏洞，生产绝对不能用</td>
+</tr>
+<tr>
+<td>不可读</td>
+<td>控制台乱码，排障崩溃</td>
+</tr>
+</tbody></table>
+<h3 id="2-消息转换器四步配置公式"><a href="#2-消息转换器四步配置公式" class="headerlink" title="2. 消息转换器四步配置公式"></a>2. 消息转换器四步配置公式</h3><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">① pom 依赖 spring-<span class="hljs-keyword">boot-starter-amqp（默认已带 </span><span class="hljs-keyword">Jackson）</span><br><span class="hljs-keyword"></span>② 配 @<span class="hljs-keyword">Bean </span>MessageConverter = <span class="hljs-keyword">Jackson2JsonMessageConverter</span><br><span class="hljs-keyword"></span>③ ✅ setCreateMessageIds(true)（推荐开追踪）<br>④ ⚠️ 生产者、消费者两边都要配，缺一不可<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-核心机制要点"><a href="#3-核心机制要点" class="headerlink" title="3. 核心机制要点"></a>3. 核心机制要点</h3><table>
+<thead>
+<tr>
+<th>机制</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>__TypeId__</code> 消息头</td>
+<td>告诉反序列化器「要 new 哪个类的对象」</td>
+</tr>
+<tr>
+<td>包名不一致时</td>
+<td>配 <code>setIdClassMapping</code> 自定义逻辑名</td>
+</tr>
+<tr>
+<td><code>messageId</code></td>
+<td>日志追踪 + 幂等去重 + 死信排查</td>
+</tr>
+</tbody></table>
+<h3 id="4-易错点速记"><a href="#4-易错点速记" class="headerlink" title="4. 易错点速记"></a>4. 易错点速记</h3><blockquote>
+<p>❌ 只单边配转换器 → 消费侧乱码&#x2F;抛错</p>
+<p>❌ POJO 没无参构造 → Jackson 没法实例化</p>
+<p>❌ 跨服务包名不同没配 IdClassMapping → ClassNotFoundException</p>
+<p>❌ List&lt;User&gt; 泛型擦除 → 元素变 LinkedHashMap，改用 User[] 数组</p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="print-no-link">#消息队列</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="print-no-link">#中间件</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>RabbitMQ06：消息转换器</div>
+      <div>http://zl1nq.github.io/2026/08/08/RabbitMQ06/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zl1nq</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年8月8日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/08/08/RabbitMQ07/" title="RabbitMQ07：发送者可靠性">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">RabbitMQ07：发送者可靠性</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/08/07/RabbitMQ05/" title="RabbitMQ05：声明队列和交换机">
+                        <span class="hidden-mobile">RabbitMQ05：声明队列和交换机</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Blog</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

@@ -1,0 +1,1111 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/z.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="zl1nq">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="目录 一、交换机总览：消息的分拣中心 二、Fanout 交换机：广播模式 三、Direct 交换机：精确路由模式 四、Topic 交换机：通配符模式 五、三种交换机对比选型 六、总结与速记   一、交换机总览：消息的分拣中心 ⭐ 一句话理解：Exchange（交换机）&#x3D; RabbitMQ 消息的分拣中心。生产者不直接投队列，而是先发给交换机，由它根据规则决定消息发给哪些队列。  1. 消">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ04：交换机">
+<meta property="og:url" content="http://zl1nq.github.io/2026/08/07/RabbitMQ04/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="目录 一、交换机总览：消息的分拣中心 二、Fanout 交换机：广播模式 三、Direct 交换机：精确路由模式 四、Topic 交换机：通配符模式 五、三种交换机对比选型 六、总结与速记   一、交换机总览：消息的分拣中心 ⭐ 一句话理解：Exchange（交换机）&#x3D; RabbitMQ 消息的分拣中心。生产者不直接投队列，而是先发给交换机，由它根据规则决定消息发给哪些队列。  1. 消">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://zl1nq.github.io/images/fanout.png">
+<meta property="og:image" content="http://zl1nq.github.io/images/direct%E5%88%9B%E5%BB%BA%E9%98%9F%E5%88%97.png">
+<meta property="og:image" content="http://zl1nq.github.io/images/topic%E6%B5%81%E7%A8%8B.png">
+<meta property="og:image" content="http://zl1nq.github.io/images/topic%E4%BA%A4%E6%8D%A2%E6%9C%BA.png">
+<meta property="article:published_time" content="2026-08-07T01:00:25.000Z">
+<meta property="article:modified_time" content="2026-08-09T02:33:28.155Z">
+<meta property="article:author" content="zl1nq">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="消息队列">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://zl1nq.github.io/images/fanout.png">
+  
+  
+  
+  <title>RabbitMQ04：交换机 - Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zl1nq.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="RabbitMQ04：交换机"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-08-07 09:00" pubdate>
+          2026年8月7日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.8k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          57 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">RabbitMQ04：交换机</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E4%BA%A4%E6%8D%A2%E6%9C%BA%E6%80%BB%E8%A7%88%E6%B6%88%E6%81%AF%E7%9A%84%E5%88%86%E6%8B%A3%E4%B8%AD%E5%BF%83">一、交换机总览：消息的分拣中心</a></li>
+<li><a href="#%E4%BA%8Cfanout-%E4%BA%A4%E6%8D%A2%E6%9C%BA%E5%B9%BF%E6%92%AD%E6%A8%A1%E5%BC%8F">二、Fanout 交换机：广播模式</a></li>
+<li><a href="#%E4%B8%89direct-%E4%BA%A4%E6%8D%A2%E6%9C%BA%E7%B2%BE%E7%A1%AE%E8%B7%AF%E7%94%B1%E6%A8%A1%E5%BC%8F">三、Direct 交换机：精确路由模式</a></li>
+<li><a href="#%E5%9B%9Btopic-%E4%BA%A4%E6%8D%A2%E6%9C%BA%E9%80%9A%E9%85%8D%E7%AC%A6%E6%A8%A1%E5%BC%8F">四、Topic 交换机：通配符模式</a></li>
+<li><a href="#%E4%BA%94%E4%B8%89%E7%A7%8D%E4%BA%A4%E6%8D%A2%E6%9C%BA%E5%AF%B9%E6%AF%94%E9%80%89%E5%9E%8B">五、三种交换机对比选型</a></li>
+<li><a href="#%E5%85%AD%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%9F%E8%AE%B0">六、总结与速记</a></li>
+</ul>
+<hr>
+<h2 id="一、交换机总览：消息的分拣中心"><a href="#一、交换机总览：消息的分拣中心" class="headerlink" title="一、交换机总览：消息的分拣中心"></a>一、交换机总览：消息的分拣中心</h2><blockquote>
+<p>⭐ <strong>一句话理解</strong>：Exchange（交换机）&#x3D; RabbitMQ 消息的<strong>分拣中心</strong>。生产者不直接投队列，而是先发给交换机，由它根据规则决定消息发给哪些队列。</p>
+</blockquote>
+<h3 id="1-消息流转模型（含交换机）"><a href="#1-消息流转模型（含交换机）" class="headerlink" title="1. 消息流转模型（含交换机）"></a>1. 消息流转模型（含交换机）</h3><figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs tap">Publisher（生产者）<br>    ↓  投递消息（携带 RoutingKey<br>Exchange（交换机）——  根据交换机类型 + RoutingKey 路由<br>    ↓          ↓            ↓<br>Queue1     Queue2      QueueN   ←<span class="hljs-number"> 0 </span>个或多个<br>    ↓          ↓            ↓<br>Consumer1  Consumer2    ConsumerN<br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>角色</th>
+<th>职责</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Publisher</strong></td>
+<td>生产者：发送消息到 Exchange，不再发到队列</td>
+</tr>
+<tr>
+<td><strong>Exchange</strong></td>
+<td>交换机：接收消息，根据类型 + RoutingKey 路由到对应队列</td>
+</tr>
+<tr>
+<td><strong>Queue</strong></td>
+<td>队列：存储消息，必须与交换机<strong>绑定（Binding）</strong></td>
+</tr>
+<tr>
+<td><strong>Consumer</strong></td>
+<td>消费者：订阅队列，无变化</td>
+</tr>
+</tbody></table>
+<h3 id="2-⚠️-交换机不存消息！"><a href="#2-⚠️-交换机不存消息！" class="headerlink" title="2. ⚠️ 交换机不存消息！"></a>2. ⚠️ 交换机不存消息！</h3><blockquote>
+<p><strong>核心认知</strong>：Exchange <strong>只负责转发消息，没有存储能力</strong>。</p>
+<p>如果没有任何队列与 Exchange 绑定，或者没有符合路由规则的队列 → <strong>消息直接丢失！</strong></p>
+<p>（队列才是真正存储消息的地方）</p>
+</blockquote>
+<h3 id="3-四种交换机类型"><a href="#3-四种交换机类型" class="headerlink" title="3. 四种交换机类型"></a>3. 四种交换机类型</h3><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>中文名</th>
+<th>路由规则</th>
+<th>使用频率</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Fanout</strong></td>
+<td>广播 &#x2F; 扇出</td>
+<td>发给所有绑定的队列，忽略 RoutingKey</td>
+<td>⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Direct</strong></td>
+<td>精确路由 &#x2F; 订阅</td>
+<td>RoutingKey 必须与绑定的 BindingKey <strong>完全相等</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Topic</strong></td>
+<td>通配符订阅</td>
+<td>RoutingKey 匹配通配符 BindingKey（<code>*</code> &#x2F; <code>#</code>）</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Headers</strong></td>
+<td>头匹配</td>
+<td>基于消息 Header 匹配，性能差</td>
+<td>极少用</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 本章节重点讲解前三种（Fanout&#x2F;Direct&#x2F;Topic），Headers 日常开发基本不用。</p>
+</blockquote>
+<hr>
+<h2 id="二、Fanout-交换机：广播模式"><a href="#二、Fanout-交换机：广播模式" class="headerlink" title="二、Fanout 交换机：广播模式"></a>二、Fanout 交换机：广播模式</h2><blockquote>
+<p>📢 <strong>Fanout &#x3D; 广播</strong>：不管消息的 RoutingKey 是什么，<strong>把消息转发给所有绑定到本交换机的队列</strong>。</p>
+</blockquote>
+<h3 id="1-路由规则"><a href="#1-路由规则" class="headerlink" title="1. 路由规则"></a>1. 路由规则</h3><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">Publisher</span><br>    ↓ 消息（RoutingKey 随便写，会被忽略）<br>Fanout Exchange<br>    ├→ Queue1 → Consumer1<br>    ├→ Queue2 → Consumer2<br>    └→ QueueN → ConsumerN   （所有绑定队列都收到同一份消息）<br></code></pre></td></tr></table></figure>
+
+<p>Fanout 的 5 个要点：</p>
+<ol>
+<li>可以有多个队列</li>
+<li>每个队列都要绑定到 Fanout Exchange</li>
+<li>生产者发消息 → 交换机</li>
+<li>交换机把消息<strong>复制 N 份</strong>发给每个绑定队列</li>
+<li>订阅各队列的消费者都能拿到完整消息</li>
+</ol>
+<h3 id="2-流程示例图"><a href="#2-流程示例图" class="headerlink" title="2. 流程示例图"></a>2. 流程示例图</h3><p><img src="/../images/fanout.png" srcset="/img/loading.gif" lazyload alt="Fanout 交换机发送流程"></p>
+<h3 id="3-代码实现"><a href="#3-代码实现" class="headerlink" title="3. 代码实现"></a>3. 代码实现</h3><h4 id="消费者：监听两个队列"><a href="#消费者：监听两个队列" class="headerlink" title="消费者：监听两个队列"></a>消费者：监听两个队列</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RabbitListener(queues = &quot;fanout.queue1&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenFanoutQueue1</span><span class="hljs-params">(String message)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者1 接收到 fanout.queue1 消息: &#123;&#125;, 日期: &#123;&#125;&quot;</span>, message, LocalDateTime.now());<br>&#125;<br><br><span class="hljs-meta">@RabbitListener(queues = &quot;fanout.queue2&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenFanoutQueue2</span><span class="hljs-params">(String message)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者2 接收到 fanout.queue2 消息: &#123;&#125;, 日期: &#123;&#125;&quot;</span>, message, LocalDateTime.now());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ 先在控制台把 <code>fanout.queue1</code>、<code>fanout.queue2</code> 两个队列创建出来，并绑定到 <code>hmall.fanout</code> 交换机。</p>
+</blockquote>
+<h4 id="生产者：发送到交换机"><a href="#生产者：发送到交换机" class="headerlink" title="生产者：发送到交换机"></a>生产者：发送到交换机</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testFanoutQueue</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">// 交换机名称</span><br>    <span class="hljs-type">String</span> <span class="hljs-variable">exchangeName</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;hmall.fanout&quot;</span>;<br>    <span class="hljs-comment">// 消息内容</span><br>    <span class="hljs-type">String</span> <span class="hljs-variable">message</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;hello, everyone!&quot;</span>;<br>    <span class="hljs-comment">// 三个参数：交换机 + RoutingKey（Fanout 下传空串 &quot;&quot; 即可）+ 消息</span><br>    rabbitTemplate.convertAndSend(exchangeName, <span class="hljs-string">&quot;&quot;</span>, message);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 Fanout 模式下 RoutingKey 参数传什么都无所谓，因为 Fanout 会忽略它，广播给所有队列。</p>
+</blockquote>
+<h3 id="4-执行结果"><a href="#4-执行结果" class="headerlink" title="4. 执行结果"></a>4. 执行结果</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs bash">消费者1 接收到 fanout.queue1 消息: hello, everyone!, 日期: 2026-08-07T09:26:28.521<br>消费者2 接收到 fanout.queue2 消息: hello, everyone!, 日期: 2026-08-07T09:26:28.521<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>✅ 两个消费者<strong>同时收到同一份消息</strong>，说明 Fanout 广播成功。</p>
+</blockquote>
+<h3 id="5-适用场景"><a href="#5-适用场景" class="headerlink" title="5. 适用场景"></a>5. 适用场景</h3><table>
+<thead>
+<tr>
+<th>场景</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>通知公告</td>
+<td>所有在线用户都要收到的系统通知</td>
+</tr>
+<tr>
+<td>广播事件</td>
+<td>订单支付成功 → 库存、积分、短信服务都要感知</td>
+</tr>
+<tr>
+<td>数据同步</td>
+<td>配置变更广播到所有节点</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="三、Direct-交换机：精确路由模式"><a href="#三、Direct-交换机：精确路由模式" class="headerlink" title="三、Direct 交换机：精确路由模式"></a>三、Direct 交换机：精确路由模式</h2><blockquote>
+<p>🎯 <strong>Direct &#x3D; 精确匹配</strong>：队列绑定 Exchange 时指定一个或多个 BindingKey，消息的 RoutingKey 必须<strong>完全相等</strong>，才转发给该队列。</p>
+</blockquote>
+<h3 id="1-路由规则-1"><a href="#1-路由规则-1" class="headerlink" title="1. 路由规则"></a>1. 路由规则</h3><p>Fanout 是「不管什么消息全部队列都发一份」，但实际业务中我们常常需要：</p>
+<ul>
+<li>红色消息 → 只给 Q1 和 Q2</li>
+<li>蓝色消息 → 只给 Q2 和 Q3</li>
+</ul>
+<p>Direct 模式就能做到精确控制。</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm">Publisher（RoutingKey = <span class="hljs-string">&quot;blue&quot;</span><br>    ↓<br><span class="hljs-keyword">Direct </span>Exchange（hmall.<span class="hljs-keyword">direct</span><br><span class="hljs-keyword"></span>    ├→ <span class="hljs-keyword">BindingKey </span>= &#123;<span class="hljs-string">&quot;red&quot;</span>,<span class="hljs-string">&quot;blue&quot;</span>&#125;  → Q1 → C1  ✅ 匹配 <span class="hljs-keyword">blue </span>→ 收到<br>    └→ <span class="hljs-keyword">BindingKey </span>= &#123;<span class="hljs-string">&quot;red&quot;</span>,<span class="hljs-string">&quot;yellow&quot;</span>&#125; → Q2 → C2  ❌ 不匹配 <span class="hljs-keyword">blue </span>→ 不收<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-关键概念区分"><a href="#2-关键概念区分" class="headerlink" title="2. 关键概念区分"></a>2. 关键概念区分</h3><table>
+<thead>
+<tr>
+<th>术语</th>
+<th>谁设置的</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>RoutingKey</strong></td>
+<td><strong>生产者</strong> 发消息时携带</td>
+<td>消息的「地址标签」</td>
+</tr>
+<tr>
+<td><strong>BindingKey</strong></td>
+<td>队列 和 交换机绑定时约定</td>
+<td>队列的「收件规则」</td>
+</tr>
+<tr>
+<td>匹配逻辑</td>
+<td>——</td>
+<td>RoutingKey <strong>完全等于</strong> BindingKey → 才转发</td>
+</tr>
+</tbody></table>
+<h3 id="3-代码实现（-QueueBinding-声明式绑定）"><a href="#3-代码实现（-QueueBinding-声明式绑定）" class="headerlink" title="3. 代码实现（@QueueBinding 声明式绑定）"></a>3. 代码实现（@QueueBinding 声明式绑定）</h3><blockquote>
+<p>💡 消费者端用 <code>@QueueBinding</code> <strong>不用提前去控制台建队列&#x2F;绑定</strong>，启动时 Spring 会自动声明！</p>
+<p>这是 SpringAMQP 推荐的写法，生产环境常用。</p>
+</blockquote>
+<h4 id="消费者：声明式绑定"><a href="#消费者：声明式绑定" class="headerlink" title="消费者：声明式绑定"></a>消费者：声明式绑定</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * direct.queue1 绑定到 hmall.direct 交换机，BindingKey: red + blue</span><br><span class="hljs-comment"> */</span><br><span class="hljs-meta">@RabbitListener(bindings = @QueueBinding(</span><br><span class="hljs-meta">    value = @Queue(name = &quot;direct.queue1&quot;),</span><br><span class="hljs-meta">    exchange = @Exchange(name = &quot;hmall.direct&quot;, type = ExchangeTypes.DIRECT),</span><br><span class="hljs-meta">    key = &#123;&quot;red&quot;, &quot;blue&quot;&#125;</span><br><span class="hljs-meta">))</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenDirectQueue1</span><span class="hljs-params">(String message)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者1 接收到 direct.queue1 消息: &#123;&#125;, 日期: &#123;&#125;&quot;</span>, message, LocalDateTime.now());<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * direct.queue2 绑定到 hmall.direct 交换机，BindingKey: red + yellow</span><br><span class="hljs-comment"> */</span><br><span class="hljs-meta">@RabbitListener(bindings = @QueueBinding(</span><br><span class="hljs-meta">    value = @Queue(name = &quot;direct.queue2&quot;),</span><br><span class="hljs-meta">    exchange = @Exchange(name = &quot;hmall.direct&quot;, type = ExchangeTypes.DIRECT),</span><br><span class="hljs-meta">    key = &#123;&quot;red&quot;, &quot;yellow&quot;&#125;</span><br><span class="hljs-meta">))</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenDirectQueue2</span><span class="hljs-params">(String message)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者2 接收到 direct.queue2 消息: &#123;&#125;, 日期: &#123;&#125;&quot;</span>, message, LocalDateTime.now());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>控制台先建好关系示意：<br><img src="/../images/direct%E5%88%9B%E5%BB%BA%E9%98%9F%E5%88%97.png" srcset="/img/loading.gif" lazyload alt="Direct 交换机控制台操作"></p>
+</blockquote>
+<h4 id="生产者：发送指定-RoutingKey"><a href="#生产者：发送指定-RoutingKey" class="headerlink" title="生产者：发送指定 RoutingKey"></a>生产者：发送指定 RoutingKey</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testDirectQueue</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">exchangeName</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;hmall.direct&quot;</span>;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">redMsg</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;hello, red!&quot;</span>;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">blueMsg</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;hello, blue!&quot;</span>;<br>    <span class="hljs-comment">// 发送 RoutingKey = &quot;blue&quot; 的消息</span><br>    rabbitTemplate.convertAndSend(exchangeName, <span class="hljs-string">&quot;blue&quot;</span>, blueMsg);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-执行结果-1"><a href="#4-执行结果-1" class="headerlink" title="4. 执行结果"></a>4. 执行结果</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># RoutingKey = blue：</span><br>消费者1 接收到 direct.queue1 消息: hello, blue!, 日期: 2026-08-07T09:39:56.268<br>消费者2 接收到 direct.queue2 消息: hello, blue!, 日期: 2026-08-07T09:39:56.268<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>因为两个队列的 BindingKey 都包含了 “blue”，所以都收到。</p>
+</blockquote>
+<h3 id="5-特殊情况：多个队列同-BindingKey"><a href="#5-特殊情况：多个队列同-BindingKey" class="headerlink" title="5. 特殊情况：多个队列同 BindingKey"></a>5. 特殊情况：多个队列同 BindingKey</h3><p>如果多个队列绑定了同一个 BindingKey，Direct 的行为就<strong>等价于 Fanout</strong>——所有匹配队列都会收到一份消息。</p>
+<hr>
+<h2 id="四、Topic-交换机：通配符模式"><a href="#四、Topic-交换机：通配符模式" class="headerlink" title="四、Topic 交换机：通配符模式"></a>四、Topic 交换机：通配符模式</h2><blockquote>
+<p>🌐 <strong>Topic &#x3D; Direct 的升级版</strong>：允许 BindingKey 使用通配符，RoutingKey 仍为普通多单词格式（<code>.</code> 分隔）。</p>
+<p>相比 Direct 更灵活：比如要做「所有商品相关的消息都发过去」，用 Topic 一个 <code>item.#</code> 就能覆盖，不用列几十个 BindingKey。</p>
+</blockquote>
+<h3 id="1-通配符规则"><a href="#1-通配符规则" class="headerlink" title="1. 通配符规则"></a>1. 通配符规则</h3><p>BindingKey 一般由<strong>多个单词 + <code>.</code> 分隔</strong>组成，例如：<code>item.insert</code>、<code>china.news</code>。</p>
+<table>
+<thead>
+<tr>
+<th>通配符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>#</code>（井号）</td>
+<td>匹配 <strong>0 个、1 个或多个</strong>词</td>
+</tr>
+<tr>
+<td><code>*</code>（星号）</td>
+<td>匹配<strong>不多不少恰好 1 个</strong>词</td>
+</tr>
+</tbody></table>
+<h3 id="2-匹配示例"><a href="#2-匹配示例" class="headerlink" title="2. 匹配示例"></a>2. 匹配示例</h3><table>
+<thead>
+<tr>
+<th>BindingKey</th>
+<th>能匹配的 RoutingKey（打 ✅，不能 ❌）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>item.#</code></td>
+<td>✅ <code>item.spu.insert</code>、✅ <code>item.spu</code>、✅ <code>item</code>（0 个也可以</td>
+</tr>
+<tr>
+<td><code>item.*</code></td>
+<td>✅ <code>item.spu</code>、❌ <code>item.spu.insert</code>（多了1个词不行、❌ <code>item</code>（没词不行</td>
+</tr>
+</tbody></table>
+<h3 id="3-流程示例图"><a href="#3-流程示例图" class="headerlink" title="3. 流程示例图"></a>3. 流程示例图</h3><p><img src="/../images/topic%E6%B5%81%E7%A8%8B.png" srcset="/img/loading.gif" lazyload alt="Topic 交换机流程"></p>
+<p>控制台操作参考：</p>
+<p><img src="/../images/topic%E4%BA%A4%E6%8D%A2%E6%9C%BA.png" srcset="/img/loading.gif" lazyload alt="Topic 交换机控制台操作"></p>
+<h3 id="4-代码实现"><a href="#4-代码实现" class="headerlink" title="4. 代码实现"></a>4. 代码实现</h3><h4 id="消费者："><a href="#消费者：" class="headerlink" title="消费者："></a>消费者：</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * topic.queue1 绑定 china.#，匹配 china.weather china.news china.*.xx</span><br><span class="hljs-comment"> */</span><br><span class="hljs-meta">@RabbitListener(queues = &quot;topic.queue1&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenTopicQueue1</span><span class="hljs-params">(String message)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者1 接收到 topic.queue1 消息: &#123;&#125;, 日期: &#123;&#125;&quot;</span>, message, LocalDateTime.now());<br>&#125;<br><br><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * topic.queue2 绑定 china.news（仅精确匹配 china.news</span><br><span class="hljs-comment"> */</span><br><span class="hljs-meta">@RabbitListener(queues = &quot;topic.queue2&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenTopicQueue2</span><span class="hljs-params">(String message)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者2 接收到 topic.queue2 消息: &#123;&#125;, 日期: &#123;&#125;&quot;</span>, message, LocalDateTime.now());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="生产者："><a href="#生产者：" class="headerlink" title="生产者："></a>生产者：</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testTopicQueue</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">exchangeName</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;amq.topic&quot;</span>;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">newsMessage</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;hello, china news!&quot;</span>;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">weatherMessage</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;weather in china is fine&quot;</span>;<br>    <span class="hljs-comment">// 发两条不同 RoutingKey 的消息</span><br>    rabbitTemplate.convertAndSend(exchangeName, <span class="hljs-string">&quot;china.weather&quot;</span>, weatherMessage);<br>    rabbitTemplate.convertAndSend(exchangeName, <span class="hljs-string">&quot;china.news&quot;</span>, newsMessage);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="5-执行结果"><a href="#5-执行结果" class="headerlink" title="5. 执行结果"></a>5. 执行结果</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs bash">消费者2 接收到 topic.queue2 消息: hello, china news!, 日期: 2026-08-07T17:28:56.126<br>消费者1 接收到 topic.queue1 消息: weather <span class="hljs-keyword">in</span> china is fine, 日期: 2026-08-07T17:28:56.126<br>消费者1 接收到 topic.queue1 消息: hello, china news!, 日期: 2026-08-07T17:28:56.169<br></code></pre></td></tr></table></figure>
+
+<p><strong>匹配结果分析：</strong></p>
+<table>
+<thead>
+<tr>
+<th>RoutingKey</th>
+<th>topic.queue1（<code>china.#</code>）</th>
+<th>topic.queue2（<code>china.news</code>）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>china.weather</code></td>
+<td>✅ 匹配（china 后有 1 个词）</td>
+<td>❌ 不匹配</td>
+</tr>
+<tr>
+<td><code>china.news</code></td>
+<td>✅ 匹配（china 后有 1 个词）</td>
+<td>✅ 精确匹配</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="五、三种交换机对比选型"><a href="#五、三种交换机对比选型" class="headerlink" title="五、三种交换机对比选型"></a>五、三种交换机对比选型</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>Fanout（广播）</th>
+<th>Direct（精确）</th>
+<th>Topic（通配符）</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>路由逻辑</strong></td>
+<td>忽略 RoutingKey，所有绑定队列都收</td>
+<td>RoutingKey <strong>完全等于</strong> BindingKey 才发</td>
+<td>RoutingKey 匹配通配符 BindingKey</td>
+</tr>
+<tr>
+<td><strong>BindingKey 形式</strong></td>
+<td>任意（被忽略，无需 RoutingKey）</td>
+<td>普通字符串，比如 <code>red</code></td>
+<td>多单词 + 通配符 <code>*</code> &#x2F; <code>#</code></td>
+</tr>
+<tr>
+<td><strong>灵活性</strong></td>
+<td>❌ 最差（全广播）</td>
+<td>⭐⭐⭐ 中（绑定什么发什么）</td>
+<td>✅ 最强（通配符，模糊匹配）</td>
+</tr>
+<tr>
+<td><strong>同一条消息可达队列数</strong></td>
+<td>所有绑定队列（N份）</td>
+<td>所有 BindingKey 等于 RoutingKey 的队列</td>
+<td>通配符匹配到的队列（0~N）</td>
+</tr>
+<tr>
+<td><strong>典型场景</strong></td>
+<td>系统广播、公告通知</td>
+<td>精确分类路由（red&#x2F;blue 不同颜色分开）</td>
+<td>分层业务（商品、订单等多业务分类）</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>🧠 <strong>选型建议</strong>：</p>
+<ul>
+<li>要全广播 → Fanout</li>
+<li>要精确分类、路由简单 → Direct</li>
+<li>要灵活路由、业务有层级结构 → Topic</li>
+<li>能用 Direct 的场景一般别用 Fanout（精准投递，避免无用消息浪费</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="六、总结与速记"><a href="#六、总结与速记" class="headerlink" title="六、总结与速记"></a>六、总结与速记</h2><h3 id="1-交换机核心知识点"><a href="#1-交换机核心知识点" class="headerlink" title="1. 交换机核心知识点"></a>1. 交换机核心知识点</h3><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs abnf">交换机 <span class="hljs-operator">=</span> 消息分拣中心（不存消息，只做路由<br>Producer → Exchange → Queue（需 Binding）→ Consumer<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-QueueBinding-声明式绑定"><a href="#2-QueueBinding-声明式绑定" class="headerlink" title="2. @QueueBinding 声明式绑定"></a>2. @QueueBinding 声明式绑定</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RabbitListener(bindings = @QueueBinding(</span><br><span class="hljs-meta">    value = @Queue(name = &quot;xxx.queue&quot;),</span><br><span class="hljs-meta">    exchange = @Exchange(name = &quot;xxx.exchange&quot;, type = ExchangeTypes.DIRECT),</span><br><span class="hljs-meta">    key = &#123;&quot;bindingKey1&quot;, &quot;bindingKey2&quot;&#125;</span><br><span class="hljs-meta">))</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>✅ 好处：无需控制台手动建队列&#x2F;交换机&#x2F;绑定，启动自动声明。<strong>推荐线上用</strong></p>
+</blockquote>
+<h3 id="3-易错点提醒"><a href="#3-易错点提醒" class="headerlink" title="3. 易错点提醒"></a>3. 易错点提醒</h3><blockquote>
+<p>❌ 忘记 Binding → 交换机直接把消息丢了！</p>
+<p>❌ Topic 通配符搞反了：<code>*</code> &#x3D; 恰好一个词，<code>#</code> &#x3D; 0 到多个词</p>
+<p>❌ Fanout 还写 RoutingKey &#x3D; “”（虽然不报错，但没必要，因为 Fanout 完全忽略</p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="print-no-link">#消息队列</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="print-no-link">#中间件</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>RabbitMQ04：交换机</div>
+      <div>http://zl1nq.github.io/2026/08/07/RabbitMQ04/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zl1nq</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年8月7日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/08/07/RabbitMQ05/" title="RabbitMQ05：声明队列和交换机">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">RabbitMQ05：声明队列和交换机</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/08/07/RabbitMQ03/" title="RabbitMQ03：WorkQueue">
+                        <span class="hidden-mobile">RabbitMQ03：WorkQueue</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Blog</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

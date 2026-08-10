@@ -317,15 +317,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/29/Python06/" target="_self">
-          Python：魔法方法
+        <a href="/2026/08/10/RabbitMQ10/" target="_self">
+          RabbitMQ：延迟消息
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/29/Python06/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/10/RabbitMQ10/" target="_self">
         <div>
-          目录 一、什么是魔法方法 二、对象生命周期（创建 &#x2F; 初始化 &#x2F; 销毁） 三、字符串表示（让对象「会说话」） 四、容器与迭代协议（让对象像列表&#x2F;字典） 五、运算符重载（让对象支持加减乘除） 六、综合示例：Book 类 七、魔法方法速查表 八、总结与速记   一、什么是魔法方法 ⭐ 核心特征：魔法方法是那些以双下划线开头和结尾的特殊方法，例如 __init__、__st
+          目录 一、延迟任务场景 二、死信交换机（DLX） 三、DelayExchange 插件 四、总结与速记   一、延迟任务场景 ⭐ 在电商的支付业务中，对于一些库存有限的商品，为了更好的用户体验，通常都会在用户下单时立刻扣减商品库存。例如电影院购票、高铁购票，下单后就会锁定座位资源，其他人无法重复购买。  1. 问题：库存被长期占用但是这样就存在一个问题：假如用户下单后一直不付款，就会一直占有库存资
         </div>
       </a>
 
@@ -333,134 +333,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-29 20:11" pubdate>
-              2026-07-29
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Python/" class="category-chain-item">Python</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80/">#语言基础</a>
-            
-              <a href="/tags/Python/">#Python</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/2026/07/29/Python05/" target="_self">
-          Python：装饰器
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/29/Python05/" target="_self">
-        <div>
-          目录 一、核心概念（类比 Java） 二、装饰器基础语法 三、进阶：处理带参数的函数 四、终极形态：保留原函数元数据 五、带参数的装饰器（三层嵌套） 六、语言级内置装饰器 七、标准库常用装饰器 八、总结与速记   一、核心概念（类比 Java） ⭐ 一句话理解：装饰器 &#x3D; 注解 + AOP 的 Python 实现，但比 Java 注解更强大——它是运行时动态修改函数行为，而 Java 注
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-29 20:11" pubdate>
-              2026-07-29
-            </time>
-          </div>
-        
-        
-          <div class="post-meta mr-3 d-flex align-items-center">
-            <i class="iconfont icon-category"></i>
-            
-
-<span class="category-chains">
-  
-  
-    
-      <span class="category-chain">
-        
-  <a href="/categories/Python/" class="category-chain-item">Python</a>
-  
-  
-
-      </span>
-    
-  
-</span>
-
-          </div>
-        
-        
-          <div class="post-meta">
-            <i class="iconfont icon-tags"></i>
-            
-              <a href="/tags/%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80/">#语言基础</a>
-            
-              <a href="/tags/Python/">#Python</a>
-            
-          </div>
-        
-      </div>
-    </article>
-  </div>
-
-  <div class="row mx-auto index-card">
-    
-    
-    <article class="col-12 col-md-12 mx-auto index-info">
-      <h2 class="index-header">
-        
-        <a href="/2026/07/29/RabbitMQ01/" target="_self">
-          RabbitMQ01入门
-        </a>
-      </h2>
-
-      
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/29/RabbitMQ01/" target="_self">
-        <div>
-          目录 一、Docker 安装 RabbitMQ 二、控制台登录 三、五大核心概念 四、控制台实战：收发消息四步走 五、用户与 Virtual Host 数据隔离 六、总结与速记   一、Docker 安装 RabbitMQ ⭐ 推荐安装方式：Docker 一键部署，省去 Erlang 环境和各种配置，开箱即用。 镜像选带 management 后缀的版本，自带 Web 管理控制台，不用再手动装插件
-        </div>
-      </a>
-
-      <div class="index-btm post-metas">
-        
-          <div class="post-meta mr-3">
-            <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-29 17:25" pubdate>
-              2026-07-29
+            <time datetime="2026-08-10 11:04" pubdate>
+              2026-08-10
             </time>
           </div>
         
@@ -477,6 +351,20 @@
         
   <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
   
 
       </span>
@@ -506,15 +394,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/29/MQ01/" target="_self">
-          MQ基础
+        <a href="/2026/08/09/RabbitMQ09/" target="_self">
+          RabbitMQ09：消费者可靠性
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/29/MQ01/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/09/RabbitMQ09/" target="_self">
         <div>
-          目录 一、什么是消息队列（MQ） 二、同步通讯 vs 异步通讯 三、异步通讯三角色 四、消息队列的四大优势 五、消息队列的三大缺点 六、主流 MQ 产品对比 七、总结与速记   一、什么是消息队列（MQ） ⭐ 一句话理解：MQ &#x3D; Message Queue，消息队列 &#x3D; 存储消息的队列数据结构 &#x3D; 服务间通信的中转站。 本质：把同步调用改成「发消息 → Broker
+          目录 一、消费者确认机制 二、消费者重试机制 三、失败处理策略 四、业务幂等性 五、兜底方案 六、总结与速记   一、消费者确认机制 ⭐ 当 RabbitMQ 向消费者投递消息以后，需要知道消费者的处理状态。因为消息投递给消费者并不代表就一定被正确消费了。  可能出现的故障有很多：  消息投递的过程中出现了网络故障 消费者接收到消息后突然宕机 消费者接收到消息后，因处理不当导致异常  一旦发生上述
         </div>
       </a>
 
@@ -522,8 +410,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-29 17:21" pubdate>
-              2026-07-29
+            <time datetime="2026-08-09 10:34" pubdate>
+              2026-08-09
             </time>
           </div>
         
@@ -540,6 +428,20 @@
         
   <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
   
 
       </span>
@@ -569,15 +471,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/29/Python04/" target="_self">
-          Python：类与对象
+        <a href="/2026/08/08/Golang02/" target="_self">
+          Golang：数组与切片
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/29/Python04/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/08/Golang02/" target="_self">
         <div>
-          目录 一、类定义与构造器 二、实例化与属性访问 三、私有属性与封装（@property） 四、类变量 vs 实例变量 五、类方法 vs 静态方法 六、继承（单继承 + 多重继承） 七、魔法方法（Python 特色） 八、鸭子类型（Python 核心哲学） 九、总结与速记   一、类定义与构造器 核心要点：Python 使用 class 关键字定义类，__init__ 作为构造器，self 等价于其
+          目录 数组 切片 总结与速记   数组1. 数组的特点 核心认知：Go 语言数组的长度是限定的，长度是数组类型签名的一部分。   不同长度的数组被视为不同的类型（例如 [3]int 和 [4]int 是不同类型） 数组是值类型，赋值和传参会复制整个数组  2. 数组的声明与初始化12345678910// 先声明，后赋值var nums [3]intnums[0] = 0nums[1] = 1nu
         </div>
       </a>
 
@@ -585,8 +487,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-29 12:58" pubdate>
-              2026-07-29
+            <time datetime="2026-08-08 19:54" pubdate>
+              2026-08-08
             </time>
           </div>
         
@@ -601,7 +503,7 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Python/" class="category-chain-item">Python</a>
+  <a href="/categories/Golang/" class="category-chain-item">Golang</a>
   
   
 
@@ -615,11 +517,11 @@
         
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/Golang/">#Golang</a>
             
               <a href="/tags/%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80/">#语言基础</a>
             
-              <a href="/tags/Python/">#Python</a>
-            
           </div>
         
       </div>
@@ -632,15 +534,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/27/Python03/" target="_self">
-          Python：函数 &amp; 参数相关
+        <a href="/2026/08/08/RabbitMQ08/" target="_self">
+          RabbitMQ08：MQ可靠性
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/27/Python03/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/08/RabbitMQ08/" target="_self">
         <div>
-          目录 一、函数基础 二、形参与实参 三、参数传递机制：按对象传递 四、五种参数类型详解 五、参数定义顺序规范 六、经典陷阱：默认参数的可变对象 七、总结与速记   一、函数基础 核心概念：函数是组织好的、可重复使用的代码块，用于执行单一或相关联的任务。  1. 函数的定义与调用 定义：使用 def 关键字，后跟函数名、括号（包含参数）和冒号，函数体缩进 调用：通过 函数名(实参) 的形式执行 规则
+          目录 一、MQ 可靠性概述 二、数据持久化 三、持久化 vs 非持久化：性能对比 四、Lazy Queue：惰性队列 五、总结与速记   一、MQ 可靠性概述 ⭐ 消息到达 MQ 以后，如果 MQ 不能及时保存，也会导致消息丢失，所以 MQ 的可靠性也非常重要。    💡 前一篇解决了「发送者 → MQ」的可靠性（重试 + 确认），本篇聚焦「MQ 内部」的可靠性保障。   二、数据持久化 🔧
         </div>
       </a>
 
@@ -648,8 +550,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-27 22:10" pubdate>
-              2026-07-27
+            <time datetime="2026-08-08 08:46" pubdate>
+              2026-08-08
             </time>
           </div>
         
@@ -664,8 +566,22 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Python/" class="category-chain-item">Python</a>
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
   
 
       </span>
@@ -679,9 +595,9 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80/">#语言基础</a>
+              <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">#消息队列</a>
             
-              <a href="/tags/Python/">#Python</a>
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
             
           </div>
         
@@ -695,15 +611,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/27/Python02/" target="_self">
-          Python：文件基础处理
+        <a href="/2026/08/08/RabbitMQ07/" target="_self">
+          RabbitMQ07：发送者可靠性
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/27/Python02/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/08/RabbitMQ07/" target="_self">
         <div>
-          目录 一、with 上下文管理 二、文件打开模式 三、读文件的几种方式 四、写文件的几种方式 五、二进制文件读写 六、文件与目录操作 七、拷贝 &#x2F; 移动 &#x2F; 删除 八、常见问题与总结   一、with 上下文管理 ⭐ 核心作用：确保代码块执行完毕后，自动执行清理&#x2F;收尾工作，即使发生异常也一定会执行。 最常见的用途就是自动关闭文件，避免忘记写 f.close() 导致资
+          目录 一、问题背景：消息可靠性从何而来 二、发送者可靠性：两大保障机制 三、生产者重试机制：网络故障兜底 四、生产者确认机制：投递结果回执 五、总结与速记   一、问题背景：消息可靠性从何而来 ⭐ 一句话理解：消息可靠性 &#x3D; 消息至少被消费者处理 1 次，不丢、不漏。  1. 典型场景：支付通知以支付场景为例，支付服务通过 MQ 通知交易服务更新订单状态： 123用户支付 → 支付服务（
         </div>
       </a>
 
@@ -711,8 +627,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-27 22:09" pubdate>
-              2026-07-27
+            <time datetime="2026-08-08 08:46" pubdate>
+              2026-08-08
             </time>
           </div>
         
@@ -727,8 +643,22 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Python/" class="category-chain-item">Python</a>
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
   
 
       </span>
@@ -742,9 +672,9 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80/">#语言基础</a>
+              <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">#消息队列</a>
             
-              <a href="/tags/Python/">#Python</a>
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
             
           </div>
         
@@ -758,15 +688,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/27/Python01/" target="_self">
-          Python：常用容器
+        <a href="/2026/08/08/RabbitMQ06/" target="_self">
+          RabbitMQ06：消息转换器
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/27/Python01/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/08/RabbitMQ06/" target="_self">
         <div>
-          目录 一、列表 List 二、元组 Tuple 三、集合 Set 四、字典 Dict 五、四大容器对比   一、列表 List 特点：有序、可变、可重复 列表是最常用的容器，相当于其他语言中的动态数组。  基本特性 有序：元素有顺序，可以通过索引访问 可变：可以随时增删改元素 可重复：允许存储重复元素 混合类型：可以混合存储不同类型的数据  基本语法使用方括号 [] 创建： 1my_list =
+          目录 一、消息转换器的作用与流程 二、默认转换器：JDK 序列化的三大问题 三、实战：默认 JDK 序列化效果 四、替换：Jackson2JsonMessageConverter 配置 五、实战：JSON 序列化消息收发 六、核心机制详解：TypeId 与 MessageId 七、常见坑与注意事项 八、总结与速记   一、消息转换器的作用与流程 ⭐ 消息转换器 &#x3D; 「Java 对象 ⇄
         </div>
       </a>
 
@@ -774,8 +704,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-27 17:09" pubdate>
-              2026-07-27
+            <time datetime="2026-08-08 08:13" pubdate>
+              2026-08-08
             </time>
           </div>
         
@@ -790,8 +720,22 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Python/" class="category-chain-item">Python</a>
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
   
 
       </span>
@@ -805,9 +749,9 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80/">#语言基础</a>
+              <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">#消息队列</a>
             
-              <a href="/tags/Python/">#Python</a>
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
             
           </div>
         
@@ -821,15 +765,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/25/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06/" target="_self">
-          Java并发编程06：线程池
+        <a href="/2026/08/07/RabbitMQ05/" target="_self">
+          RabbitMQ05：声明队列和交换机
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/25/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B06/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/07/RabbitMQ05/" target="_self">
         <div>
-          目录 为什么要用线程池 核心类：ThreadPoolExecutor 任务提交执行流程（重点） 常用方法 Executors 工具类 线程池状态（5 种） 核心问题 线程池示例 面试背诵版   为什么要用线程池 降低资源消耗：复用线程，避免频繁创建销毁线程的系统开销 提高响应速度：任务到达时无需新建线程，直接执行 方便管控：限制最大并发数、任务排队、拒绝策略、监控线程状态   ⚠️ 不使用线程池的
+          目录 一、为什么需要声明式 二、声明式总览：两种实现方式 三、方式一：基于 @Bean + 配置类 四、方式二：基于 @RabbitListener 注解 五、核心参数详解（重要） 六、两种方式对比选型 七、常见坑与注意事项 八、总结与速记   一、为什么需要声明式 ⭐ 声明式 &#x3D; 幂等保证：在程序启动时，把「我要用的队列、交换机、绑定关系及它们的属性」告诉 RabbitMQ，如果不存在
         </div>
       </a>
 
@@ -837,8 +781,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-25 22:11" pubdate>
-              2026-07-25
+            <time datetime="2026-08-07 17:38" pubdate>
+              2026-08-07
             </time>
           </div>
         
@@ -853,8 +797,22 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
   
 
       </span>
@@ -868,7 +826,9 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/Java/">#Java</a>
+              <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">#消息队列</a>
+            
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
             
           </div>
         
@@ -882,15 +842,15 @@
     <article class="col-12 col-md-12 mx-auto index-info">
       <h2 class="index-header">
         
-        <a href="/2026/07/25/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B05/" target="_self">
-          Java并发编程05：阻塞队列
+        <a href="/2026/08/07/RabbitMQ04/" target="_self">
+          RabbitMQ04：交换机
         </a>
       </h2>
 
       
-      <a class="index-excerpt index-excerpt__noimg" href="/2026/07/25/Java%E5%B9%B6%E5%8F%91%E7%BC%96%E7%A8%8B05/" target="_self">
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/07/RabbitMQ04/" target="_self">
         <div>
-          目录 一、什么是阻塞队列 二、核心方法：四组 API 对比 三、六大实现类详解 四、实现类横向对比 五、生产者消费者模型 六、底层原理 七、常见问题与注意事项 八、面试背诵版   一、什么是阻塞队列BlockingQueue 位于 java.util.concurrent 包，继承自 Queue 接口，是线程安全的队列。  ⭐ 核心价值：在并发场景下，自动处理线程的阻塞与唤醒，开发者无需手动写 w
+          目录 一、交换机总览：消息的分拣中心 二、Fanout 交换机：广播模式 三、Direct 交换机：精确路由模式 四、Topic 交换机：通配符模式 五、三种交换机对比选型 六、总结与速记   一、交换机总览：消息的分拣中心 ⭐ 一句话理解：Exchange（交换机）&#x3D; RabbitMQ 消息的分拣中心。生产者不直接投队列，而是先发给交换机，由它根据规则决定消息发给哪些队列。  1. 消
         </div>
       </a>
 
@@ -898,8 +858,8 @@
         
           <div class="post-meta mr-3">
             <i class="iconfont icon-date"></i>
-            <time datetime="2026-07-25 22:09" pubdate>
-              2026-07-25
+            <time datetime="2026-08-07 09:00" pubdate>
+              2026-08-07
             </time>
           </div>
         
@@ -914,8 +874,22 @@
     
       <span class="category-chain">
         
-  <a href="/categories/Java/" class="category-chain-item">Java</a>
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
   
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
   
 
       </span>
@@ -929,7 +903,163 @@
           <div class="post-meta">
             <i class="iconfont icon-tags"></i>
             
-              <a href="/tags/Java/">#Java</a>
+              <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">#消息队列</a>
+            
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/08/07/RabbitMQ03/" target="_self">
+          RabbitMQ03：WorkQueue
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/07/RabbitMQ03/" target="_self">
+        <div>
+          目录 一、什么是 Work Queue 模型 二、代码实现：多消费者同队列竞争消费 三、默认行为：轮询平均分配（Round-Robin） 四、问题分析：为什么会出现「能者多劳」 五、解决方案：prefetch &#x3D; 1 六、效果对比：默认 vs Prefetch 七、总结与速记   一、什么是 Work Queue 模型 ⭐ Work Queues（任务模型） &#x3D; 多个消费者绑定
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-08-07 08:54" pubdate>
+              2026-08-07
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">#消息队列</a>
+            
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
+            
+          </div>
+        
+      </div>
+    </article>
+  </div>
+
+  <div class="row mx-auto index-card">
+    
+    
+    <article class="col-12 col-md-12 mx-auto index-info">
+      <h2 class="index-header">
+        
+        <a href="/2026/08/02/RabbitMQ02/" target="_self">
+          RabbitMQ02：SpringAMQP快速入门
+        </a>
+      </h2>
+
+      
+      <a class="index-excerpt index-excerpt__noimg" href="/2026/08/02/RabbitMQ02/" target="_self">
+        <div>
+          目录 一、AMQP 与 SpringAMQP 二、环境搭建：三步整合 三、Simple 模型：直接发消息到队列 四、核心组件说明 五、总结与速记   一、AMQP 与 SpringAMQP1. 什么是 AMQP AMQP（Advanced Message Queuing Protocol） &#x3D; 高级消息队列协议。 它是一套开放的、跨平台&#x2F;跨语言的消息队列通信规范，定义了消息格式
+        </div>
+      </a>
+
+      <div class="index-btm post-metas">
+        
+          <div class="post-meta mr-3">
+            <i class="iconfont icon-date"></i>
+            <time datetime="2026-08-02 19:14" pubdate>
+              2026-08-02
+            </time>
+          </div>
+        
+        
+          <div class="post-meta mr-3 d-flex align-items-center">
+            <i class="iconfont icon-category"></i>
+            
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+          </div>
+        
+        
+          <div class="post-meta">
+            <i class="iconfont icon-tags"></i>
+            
+              <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/">#消息队列</a>
+            
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/">#中间件</a>
             
           </div>
         
@@ -941,7 +1071,7 @@
 
   <nav aria-label="navigation">
     <span class="pagination" id="pagination">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/#board">2</a><a class="extend next" rel="next" href="/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/#board">2</a><a class="page-number" href="/page/3/#board">3</a><a class="page-number" href="/page/4/#board">4</a><a class="extend next" rel="next" href="/page/2/#board"><i class="iconfont icon-arrowright"></i></a>
     </span>
   </nav>
 

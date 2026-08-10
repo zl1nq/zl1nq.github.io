@@ -1,0 +1,966 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/z.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="zl1nq">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="目录 一、什么是 Work Queue 模型 二、代码实现：多消费者同队列竞争消费 三、默认行为：轮询平均分配（Round-Robin） 四、问题分析：为什么会出现「能者多劳」 五、解决方案：prefetch &#x3D; 1 六、效果对比：默认 vs Prefetch 七、总结与速记   一、什么是 Work Queue 模型 ⭐ Work Queues（任务模型） &#x3D; 多个消费者绑定">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ03：WorkQueue">
+<meta property="og:url" content="http://zl1nq.github.io/2026/08/07/RabbitMQ03/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="目录 一、什么是 Work Queue 模型 二、代码实现：多消费者同队列竞争消费 三、默认行为：轮询平均分配（Round-Robin） 四、问题分析：为什么会出现「能者多劳」 五、解决方案：prefetch &#x3D; 1 六、效果对比：默认 vs Prefetch 七、总结与速记   一、什么是 Work Queue 模型 ⭐ Work Queues（任务模型） &#x3D; 多个消费者绑定">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-08-07T00:54:25.000Z">
+<meta property="article:modified_time" content="2026-08-09T02:33:28.789Z">
+<meta property="article:author" content="zl1nq">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="消息队列">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>RabbitMQ03：WorkQueue - Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zl1nq.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="RabbitMQ03：WorkQueue"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-08-07 08:54" pubdate>
+          2026年8月7日 早上
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          3.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          31 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">RabbitMQ03：WorkQueue</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E4%BB%80%E4%B9%88%E6%98%AF-work-queue-%E6%A8%A1%E5%9E%8B">一、什么是 Work Queue 模型</a></li>
+<li><a href="#%E4%BA%8C%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%E5%A4%9A%E6%B6%88%E8%B4%B9%E8%80%85%E5%90%8C%E9%98%9F%E5%88%97%E7%AB%9E%E4%BA%89%E6%B6%88%E8%B4%B9">二、代码实现：多消费者同队列竞争消费</a></li>
+<li><a href="#%E4%B8%89%E9%BB%98%E8%AE%A4%E8%A1%8C%E4%B8%BA%E8%BD%AE%E8%AF%A2%E5%B9%B3%E5%9D%87%E5%88%86%E9%85%8Dround-robin">三、默认行为：轮询平均分配（Round-Robin）</a></li>
+<li><a href="#%E5%9B%9B%E9%97%AE%E9%A2%98%E5%88%86%E6%9E%90%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E5%87%BA%E7%8E%B0%E8%83%BD%E8%80%85%E5%A4%9A%E5%8A%B3">四、问题分析：为什么会出现「能者多劳」</a></li>
+<li><a href="#%E4%BA%94%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88prefetch--1">五、解决方案：prefetch &#x3D; 1</a></li>
+<li><a href="#%E5%85%AD%E6%95%88%E6%9E%9C%E5%AF%B9%E6%AF%94%E9%BB%98%E8%AE%A4-vs-prefetch">六、效果对比：默认 vs Prefetch</a></li>
+<li><a href="#%E4%B8%83%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%9F%E8%AE%B0">七、总结与速记</a></li>
+</ul>
+<hr>
+<h2 id="一、什么是-Work-Queue-模型"><a href="#一、什么是-Work-Queue-模型" class="headerlink" title="一、什么是 Work Queue 模型"></a>一、什么是 Work Queue 模型</h2><blockquote>
+<p>⭐ <strong>Work Queues（任务模型）</strong> &#x3D; 多个消费者绑定到同一个队列，竞争消费同一条消息。</p>
+<p>核心解决场景：<strong>消息堆积</strong>。</p>
+<p>当消息生产速度 ＞消费速度时，多个消费者一起干活，横向扩展消费能力，提升吞吐量。</p>
+</blockquote>
+<h3 id="1-适用场景"><a href="#1-适用场景" class="headerlink" title="1. 适用场景"></a>1. 适用场景</h3><table>
+<thead>
+<tr>
+<th>痛点</th>
+<th>Work Queue 解决方案</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>消息生产速度 &gt;&gt; 消费速度，消息越来越多堆积</td>
+<td>加消费者数量，多个消费者并行处理，相当于把任务分摊处理速度 N 倍扩容</td>
+</tr>
+</tbody></table>
+<h3 id="2-模型结构"><a href="#2-模型结构" class="headerlink" title="2. 模型结构"></a>2. 模型结构</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs cpp">           ┌→ 消费者<span class="hljs-number">1</span>（慢处理<br>生产者 → work.queue → 消费者<span class="hljs-number">2</span>（慢处理<br>           └→ 消费者N（慢处理<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 <strong>关键规则</strong>：同一条消息<strong>只会被一个消费者处理</strong>（不会被竞争到的一个消费者拿到），不会被重复消费。</p>
+</blockquote>
+<hr>
+<h2 id="二、代码实现：多消费者同队列竞争消费"><a href="#二、代码实现：多消费者同队列竞争消费" class="headerlink" title="二、代码实现：多消费者同队列竞争消费"></a>二、代码实现：多消费者同队列竞争消费</h2><h3 id="1-消费者：两个-Listener-监听同一个队列"><a href="#1-消费者：两个-Listener-监听同一个队列" class="headerlink" title="1. 消费者：两个 Listener 监听同一个队列"></a>1. 消费者：两个 Listener 监听同一个队列</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * Work 两个消费者同时监听同一个队列 work.queue</span><br><span class="hljs-comment"> * 消费者1 处理较快：20ms，消费者2 处理较慢：200ms（差 10 倍</span><br><span class="hljs-comment"> */</span><br><span class="hljs-meta">@RabbitListener(queues = &quot;work.queue&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenWorkQueue1</span><span class="hljs-params">(String message)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者1 接收到消息: &#123;&#125;, 日期: &#123;&#125;&quot;</span>, message, LocalDateTime.now());<br>    Thread.sleep(<span class="hljs-number">20</span>);<br>&#125;<br><br><span class="hljs-meta">@RabbitListener(queues = &quot;work.queue&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenWorkQueue2</span><span class="hljs-params">(String message)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者2 ......... 接收到消息: &#123;&#125;, 日期: &#123;&#125;&quot;</span>, message, LocalDateTime.now());<br>    Thread.sleep(<span class="hljs-number">200</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>两个消费者都监听 <code>work.queue</code>，构成竞争消费关系。</p>
+</blockquote>
+<h3 id="2-生产者：循环发-100-条消息模拟堆积"><a href="#2-生产者：循环发-100-条消息模拟堆积" class="headerlink" title="2. 生产者：循环发 100 条消息模拟堆积"></a>2. 生产者：循环发 100 条消息模拟堆积</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Autowired</span><br><span class="hljs-keyword">public</span> RabbitTemplate rabbitTemplate;<br><br><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testWork</span><span class="hljs-params">()</span> <span class="hljs-keyword">throws</span> InterruptedException &#123;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">queue</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;work.queue&quot;</span>;<br>    <span class="hljs-type">String</span> <span class="hljs-variable">message</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;hello, spring amqp SimpleMessage_&quot;</span>;<br>    <span class="hljs-comment">// 循环发送 100 条，模拟大量消息堆积</span><br>    <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">100</span>; i++) &#123;<br>        rabbitTemplate.convertAndSend(queue, message + i);<br>        Thread.sleep(<span class="hljs-number">20</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="三、默认行为：轮询平均分配（Round-Robin）"><a href="#三、默认行为：轮询平均分配（Round-Robin）" class="headerlink" title="三、默认行为：轮询平均分配（Round-Robin）"></a>三、默认行为：轮询平均分配（Round-Robin）</h2><h3 id="1-执行结果（默认配置"><a href="#1-执行结果（默认配置" class="headerlink" title="1. 执行结果（默认配置"></a>1. 执行结果（默认配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">消费者2 ......... 接收到消息: Message_0, 日期: 2026-08-07T09:00:03.536<br>消费者1 接收到消息: Message_1, 日期: 2026-08-07T09:00:03.536<br>消费者2 ......... 接收到消息: Message_2, 日期: 2026-08-07T09:00:03.538<br>消费者1 接收到消息: Message_3, 日期: 2026-08-07T09:00:03.538<br>消费者2 ......... 接收到消息: Message_4, 日期: 2026-08-07T09:00:03.538<br>消费者1 接收到消息: Message_5, 日期: 2026-08-07T09:00:03.538<br>消费者2 ......... 接收到消息: Message_6, 日期: 2026-08-07T09:00:03.538<br>消费者1 接收到消息: Message_7, 日期: 2026-08-07T09:00:03.538<br>消费者2 ......... 接收到消息: Message_8, 日期: 2026-08-07T09:00:03.538<br>消费者1 接收到消息: Message_9, 日期: 2026-08-07T09:00:03.538<br>......<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-现象分析"><a href="#2-现象分析" class="headerlink" title="2. 现象分析"></a>2. 现象分析</h3><table>
+<thead>
+<tr>
+<th>观察现象</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>消费者1 收到 50 条，消费者2 收到 50 条</td>
+<td>严格 <strong>1 : 1</strong> 轮询(平均分配)</td>
+</tr>
+<tr>
+<td>消费者1 很快处理完后空闲</td>
+<td>处理完自己分的 50 条后就没事干了</td>
+</tr>
+<tr>
+<td>消费者2 还在慢悠悠处理</td>
+<td>因为每条要 200ms，还在干活，迟迟处理不完</td>
+</tr>
+<tr>
+<td>整体总耗时 &gt;&gt; 1 秒</td>
+<td>因为慢的那个拖了整体</td>
+</tr>
+</tbody></table>
+<p><strong>结论</strong>：默认模式下，RabbitMQ 把消息<strong>按顺序一人一条平均分配</strong>，完全不管消费者处理能力，结果：<strong>能者不多劳，忙的忙死，闲的闲死。</strong></p>
+<hr>
+<h2 id="四、问题分析：为什么会出现「能者不多劳」"><a href="#四、问题分析：为什么会出现「能者不多劳」" class="headerlink" title="四、问题分析：为什么会出现「能者不多劳」"></a>四、问题分析：为什么会出现「能者不多劳」</h2><h3 id="根本原因：prefetch（预取）机制"><a href="#根本原因：prefetch（预取）机制" class="headerlink" title="根本原因：prefetch（预取）机制"></a>根本原因：<strong>prefetch（预取）机制</strong></h3><blockquote>
+<p>🧠 <strong>prefetch 的定义</strong>：消费者一次性从 Broker 预先抓取到本地缓存的消息数量。</p>
+<p>Spring AMQP 默认的默认 prefetch 是：<strong>prefetch &#x3D; 250（简单队列一次性把一批消息全取到本地</strong>。</p>
+</blockquote>
+<p><strong>默认逻辑</strong>：</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs mipsasm"><span class="hljs-keyword">Broker </span>端一次性全给 消费者<span class="hljs-number">1</span> <span class="hljs-number">50</span>条（一次性全发过去了）<br><span class="hljs-keyword">Broker </span>端一次性全给 消费者<span class="hljs-number">2</span> <span class="hljs-number">50</span>条（一次性全发过去了）<br>    ↓<br>消费者<span class="hljs-number">1</span> 拿到手里攥着 <span class="hljs-number">50</span> 条，处理完了<br>消费者<span class="hljs-number">2</span> 攥着 <span class="hljs-number">50</span> 条，慢但还在处理<br></code></pre></td></tr></table></figure>
+
+<p>结果：消息分配是在发送分配的时候就定死了，处理能力不均匀，无法动态调整。</p>
+<blockquote>
+<p>❌ 不管谁空了，就白等着慢的，整体吞吐量取决于最慢那个消费者。</p>
+</blockquote>
+<hr>
+<h2 id="五、解决方案：prefetch-1"><a href="#五、解决方案：prefetch-1" class="headerlink" title="五、解决方案：prefetch &#x3D; 1"></a>五、解决方案：prefetch &#x3D; 1</h2><h3 id="核心思路：每次只给消费者分-1-条，处理完-ACK-后再分下-1-条。"><a href="#核心思路：每次只给消费者分-1-条，处理完-ACK-后再分下-1-条。" class="headerlink" title="核心思路：每次只给消费者分 1 条，处理完 ACK 后再分下 1 条。"></a>核心思路：每次只给消费者分 1 条，处理完 ACK 后再分下 1 条。</h3><h3 id="配置方式"><a href="#配置方式" class="headerlink" title="配置方式"></a>配置方式</h3><p>修改 <code>application.yml</code>：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">rabbitmq:</span><br>    <span class="hljs-attr">listener:</span><br>      <span class="hljs-attr">simple:</span><br>        <span class="hljs-comment"># 每次只分配 1 条消息给消费者</span><br>        <span class="hljs-comment"># 处理完成（ACK）后，再分配下一条消息</span><br>        <span class="hljs-attr">prefetch:</span> <span class="hljs-number">1</span><br></code></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>prefetch 值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>默认 250（默认）</td>
+<td>一次性预取大量，分配不均</td>
+</tr>
+<tr>
+<td><strong>1</strong></td>
+<td>一次只拿 1 条，处理完再要下一条</td>
+</tr>
+<tr>
+<td>N (2~10 常用)</td>
+<td>小批量预取，平衡网络开销与公平性</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="六、效果对比：默认-vs-Prefetch-1"><a href="#六、效果对比：默认-vs-Prefetch-1" class="headerlink" title="六、效果对比：默认 vs Prefetch&#x3D;1"></a>六、效果对比：默认 vs Prefetch&#x3D;1</h2><h3 id="1-Prefetch-1-的执行结果"><a href="#1-Prefetch-1-的执行结果" class="headerlink" title="1. Prefetch&#x3D;1 的执行结果"></a>1. Prefetch&#x3D;1 的执行结果</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><code class="hljs bash">消费者1 接收到消息: Message_0, 日期: 2026-08-07T09:10:19.921<br>消费者2 ......... 接收到消息: Message_1, 日期: 2026-08-07T09:10:19.921<br>消费者1 接收到消息: Message_2, 日期: 2026-08-07T09:10:19.985<br>消费者1 接收到消息: Message_3, 日期: 2026-08-07T09:10:20.044<br>消费者2 ......... 接收到消息: Message_4, 日期: 2026-08-07T09:10:20.107<br>消费者1 接收到消息: Message_5, 日期: 2026-08-07T09:10:20.166<br>消费者1 接收到消息: Message_6, 日期: 2026-08-07T09:10:20.170<br>消费者1 接收到消息: Message_7, 日期: 2026-08-07T09:10:20.233<br>消费者2 ......... 接收到消息: Message_8, 日期: 2026-08-07T09:10:20.294<br>消费者1 接收到消息: Message_9, 日期: 2026-08-07T09:10:20.356<br>......<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-结果统计"><a href="#2-结果统计" class="headerlink" title="2. 结果统计"></a>2. 结果统计</h3><table>
+<thead>
+<tr>
+<th>指标</th>
+<th>默认（Prefetch&#x3D;250）</th>
+<th>Prefetch &#x3D; 1</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>**消费者1 处理条数</td>
+<td>50 条</td>
+<td>**约 94 条</td>
+</tr>
+<tr>
+<td>**消费者2 处理条数</td>
+<td>50 条</td>
+<td>**约 6 条</td>
+</tr>
+<tr>
+<td>**总耗时</td>
+<td>远大于 1 秒</td>
+<td>≈ 1 秒左右</td>
+</tr>
+<tr>
+<td>**空闲问题</td>
+<td>消费者1处理完后闲等</td>
+<td>✅ 没有空闲，谁空谁接活</td>
+</tr>
+<tr>
+<td>**资源利用率</td>
+<td>低（快的闲置）</td>
+<td>✅ 高（能者多劳）</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>✅ <strong>结论</strong>：设置 <code>prefetch: 1</code> 后，消费者1 因为处理快，所以处理了更多的消息；消费者2 慢只处理了几条。总耗时从好几秒压缩到 ~1 秒，**能者多劳，资源充分利用，有效避免消息积压。</p>
+</blockquote>
+<hr>
+<h2 id="七、总结与速记"><a href="#七、总结与速记" class="headerlink" title="七、总结与速记"></a>七、总结与速记</h2><h3 id="1-Work-Queue-核心知识点"><a href="#1-Work-Queue-核心知识点" class="headerlink" title="1. Work Queue 核心知识点"></a>1. Work Queue 核心知识点</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>模型</strong></td>
+<td>多个消费者 → 同一个队列 → 竞争消费</td>
+</tr>
+<tr>
+<td><strong>消息</strong></td>
+<td>每条消息只能被 1 个消费者拿到（不会重复）</td>
+</tr>
+<tr>
+<td><strong>默认分配</strong></td>
+<td>Round-Robin 轮询平均，不考虑能力</td>
+</tr>
+<tr>
+<td><strong>能者多劳开关</strong></td>
+<td><code>spring.rabbitmq.listener.simple.prefetch=1</code></td>
+</tr>
+<tr>
+<td><strong>prefetch 原理</strong></td>
+<td>一次只给 1 条，ACK 后再分下一条</td>
+</tr>
+</tbody></table>
+<h3 id="2-配置速记"><a href="#2-配置速记" class="headerlink" title="2. 配置速记"></a>2. 配置速记</h3><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">rabbitmq:</span><br>    <span class="hljs-attr">listener:</span><br>      <span class="hljs-attr">simple:</span><br>        <span class="hljs-attr">prefetch:</span> <span class="hljs-number">1</span>   <span class="hljs-comment"># 能者多劳</span><br></code></pre></td></tr></table></figure>
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="print-no-link">#消息队列</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="print-no-link">#中间件</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>RabbitMQ03：WorkQueue</div>
+      <div>http://zl1nq.github.io/2026/08/07/RabbitMQ03/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zl1nq</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年8月7日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/08/07/RabbitMQ04/" title="RabbitMQ04：交换机">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">RabbitMQ04：交换机</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/08/02/RabbitMQ02/" title="RabbitMQ02：SpringAMQP快速入门">
+                        <span class="hidden-mobile">RabbitMQ02：SpringAMQP快速入门</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Blog</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

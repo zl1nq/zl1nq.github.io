@@ -1,0 +1,967 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/z.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="zl1nq">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="目录 一、延迟任务场景 二、死信交换机（DLX） 三、DelayExchange 插件 四、总结与速记   一、延迟任务场景 ⭐ 在电商的支付业务中，对于一些库存有限的商品，为了更好的用户体验，通常都会在用户下单时立刻扣减商品库存。例如电影院购票、高铁购票，下单后就会锁定座位资源，其他人无法重复购买。  1. 问题：库存被长期占用但是这样就存在一个问题：假如用户下单后一直不付款，就会一直占有库存资">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ：延迟消息">
+<meta property="og:url" content="http://zl1nq.github.io/2026/08/10/RabbitMQ10/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="目录 一、延迟任务场景 二、死信交换机（DLX） 三、DelayExchange 插件 四、总结与速记   一、延迟任务场景 ⭐ 在电商的支付业务中，对于一些库存有限的商品，为了更好的用户体验，通常都会在用户下单时立刻扣减商品库存。例如电影院购票、高铁购票，下单后就会锁定座位资源，其他人无法重复购买。  1. 问题：库存被长期占用但是这样就存在一个问题：假如用户下单后一直不付款，就会一直占有库存资">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://zl1nq.github.io/images/%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97.png">
+<meta property="article:published_time" content="2026-08-10T03:04:54.000Z">
+<meta property="article:modified_time" content="2026-08-10T03:38:46.849Z">
+<meta property="article:author" content="zl1nq">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="消息队列">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://zl1nq.github.io/images/%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97.png">
+  
+  
+  
+  <title>RabbitMQ：延迟消息 - Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zl1nq.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="RabbitMQ：延迟消息"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-08-10 11:04" pubdate>
+          2026年8月10日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          4.7k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          39 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">RabbitMQ：延迟消息</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E5%BB%B6%E8%BF%9F%E4%BB%BB%E5%8A%A1%E5%9C%BA%E6%99%AF">一、延迟任务场景</a></li>
+<li><a href="#%E4%BA%8C%E6%AD%BB%E4%BF%A1%E4%BA%A4%E6%8D%A2%E6%9C%BAdlx">二、死信交换机（DLX）</a></li>
+<li><a href="#%E4%B8%89delayexchange-%E6%8F%92%E4%BB%B6">三、DelayExchange 插件</a></li>
+<li><a href="#%E5%9B%9B%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%9F%E8%AE%B0">四、总结与速记</a></li>
+</ul>
+<hr>
+<h2 id="一、延迟任务场景"><a href="#一、延迟任务场景" class="headerlink" title="一、延迟任务场景"></a>一、延迟任务场景</h2><blockquote>
+<p>⭐ 在电商的支付业务中，对于一些库存有限的商品，为了更好的用户体验，通常都会在用户下单时立刻扣减商品库存。例如电影院购票、高铁购票，下单后就会锁定座位资源，其他人无法重复购买。</p>
+</blockquote>
+<h3 id="1-问题：库存被长期占用"><a href="#1-问题：库存被长期占用" class="headerlink" title="1. 问题：库存被长期占用"></a>1. 问题：库存被长期占用</h3><p>但是这样就存在一个问题：假如用户下单后一直不付款，就会一直占有库存资源，导致其他客户无法正常交易，最终导致商户利益受损！</p>
+<h3 id="2-解决思路：超时取消订单"><a href="#2-解决思路：超时取消订单" class="headerlink" title="2. 解决思路：超时取消订单"></a>2. 解决思路：超时取消订单</h3><p>因此，电商中通常的做法就是：对于超过一定时间未支付的订单，应该立刻取消订单并释放占用的库存。</p>
+<p>例如，订单支付超时时间为 30 分钟，则我们应该在用户下单后的第 30 分钟检查订单支付状态，如果发现未支付，应该立刻取消订单，释放库存。</p>
+<blockquote>
+<p>🧠 但问题来了：如何才能准确地实现在下单后第 30 分钟去检查支付状态呢？</p>
+</blockquote>
+<p>像这种在一段时间以后才执行的任务，我们称之为<strong>延迟任务</strong>，而要实现延迟任务，最简单的方案就是利用 MQ 的<strong>延迟消息</strong>了。</p>
+<hr>
+<h2 id="二、死信交换机（DLX）"><a href="#二、死信交换机（DLX）" class="headerlink" title="二、死信交换机（DLX）"></a>二、死信交换机（DLX）</h2><h3 id="1-什么是死信"><a href="#1-什么是死信" class="headerlink" title="1. 什么是死信"></a>1. 什么是死信</h3><p>当一个队列中的消息满足下列情况之一时，可以成为<strong>死信（dead letter）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>成为死信的条件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>消费者拒绝且不重入队</td>
+<td>消费者使用 <code>basic.reject</code> 或 <code>basic.nack</code> 声明消费失败，并且消息的 <code>requeue</code> 参数设置为 <code>false</code></td>
+</tr>
+<tr>
+<td>消息过期</td>
+<td>消息是一个过期消息（TTL 到期），超时无人消费</td>
+</tr>
+<tr>
+<td>队列已满</td>
+<td>要投递的队列消息达到最大长度，无法投递</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 一句话理解：死信就是<strong>无法被正常处理或传递的消息</strong>。</p>
+</blockquote>
+<h3 id="2-什么是死信交换机"><a href="#2-什么是死信交换机" class="headerlink" title="2. 什么是死信交换机"></a>2. 什么是死信交换机</h3><p>如果一个队列中的消息已经成为死信，并且这个队列通过 <code>dead-letter-exchange</code> 属性指定了一个交换机，那么队列中的死信就会投递到这个交换机中，而这个交换机就称为<strong>死信交换机（Dead Letter Exchange，DLX）</strong>。</p>
+<blockquote>
+<p>💡 而此时如果有队列与死信交换机绑定，则最终死信就会被投递到这个队列中。</p>
+</blockquote>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs nix">普通队列（指定 dead-letter-exchange）<br>    │ 消息成为死信（拒绝 <span class="hljs-symbol">/</span> 过期 <span class="hljs-symbol">/</span> 队满）<br>    ↓<br>死信交换机（DLX）<br>    ↓ 按路由键投递<br>死信队列 → 消费者监听处理<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-死信交换机的作用"><a href="#3-死信交换机的作用" class="headerlink" title="3. 死信交换机的作用"></a>3. 死信交换机的作用</h3><p>死信交换机的作用正是收集上述三种死信：</p>
+<ul>
+<li>收集那些因<strong>处理失败而被拒绝</strong>的消息</li>
+<li>收集那些因<strong>队列满了</strong>而被拒绝的消息</li>
+<li>收集因 <strong>TTL（有效期）到期</strong>的消息</li>
+</ul>
+<blockquote>
+<p>💡 利用第 3 点（TTL 到期 → 死信 → DLX），就可以实现延迟消息：消息设置过期时间，过期后成为死信被投递到 DLX，消费者监听 DLX 即可在延迟后收到消息。</p>
+</blockquote>
+<p><img src="/../images/%E6%AD%BB%E4%BF%A1%E9%98%9F%E5%88%97.png" srcset="/img/loading.gif" lazyload alt="死信队列示意"></p>
+<h3 id="4-代码实现：DLX-实现延迟消息"><a href="#4-代码实现：DLX-实现延迟消息" class="headerlink" title="4. 代码实现：DLX 实现延迟消息"></a>4. 代码实现：DLX 实现延迟消息</h3><h4 id="消费者：监听死信队列"><a href="#消费者：监听死信队列" class="headerlink" title="消费者：监听死信队列"></a>消费者：监听死信队列</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RabbitListener(bindings = @QueueBinding(</span><br><span class="hljs-meta">        value = @Queue(name = &quot;dlx.queue&quot;,durable = &quot;true&quot;),// 死信队列</span><br><span class="hljs-meta">        exchange = @Exchange(name = &quot;dlx.direct&quot;,type = ExchangeTypes.DIRECT),// 死信交换机</span><br><span class="hljs-meta">        key = &#123;&quot;hi&quot;&#125;// 死信路由键</span><br><span class="hljs-meta">))</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenDlxQueue</span><span class="hljs-params">(String message)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者接收到dlx.queue消息:&#123;&#125;,日期:&#123;&#125;&quot;</span>,message, LocalDateTime.now());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="配置类：普通队列绑定死信交换机"><a href="#配置类：普通队列绑定死信交换机" class="headerlink" title="配置类：普通队列绑定死信交换机"></a>配置类：普通队列绑定死信交换机</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">NormalConfiguration</span> &#123;<br><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> DirectExchange <span class="hljs-title function_">normalExchange</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">DirectExchange</span>(<span class="hljs-string">&quot;normal.direct&quot;</span>);<br>        <span class="hljs-comment">//return ExchangeBuilder.directExchange(&quot;normal.direct&quot;).build();</span><br>    &#125;<br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> Queue <span class="hljs-title function_">normalQueue</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">//return new Queue(&quot;normal.queue&quot;);</span><br>        <span class="hljs-comment">//普通队列在声明时指定死信交换机</span><br>        <span class="hljs-keyword">return</span> QueueBuilder.durable(<span class="hljs-string">&quot;normal.queue&quot;</span>).deadLetterExchange(<span class="hljs-string">&quot;dlx.direct&quot;</span>).build();<br>    &#125;<br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> Binding <span class="hljs-title function_">normalExchangeBinding</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> BindingBuilder.bind(normalQueue()).to(normalExchange()).with(<span class="hljs-string">&quot;hi&quot;</span>);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="生产者：设置消息过期时间"><a href="#生产者：设置消息过期时间" class="headerlink" title="生产者：设置消息过期时间"></a>生产者：设置消息过期时间</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">testSendDelayMessage</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">// 通过MessagePostProcessor为消息设置过期时间，单位毫秒</span><br>    rabbitTemplate.convertAndSend(<span class="hljs-string">&quot;normal.direct&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>, <span class="hljs-string">&quot;hello&quot;</span>, message -&gt; &#123;<br>        message.getMessageProperties().setExpiration(<span class="hljs-string">&quot;10000&quot;</span>);<br>        <span class="hljs-keyword">return</span> message;<br>    &#125;);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="执行结果"><a href="#执行结果" class="headerlink" title="执行结果"></a>执行结果</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs bash"><span class="hljs-comment"># 发送时间：2026-08-10 11:24:51.508</span><br>2026-08-10 11:24:51.508  INFO 5860 --- ......<br><br><span class="hljs-comment"># 接收时间：2026-08-10 11:25:01.683</span><br>2026-08-10 11:25:01.683  INFO 25104 --- ........<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>✅ 时间的差距为 <strong>10 秒</strong>，与我们设置的过期时间为 10 秒（10000 毫秒）一致。这样就通过死信交换机实现了延迟消息的功能。</p>
+</blockquote>
+<h3 id="5-⚠️-DLX-TTL-的局限：队头阻塞"><a href="#5-⚠️-DLX-TTL-的局限：队头阻塞" class="headerlink" title="5. ⚠️ DLX + TTL 的局限：队头阻塞"></a>5. ⚠️ DLX + TTL 的局限：队头阻塞</h3><blockquote>
+<p>❌ 基于 DLX + TTL 实现延迟消息虽然可行，但存在一个<strong>致命缺陷</strong>：队头阻塞。</p>
+</blockquote>
+<p>RabbitMQ 对队列中的消息做过期检查时，<strong>只检查队头消息</strong>：</p>
+<ul>
+<li>如果队头消息的 TTL 很长（比如 30 分钟），即使它后面的消息 TTL 很短（比如 1 秒），短 TTL 消息也<strong>无法先成为死信</strong>，必须等队头消息先过期</li>
+<li>这会导致短 TTL 消息被<strong>严重延迟</strong>，无法在预期时间被消费</li>
+</ul>
+<blockquote>
+<p>💡 此外，DLX 方案需要手动声明普通队列、死信交换机、死信队列及绑定关系，配置较为繁琐。正因如此，RabbitMQ 社区提供了延迟消息插件。</p>
+</blockquote>
+<hr>
+<h2 id="三、DelayExchange-插件"><a href="#三、DelayExchange-插件" class="headerlink" title="三、DelayExchange 插件"></a>三、DelayExchange 插件</h2><h3 id="1-为什么需要插件"><a href="#1-为什么需要插件" class="headerlink" title="1. 为什么需要插件"></a>1. 为什么需要插件</h3><p>基于死信队列虽然可以实现延迟消息，但是太麻烦了，而且存在队头阻塞问题。因此 RabbitMQ 社区提供了一个<strong>延迟消息插件</strong> <code>rabbitmq_delayed_message_exchange</code> 来实现相同的效果，且<strong>没有队头阻塞问题</strong>。</p>
+<h3 id="2-安装插件"><a href="#2-安装插件" class="headerlink" title="2. 安装插件"></a>2. 安装插件</h3><p>将插件放在插件的挂载目录下，然后执行启用命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs shell">docker exec -it mq rabbitmq-plugins enable rabbitmq_delayed_message_exchange<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-声明延迟交换机"><a href="#3-声明延迟交换机" class="headerlink" title="3. 声明延迟交换机"></a>3. 声明延迟交换机</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RabbitListener(bindings = @QueueBinding(</span><br><span class="hljs-meta">        value = @Queue(name = &quot;delay.queue&quot;, durable = &quot;true&quot;),</span><br><span class="hljs-meta">        exchange = @Exchange(name = &quot;delay.direct&quot;, delayed = &quot;true&quot;),// 延迟交换机</span><br><span class="hljs-meta">        key = &quot;delay&quot;</span><br><span class="hljs-meta">))</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenDelayMessage</span><span class="hljs-params">(String msg)</span>&#123;<br>    log.info(<span class="hljs-string">&quot;接收到delay.queue的延迟消息：&#123;&#125;&quot;</span>, msg);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 关键点：<code>@Exchange</code> 中设置 <code>delayed = &quot;true&quot;</code>，声明一个延迟交换机。</p>
+</blockquote>
+<h3 id="4-发送延迟消息"><a href="#4-发送延迟消息" class="headerlink" title="4. 发送延迟消息"></a>4. 发送延迟消息</h3><p>发送消息时，必须通过 <code>x-delay</code> 属性设定延迟时间，单位毫秒：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Test</span><br><span class="hljs-keyword">void</span> <span class="hljs-title function_">testPublisherDelayMessage</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">// 1.创建消息</span><br>    <span class="hljs-type">String</span> <span class="hljs-variable">message</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;hello, delayed message&quot;</span>;<br>    <span class="hljs-comment">// 2.发送消息，利用消息后置处理器添加消息头</span><br>    rabbitTemplate.convertAndSend(<span class="hljs-string">&quot;delay.direct&quot;</span>, <span class="hljs-string">&quot;delay&quot;</span>, message, <span class="hljs-keyword">new</span> <span class="hljs-title class_">MessagePostProcessor</span>() &#123;<br>        <span class="hljs-meta">@Override</span><br>        <span class="hljs-keyword">public</span> Message <span class="hljs-title function_">postProcessMessage</span><span class="hljs-params">(Message message)</span> <span class="hljs-keyword">throws</span> AmqpException &#123;<br>            <span class="hljs-comment">// 添加延迟消息属性</span><br>            message.getMessageProperties().setDelay(<span class="hljs-number">5000</span>);<br>            <span class="hljs-keyword">return</span> message;<br>        &#125;<br>    &#125;);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 <code>message.getMessageProperties().setDelay(5000)</code> 底层就是设置 <code>x-delay</code> 消息头，延迟 5 秒。</p>
+</blockquote>
+<h3 id="5-⚠️-注意事项"><a href="#5-⚠️-注意事项" class="headerlink" title="5. ⚠️ 注意事项"></a>5. ⚠️ 注意事项</h3><blockquote>
+<p>🧠 延迟消息插件内部会维护一个本地数据库表，同时使用 <strong>Erlang Timers</strong> 功能实现计时。</p>
+</blockquote>
+<p>需要注意：</p>
+<ul>
+<li>如果消息的延迟时间设置较长，可能会导致堆积的延迟消息非常多，带来较大的 CPU 开销</li>
+<li>同时延迟消息的时间会存在一定误差</li>
+</ul>
+<blockquote>
+<p>❌ 因此，<strong>不建议设置延迟时间过长的延迟消息</strong>。</p>
+</blockquote>
+<hr>
+<h2 id="四、总结与速记"><a href="#四、总结与速记" class="headerlink" title="四、总结与速记"></a>四、总结与速记</h2><h3 id="1-延迟消息核心知识点"><a href="#1-延迟消息核心知识点" class="headerlink" title="1. 延迟消息核心知识点"></a>1. 延迟消息核心知识点</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>延迟任务</strong></td>
+<td>一段时间后才执行的任务（如订单超时取消）</td>
+</tr>
+<tr>
+<td><strong>DLX 方案</strong></td>
+<td>TTL 过期 → 死信 → 死信交换机 → 死信队列</td>
+</tr>
+<tr>
+<td><strong>DLX 局限</strong></td>
+<td>队头阻塞 + 配置繁琐</td>
+</tr>
+<tr>
+<td><strong>插件方案</strong></td>
+<td>DelayExchange 插件，无队头阻塞，推荐使用</td>
+</tr>
+<tr>
+<td><strong>插件注意</strong></td>
+<td>不建议设置过长延迟时间（CPU 开销 + 时间误差）</td>
+</tr>
+</tbody></table>
+<h3 id="2-两种方案对比"><a href="#2-两种方案对比" class="headerlink" title="2. 两种方案对比"></a>2. 两种方案对比</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>DLX + TTL</th>
+<th>DelayExchange 插件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>实现方式</strong></td>
+<td>消息设 TTL，过期成死信投递到 DLX</td>
+<td>延迟交换机直接计时后投递</td>
+</tr>
+<tr>
+<td><strong>队头阻塞</strong></td>
+<td>❌ 有（只检查队头消息过期）</td>
+<td>✅ 无</td>
+</tr>
+<tr>
+<td><strong>配置复杂度</strong></td>
+<td>高（普通队列 + DLX + 死信队列 + 绑定）</td>
+<td>低（一个延迟交换机即可）</td>
+</tr>
+<tr>
+<td><strong>额外依赖</strong></td>
+<td>无</td>
+<td>需安装插件</td>
+</tr>
+<tr>
+<td><strong>推荐度</strong></td>
+<td>⭐⭐</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<h3 id="3-死信的三个条件速记"><a href="#3-死信的三个条件速记" class="headerlink" title="3. 死信的三个条件速记"></a>3. 死信的三个条件速记</h3><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs routeros">拒绝不重入队（reject/nack + <span class="hljs-attribute">requeue</span>=<span class="hljs-literal">false</span>）<br>TTL 过期（超时无人消费）<br>队列已满（达到最大长度）<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-易错点提醒"><a href="#4-易错点提醒" class="headerlink" title="4. 易错点提醒"></a>4. 易错点提醒</h3><blockquote>
+<p>❌ DLX + TTL 存在<strong>队头阻塞</strong>：长 TTL 消息会阻塞其后短 TTL 消息的死信投递。</p>
+<p>❌ 插件计时使用的是 <strong>Erlang</strong> Timers，不是 “Elang”。</p>
+<p>❌ 延迟消息属性是 <code>x-delay</code>，代码中用 <code>setDelay()</code> 设置；DLX 方案的过期时间用 <code>setExpiration()</code> 设置，两者不要混淆。</p>
+<p>❌ 声明延迟交换机要设 <code>delayed = &quot;true&quot;</code>，普通交换机没有这个属性。</p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="print-no-link">#消息队列</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="print-no-link">#中间件</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>RabbitMQ：延迟消息</div>
+      <div>http://zl1nq.github.io/2026/08/10/RabbitMQ10/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zl1nq</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年8月10日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/08/09/RabbitMQ09/" title="RabbitMQ09：消费者可靠性">
+                        <span class="hidden-mobile">RabbitMQ09：消费者可靠性</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Blog</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

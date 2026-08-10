@@ -1,0 +1,1154 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/z.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="zl1nq">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="目录 一、消费者确认机制 二、消费者重试机制 三、失败处理策略 四、业务幂等性 五、兜底方案 六、总结与速记   一、消费者确认机制 ⭐ 当 RabbitMQ 向消费者投递消息以后，需要知道消费者的处理状态。因为消息投递给消费者并不代表就一定被正确消费了。  可能出现的故障有很多：  消息投递的过程中出现了网络故障 消费者接收到消息后突然宕机 消费者接收到消息后，因处理不当导致异常  一旦发生上述">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ09：消费者可靠性">
+<meta property="og:url" content="http://zl1nq.github.io/2026/08/09/RabbitMQ09/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="目录 一、消费者确认机制 二、消费者重试机制 三、失败处理策略 四、业务幂等性 五、兜底方案 六、总结与速记   一、消费者确认机制 ⭐ 当 RabbitMQ 向消费者投递消息以后，需要知道消费者的处理状态。因为消息投递给消费者并不代表就一定被正确消费了。  可能出现的故障有很多：  消息投递的过程中出现了网络故障 消费者接收到消息后突然宕机 消费者接收到消息后，因处理不当导致异常  一旦发生上述">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://zl1nq.github.io/images/error_queue.png">
+<meta property="article:published_time" content="2026-08-09T02:34:44.000Z">
+<meta property="article:modified_time" content="2026-08-10T03:04:10.273Z">
+<meta property="article:author" content="zl1nq">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="消息队列">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://zl1nq.github.io/images/error_queue.png">
+  
+  
+  
+  <title>RabbitMQ09：消费者可靠性 - Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zl1nq.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="RabbitMQ09：消费者可靠性"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-08-09 10:34" pubdate>
+          2026年8月9日 上午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.4k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          54 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">RabbitMQ09：消费者可靠性</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E6%B6%88%E8%B4%B9%E8%80%85%E7%A1%AE%E8%AE%A4%E6%9C%BA%E5%88%B6">一、消费者确认机制</a></li>
+<li><a href="#%E4%BA%8C%E6%B6%88%E8%B4%B9%E8%80%85%E9%87%8D%E8%AF%95%E6%9C%BA%E5%88%B6">二、消费者重试机制</a></li>
+<li><a href="#%E4%B8%89%E5%A4%B1%E8%B4%A5%E5%A4%84%E7%90%86%E7%AD%96%E7%95%A5">三、失败处理策略</a></li>
+<li><a href="#%E5%9B%9B%E4%B8%9A%E5%8A%A1%E5%B9%82%E7%AD%89%E6%80%A7">四、业务幂等性</a></li>
+<li><a href="#%E4%BA%94%E5%85%9C%E5%BA%95%E6%96%B9%E6%A1%88">五、兜底方案</a></li>
+<li><a href="#%E5%85%AD%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%9F%E8%AE%B0">六、总结与速记</a></li>
+</ul>
+<hr>
+<h2 id="一、消费者确认机制"><a href="#一、消费者确认机制" class="headerlink" title="一、消费者确认机制"></a>一、消费者确认机制</h2><blockquote>
+<p>⭐ 当 RabbitMQ 向消费者投递消息以后，需要知道消费者的处理状态。因为消息投递给消费者并不代表就一定被正确消费了。</p>
+</blockquote>
+<p>可能出现的故障有很多：</p>
+<ul>
+<li>消息投递的过程中出现了网络故障</li>
+<li>消费者接收到消息后突然宕机</li>
+<li>消费者接收到消息后，因处理不当导致异常</li>
+</ul>
+<p>一旦发生上述情况，消息也会丢失。因此，RabbitMQ 必须知道消费者的处理状态，一旦消息处理失败才能重新投递消息。</p>
+<h3 id="1-三种回执"><a href="#1-三种回执" class="headerlink" title="1. 三种回执"></a>1. 三种回执</h3><p>为了确认消费者是否成功处理消息，RabbitMQ 提供了<strong>消费者确认机制（Consumer Acknowledgement）</strong>：当消费者处理消息结束后，应该向 RabbitMQ 发送一个回执，告知 RabbitMQ 自己消息处理状态。回执有三种可选值：</p>
+<table>
+<thead>
+<tr>
+<th>回执</th>
+<th>含义</th>
+<th>RabbitMQ 动作</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ack</strong></td>
+<td>成功处理消息</td>
+<td>从队列中删除该消息</td>
+</tr>
+<tr>
+<td><strong>nack</strong></td>
+<td>消息处理失败</td>
+<td>再次投递消息（重新入队）</td>
+</tr>
+<tr>
+<td><strong>reject</strong></td>
+<td>消息处理失败并拒绝</td>
+<td>从队列中删除该消息</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>💡 一般 reject 方式用的较少，除非是消息格式有问题（那就是开发问题了）。因此大多数情况下我们需要将消息处理的代码通过 try-catch 机制捕获，消息处理成功时返回 ack，处理失败时返回 nack。</p>
+</blockquote>
+<h3 id="2-SpringAMQP-的三种-ACK-模式"><a href="#2-SpringAMQP-的三种-ACK-模式" class="headerlink" title="2. SpringAMQP 的三种 ACK 模式"></a>2. SpringAMQP 的三种 ACK 模式</h3><p>由于消息回执的处理代码比较统一，因此 SpringAMQP 帮我们实现了消息确认，并允许我们通过配置文件设置 ACK 处理方式，有三种模式：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>说明</th>
+<th>安全性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>none</code></td>
+<td>不处理。消息投递给消费者后立刻 ack，消息会立刻从 MQ 删除</td>
+<td>❌ 非常不安全，不建议使用</td>
+</tr>
+<tr>
+<td><code>manual</code></td>
+<td>手动模式。需要自己在业务代码中调用 api，发送 ack 或 reject</td>
+<td>✅ 更灵活，但存在业务入侵</td>
+</tr>
+<tr>
+<td><code>auto</code></td>
+<td>自动模式。SpringAMQP 利用 AOP 对消息处理逻辑做环绕增强</td>
+<td>✅ 推荐</td>
+</tr>
+</tbody></table>
+<p><strong>auto 模式的自动判断逻辑</strong>：</p>
+<ul>
+<li>业务正常执行 → 自动返回 <strong>ack</strong></li>
+<li>业务出现异常时，根据异常类型判断：<ul>
+<li><strong>业务异常</strong>（如 <code>RuntimeException</code>）→ 自动返回 <strong>nack</strong>（消息重新入队）</li>
+<li><strong>消息处理 &#x2F; 校验异常</strong> → 自动返回 <strong>reject</strong>（消息被删除）</li>
+</ul>
+</li>
+</ul>
+<p>返回 reject 的常见异常有：</p>
+<table>
+<thead>
+<tr>
+<th>异常</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>MessageConversionException</code></td>
+<td>消息转换异常，比如消息格式错误</td>
+</tr>
+<tr>
+<td><code>MethodArgumentNotValidException</code></td>
+<td>方法参数校验异常，比如用户名为空、密码为空等</td>
+</tr>
+</tbody></table>
+<h3 id="3-实践验证"><a href="#3-实践验证" class="headerlink" title="3. 实践验证"></a>3. 实践验证</h3><h4 id="验证-1：none-模式"><a href="#验证-1：none-模式" class="headerlink" title="验证 1：none 模式"></a>验证 1：none 模式</h4><p>通过配置修改 SpringAMQP 的 ACK 处理方式：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-comment"># 消费者的配置文件</span><br><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">rabbitmq:</span><br>    <span class="hljs-attr">listener:</span><br>      <span class="hljs-attr">simple:</span><br>        <span class="hljs-attr">acknowledge-mode:</span> <span class="hljs-string">none</span> <span class="hljs-comment"># 不做处理</span><br></code></pre></td></tr></table></figure>
+
+<p>修改 consumer 服务的 SpringRabbitListener 类中的方法，模拟一个消息处理的异常：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RabbitListener(queues = &quot;simple.queue&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenSimpleQueueMessage</span><span class="hljs-params">(String msg)</span> <span class="hljs-keyword">throws</span> InterruptedException &#123;<br>    log.info(<span class="hljs-string">&quot;spring 消费者接收到消息：【&quot;</span> + msg + <span class="hljs-string">&quot;】&quot;</span>);<br>    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">MessageConversionException</span>(<span class="hljs-string">&quot;模拟消息转换异常&quot;</span>);<br>    &#125;<br>    log.info(<span class="hljs-string">&quot;消息处理完成&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ 可以发现：当消息处理发生异常时，消息被 RabbitMQ 删除了。因为 none 模式下消息投递后立刻 ack，与是否异常无关。</p>
+</blockquote>
+<h4 id="验证-2：auto-模式-消息转换异常"><a href="#验证-2：auto-模式-消息转换异常" class="headerlink" title="验证 2：auto 模式 + 消息转换异常"></a>验证 2：auto 模式 + 消息转换异常</h4><p>把确认机制修改为 auto：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-comment"># 消费者的配置文件</span><br><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">rabbitmq:</span><br>    <span class="hljs-attr">listener:</span><br>      <span class="hljs-attr">simple:</span><br>        <span class="hljs-attr">acknowledge-mode:</span> <span class="hljs-string">auto</span> <span class="hljs-comment"># 自动处理</span><br></code></pre></td></tr></table></figure>
+
+<p>在异常位置打断点，再次发送消息，程序卡在断点时，在控制台中可以发现此时消息状态为 <strong>unacked</strong>（未确定状态）。</p>
+<p>放行以后，由于抛出的是消息转换异常，因此 Spring 会自动返回 <strong>reject</strong>，所以消息会被删除。</p>
+<h4 id="验证-3：auto-模式-业务异常"><a href="#验证-3：auto-模式-业务异常" class="headerlink" title="验证 3：auto 模式 + 业务异常"></a>验证 3：auto 模式 + 业务异常</h4><p>将异常改为 RuntimeException 类型：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RabbitListener(queues = &quot;simple.queue&quot;)</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenSimpleQueueMessage</span><span class="hljs-params">(String msg)</span> <span class="hljs-keyword">throws</span> InterruptedException &#123;<br>    log.info(<span class="hljs-string">&quot;spring 消费者接收到消息：【&quot;</span> + msg + <span class="hljs-string">&quot;】&quot;</span>);<br>    <span class="hljs-keyword">if</span> (<span class="hljs-literal">true</span>) &#123;<br>        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RuntimeException</span>(<span class="hljs-string">&quot;模拟业务异常&quot;</span>);<br>    &#125;<br>    log.info(<span class="hljs-string">&quot;消息处理完成&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>然后再次发送消息测试，程序卡在断点时，可以发现此时消息状态为 <strong>unacked</strong>（未确定状态）。</p>
+<p>放行以后，由于抛出的是业务异常，所以 Spring 返回 <strong>nack</strong>，消息重新回到队列，最终消息恢复至 <strong>Ready</strong> 状态，并且没有被 RabbitMQ 删除。</p>
+<blockquote>
+<p>✅ <strong>结论</strong>：当我们把配置改为 auto 时，消息处理失败后会回到 RabbitMQ，并重新投递到消费者。</p>
+</blockquote>
+<hr>
+<h2 id="二、消费者重试机制"><a href="#二、消费者重试机制" class="headerlink" title="二、消费者重试机制"></a>二、消费者重试机制</h2><h3 id="1-问题：无限-requeue-死循环"><a href="#1-问题：无限-requeue-死循环" class="headerlink" title="1. 问题：无限 requeue 死循环"></a>1. 问题：无限 requeue 死循环</h3><p>当消费者出现异常后，消息会不断 requeue（重入队）到队列，再重新发送给消费者。如果消费者再次执行依然出错，消息会再次 requeue 到队列，再次投递，直到消息处理成功为止。</p>
+<blockquote>
+<p>❌ 极端情况就是消费者一直无法执行成功，那么消息 requeue 就会<strong>无限循环</strong>，导致 MQ 的消息处理飙升，带来不必要的压力。</p>
+</blockquote>
+<h3 id="2-解决方案：本地重试"><a href="#2-解决方案：本地重试" class="headerlink" title="2. 解决方案：本地重试"></a>2. 解决方案：本地重试</h3><p>为了应对上述情况，Spring 又提供了<strong>消费者失败重试机制</strong>：在消费者出现异常时利用本地重试，而不是无限制的 requeue 到 MQ 队列。</p>
+<p>修改 consumer 服务的 application.yml 文件，添加内容：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs yml"><span class="hljs-attr">spring:</span><br>  <span class="hljs-attr">rabbitmq:</span><br>    <span class="hljs-attr">listener:</span><br>      <span class="hljs-attr">simple:</span><br>        <span class="hljs-attr">retry:</span><br>          <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># 开启消费者失败重试</span><br>          <span class="hljs-attr">initial-interval:</span> <span class="hljs-string">1000ms</span> <span class="hljs-comment"># 初识的失败等待时长为1秒</span><br>          <span class="hljs-attr">multiplier:</span> <span class="hljs-number">1</span> <span class="hljs-comment"># 失败的等待时长倍数，下次等待时长 = multiplier * last-interval</span><br>          <span class="hljs-attr">max-attempts:</span> <span class="hljs-number">3</span> <span class="hljs-comment"># 最大重试次数</span><br>          <span class="hljs-attr">stateless:</span> <span class="hljs-literal">true</span> <span class="hljs-comment"># true无状态；false有状态。如果业务中包含事务，这里改为false</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="3-测试结果"><a href="#3-测试结果" class="headerlink" title="3. 测试结果"></a>3. 测试结果</h3><p>重启 consumer 服务，重复之前的测试。可以发现：</p>
+<ul>
+<li>消费者在失败后消息没有重新回到 MQ 无限重新投递，而是在<strong>本地重试了 3 次</strong></li>
+<li>本地重试 3 次以后，抛出了 <code>AmqpRejectAndDontRequeueException</code> 异常。查看 RabbitMQ 控制台，发现消息被删除了，说明最后 SpringAMQP 返回的是 <strong>reject</strong></li>
+</ul>
+<blockquote>
+<p>✅ <strong>结论</strong>：</p>
+<ul>
+<li>开启本地重试时，消息处理过程中抛出异常，<strong>不会 requeue 到队列</strong>，而是在消费者本地重试</li>
+<li>重试达到最大次数后，Spring 会返回 <strong>reject</strong>，消息会被丢弃</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="三、失败处理策略"><a href="#三、失败处理策略" class="headerlink" title="三、失败处理策略"></a>三、失败处理策略</h2><h3 id="1-三种-MessageRecovery-策略"><a href="#1-三种-MessageRecovery-策略" class="headerlink" title="1. 三种 MessageRecovery 策略"></a>1. 三种 MessageRecovery 策略</h3><p>在之前的测试中，本地重试达到最大次数后，消息会被丢弃。这在某些对于消息可靠性要求较高的业务场景下，显然不太合适。</p>
+<p>因此 Spring 允许我们自定义重试次数耗尽后的消息处理策略，这个策略是由 <code>MessageRecovery</code> 接口来定义的，它有 3 个不同实现：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>行为</th>
+<th>是否默认</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>RejectAndDontRequeueRecoverer</code></td>
+<td>重试耗尽后，直接 reject，丢弃消息</td>
+<td>✅ 默认</td>
+</tr>
+<tr>
+<td><code>ImmediateRequeueMessageRecoverer</code></td>
+<td>重试耗尽后，返回 nack，消息重新入队</td>
+<td></td>
+</tr>
+<tr>
+<td><code>RepublishMessageRecoverer</code></td>
+<td>重试耗尽后，将失败消息投递到指定的交换机</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="2-推荐：RepublishMessageRecoverer"><a href="#2-推荐：RepublishMessageRecoverer" class="headerlink" title="2. 推荐：RepublishMessageRecoverer"></a>2. 推荐：RepublishMessageRecoverer</h3><p>比较优雅的一种处理方案是 <code>RepublishMessageRecoverer</code>：失败后将消息投递到一个专门的、存放异常消息的队列，后续由人工集中处理。</p>
+<p><strong>第 1 步</strong>：在 consumer 服务中定义处理失败消息的交换机和队列：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Bean</span><br><span class="hljs-keyword">public</span> DirectExchange <span class="hljs-title function_">errorMessageExchange</span><span class="hljs-params">()</span>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">DirectExchange</span>(<span class="hljs-string">&quot;error.direct&quot;</span>);<br>&#125;<br><span class="hljs-meta">@Bean</span><br><span class="hljs-keyword">public</span> Queue <span class="hljs-title function_">errorQueue</span><span class="hljs-params">()</span>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Queue</span>(<span class="hljs-string">&quot;error.queue&quot;</span>, <span class="hljs-literal">true</span>);<br>&#125;<br><span class="hljs-meta">@Bean</span><br><span class="hljs-keyword">public</span> Binding <span class="hljs-title function_">errorBinding</span><span class="hljs-params">(Queue errorQueue, DirectExchange errorMessageExchange)</span>&#123;<br>    <span class="hljs-keyword">return</span> BindingBuilder.bind(errorQueue).to(errorMessageExchange).with(<span class="hljs-string">&quot;error&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><strong>第 2 步</strong>：定义一个 <code>RepublishMessageRecoverer</code>，关联队列和交换机：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Bean</span><br><span class="hljs-keyword">public</span> MessageRecoverer <span class="hljs-title function_">republishMessageRecoverer</span><span class="hljs-params">(RabbitTemplate rabbitTemplate)</span>&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RepublishMessageRecoverer</span>(rabbitTemplate, <span class="hljs-string">&quot;error.direct&quot;</span>, <span class="hljs-string">&quot;error&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>重试耗尽后，将失败消息投递到指定的地方：</p>
+<p><img src="/../images/error_queue.png" srcset="/img/loading.gif" lazyload></p>
+<hr>
+<h2 id="四、业务幂等性"><a href="#四、业务幂等性" class="headerlink" title="四、业务幂等性"></a>四、业务幂等性</h2><h3 id="1-什么是幂等性"><a href="#1-什么是幂等性" class="headerlink" title="1. 什么是幂等性"></a>1. 什么是幂等性</h3><blockquote>
+<p>🧠 幂等是一个数学概念，用函数表达式来描述是：<strong>f(f(x)) &#x3D; f(x)</strong>，例如求绝对值函数。</p>
+</blockquote>
+<p>在程序开发中，则是指<strong>同一个业务，执行一次或多次对业务状态的影响是一致的</strong>。</p>
+<p><strong>幂等操作示例</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>为什么幂等</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>根据 id 删除数据</td>
+<td>第二次删除影响 0 行，结果一致</td>
+</tr>
+<tr>
+<td>查询数据</td>
+<td>只读操作，不改变状态</td>
+</tr>
+<tr>
+<td>设置字段为固定值（如 <code>status = &#39;paid&#39;</code>）</td>
+<td>多次设置结果相同</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>⚠️ 注意：<strong>新增数据不是幂等的</strong>，重复新增会产生多条记录。</p>
+</blockquote>
+<p><strong>非幂等操作示例</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>为什么不幂等</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>取消订单、恢复库存</td>
+<td>多次恢复会导致库存重复增加</td>
+</tr>
+<tr>
+<td>退款业务</td>
+<td>重复退款对商家有经济损失</td>
+</tr>
+<tr>
+<td>数值加减（如 <code>count = count + 1</code>）</td>
+<td>每次执行结果都不同</td>
+</tr>
+</tbody></table>
+<h3 id="2-为什么消息会重复"><a href="#2-为什么消息会重复" class="headerlink" title="2. 为什么消息会重复"></a>2. 为什么消息会重复</h3><p>所以，我们要尽可能避免业务被重复执行。然而在实际业务场景中，由于意外经常会出现业务被重复执行的情况，例如：</p>
+<ul>
+<li>页面卡顿时频繁刷新导致表单重复提交</li>
+<li>服务间调用的重试</li>
+<li>MQ 消息的重复投递</li>
+</ul>
+<h3 id="3-两种保障方案"><a href="#3-两种保障方案" class="headerlink" title="3. 两种保障方案"></a>3. 两种保障方案</h3><p>要保证消息处理的幂等性，需要在业务中添加一些额外的逻辑：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>思路</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>唯一消息 ID</strong></td>
+<td>给每条消息生成唯一 ID，消费后记录，重复消息放弃处理</td>
+<td>通用、与业务解耦</td>
+</tr>
+<tr>
+<td><strong>业务状态判断</strong></td>
+<td>基于业务本身的状态判断是否已处理</td>
+<td>无需改造数据库，但依赖业务字段</td>
+</tr>
+</tbody></table>
+<h4 id="方案一：唯一消息-ID"><a href="#方案一：唯一消息-ID" class="headerlink" title="方案一：唯一消息 ID"></a>方案一：唯一消息 ID</h4><p>思路非常简单：</p>
+<ol>
+<li>每一条消息都生成一个唯一的 id，与消息一起投递给消费者</li>
+<li>消费者接收到消息后处理自己的业务，业务处理成功后将消息 ID 保存到数据库</li>
+<li>如果下次又收到相同消息，去数据库查询判断是否存在，存在则为重复消息放弃处理</li>
+</ol>
+<blockquote>
+<p>💡 如何给消息添加唯一 ID？SpringAMQP 的 MessageConverter 自带了 MessageID 功能，我们只要开启这个功能即可。</p>
+</blockquote>
+<p>以 Jackson 的消息转换器为例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Bean</span><br><span class="hljs-keyword">public</span> MessageConverter <span class="hljs-title function_">messageConverter</span><span class="hljs-params">()</span>&#123;<br>    <span class="hljs-comment">// 1.定义消息转换器</span><br>    <span class="hljs-type">Jackson2JsonMessageConverter</span> <span class="hljs-variable">jjmc</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Jackson2JsonMessageConverter</span>();<br>    <span class="hljs-comment">// 2.配置自动创建消息id，用于识别不同消息，也可以在业务中基于ID判断是否是重复消息</span><br>    jjmc.setCreateMessageIds(<span class="hljs-literal">true</span>);<br>    <span class="hljs-keyword">return</span> jjmc;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h4 id="方案二：业务状态判断"><a href="#方案二：业务状态判断" class="headerlink" title="方案二：业务状态判断"></a>方案二：业务状态判断</h4><p>业务判断就是基于业务本身的逻辑或状态来判断是否是重复的请求或消息，不同的业务场景判断的思路也不一样。</p>
+<p><strong>举例</strong>：</p>
+<ol>
+<li>假如用户刚刚支付完成，并且投递消息到交易服务，交易服务更改订单为已支付状态</li>
+<li>由于某种原因（例如网络故障导致生产者没有得到确认），隔了一段时间后重新投递给交易服务</li>
+<li>但是，在新投递的消息被消费之前，用户选择了退款，将订单状态改为了已退款状态</li>
+<li>退款完成后，新投递的消息才被消费，那么订单状态会被再次改为已支付 → <strong>业务异常</strong></li>
+</ol>
+<blockquote>
+<p>💡 当前案例中，处理消息的业务逻辑是把订单状态从「未支付」修改为「已支付」。因此我们就可以在执行业务时判断订单状态是否是未支付，如果不是则证明订单已经被处理过，无需重复处理。</p>
+</blockquote>
+<h3 id="4-两种方案对比"><a href="#4-两种方案对比" class="headerlink" title="4. 两种方案对比"></a>4. 两种方案对比</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>唯一消息 ID</th>
+<th>业务状态判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>通用性</strong></td>
+<td>✅ 通用，与业务解耦</td>
+<td>❌ 依赖具体业务字段</td>
+</tr>
+<tr>
+<td><strong>数据库改造</strong></td>
+<td>需加一张消息记录表</td>
+<td>无需改造</td>
+</tr>
+<tr>
+<td><strong>适用场景</strong></td>
+<td>无合适业务状态字段（如数值加减）、逻辑复杂</td>
+<td>有明确状态字段可判断</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>🧠 唯一消息 ID 方案有其不可替代的价值：在某些业务场景下可能没有合适的业务状态字段用来判断（如数值加减），或者逻辑极其复杂，此时一个通用的、与业务解耦的「消息记录表」方案会是更好的选择。所谓「改造数据库」通常只是加一张 <code>message_log</code> 表，成本并不高。</p>
+</blockquote>
+<hr>
+<h2 id="五、兜底方案"><a href="#五、兜底方案" class="headerlink" title="五、兜底方案"></a>五、兜底方案</h2><blockquote>
+<p>⭐ 虽然有各种机制可以增加消息的可靠性，但是最终还是会有消息丢失的风险。</p>
+</blockquote>
+<h3 id="1-思路：主动查询"><a href="#1-思路：主动查询" class="headerlink" title="1. 思路：主动查询"></a>1. 思路：主动查询</h3><p>在订单支付场景下，兜底方案的思路很简单：既然 MQ 通知如果失败，那么交易服务就必须<strong>自己主动去查询支付状态</strong>。这样即便支付服务的 MQ 通知失败，我们依然能通过主动查询来保证订单状态的一致性。</p>
+<figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs scss">支付服务 ──(MQ通知，可能失败)──→ 交易服务<br>                                  ↑<br>                            定时任务每<span class="hljs-number">20s</span>主动查询支付状态（兜底）<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-定时任务查询"><a href="#2-定时任务查询" class="headerlink" title="2. 定时任务查询"></a>2. 定时任务查询</h3><p>不过需要注意的是，交易服务并不知道用户会在什么时候支付，如果查询的时机不正确（比如查询的时候用户正在支付中），可能查询到的支付状态也不正确。</p>
+<blockquote>
+<p>💡 这个时间是无法确定的，因此通常我们采取的措施就是利用<strong>定时任务定期查询</strong>，例如每隔 20 秒就查询一次，并判断支付状态。如果发现订单已经支付，则立刻更新订单状态为已支付即可。</p>
+</blockquote>
+<hr>
+<h2 id="六、总结与速记"><a href="#六、总结与速记" class="headerlink" title="六、总结与速记"></a>六、总结与速记</h2><h3 id="1-消费者可靠性核心知识点"><a href="#1-消费者可靠性核心知识点" class="headerlink" title="1. 消费者可靠性核心知识点"></a>1. 消费者可靠性核心知识点</h3><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>消费者确认</strong></td>
+<td>ack &#x2F; nack &#x2F; reject 三种回执</td>
+</tr>
+<tr>
+<td><strong>推荐 ACK 模式</strong></td>
+<td>auto（业务异常→nack，转换&#x2F;校验异常→reject）</td>
+</tr>
+<tr>
+<td><strong>消费者重试</strong></td>
+<td>本地重试，避免无限 requeue 死循环</td>
+</tr>
+<tr>
+<td><strong>失败处理策略</strong></td>
+<td>RepublishMessageRecoverer 投递到错误队列（推荐）</td>
+</tr>
+<tr>
+<td><strong>业务幂等性</strong></td>
+<td>唯一消息 ID + 业务状态判断</td>
+</tr>
+<tr>
+<td><strong>兜底方案</strong></td>
+<td>定时任务主动查询支付状态</td>
+</tr>
+</tbody></table>
+<h3 id="2-ACK-回执速记"><a href="#2-ACK-回执速记" class="headerlink" title="2. ACK 回执速记"></a>2. ACK 回执速记</h3><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs nginx"><span class="hljs-attribute">ack</span>    → 处理成功，消息删除<br>nack   → 业务异常，消息重新入队<br>reject → 转换/校验异常，消息删除<br></code></pre></td></tr></table></figure>
+
+<h3 id="3-auto-模式异常判断速记"><a href="#3-auto-模式异常判断速记" class="headerlink" title="3. auto 模式异常判断速记"></a>3. auto 模式异常判断速记</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs php"><span class="hljs-built_in">RuntimeException</span>（业务异常）    → nack（重新入队）<br>MessageConversionException 等  → reject（删除）<br></code></pre></td></tr></table></figure>
+
+<h3 id="4-幂等性速记"><a href="#4-幂等性速记" class="headerlink" title="4. 幂等性速记"></a>4. 幂等性速记</h3><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs applescript">幂等：  删除(按<span class="hljs-built_in">id</span>)、查询、设置固定值<br>非幂等：新增、数值加减、退款、恢复库存<br></code></pre></td></tr></table></figure>
+
+<h3 id="5-易错点提醒"><a href="#5-易错点提醒" class="headerlink" title="5. 易错点提醒"></a>5. 易错点提醒</h3><blockquote>
+<p>❌ <code>none</code> 模式下消息投递后立刻 ack，异常也不会重新投递，非常不安全。</p>
+<p>❌ 开启本地重试后，异常<strong>不会 requeue 到 MQ</strong>，而是在本地重试；耗尽后返回 reject 丢弃消息。</p>
+<p>❌ <strong>新增数据不是幂等的</strong>，重复新增会产生多条记录。</p>
+<p>❌ auto 模式下业务异常返回 <strong>nack</strong>（重新入队），转换&#x2F;校验异常返回 <strong>reject</strong>（删除），别搞反。</p>
+</blockquote>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="print-no-link">#消息队列</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="print-no-link">#中间件</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>RabbitMQ09：消费者可靠性</div>
+      <div>http://zl1nq.github.io/2026/08/09/RabbitMQ09/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zl1nq</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年8月9日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/08/10/RabbitMQ10/" title="RabbitMQ：延迟消息">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">RabbitMQ：延迟消息</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/08/08/Golang02/" title="Golang：数组与切片">
+                        <span class="hidden-mobile">Golang：数组与切片</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Blog</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>

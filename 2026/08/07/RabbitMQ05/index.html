@@ -1,0 +1,1078 @@
+
+
+<!DOCTYPE html>
+<html lang="zh-CN" data-default-color-scheme=auto>
+
+
+
+<head>
+  <meta charset="UTF-8">
+
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.png">
+  <link rel="icon" href="/img/z.ico">
+  
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  
+  <meta name="theme-color" content="#2f4154">
+  <meta name="author" content="zl1nq">
+  <meta name="keywords" content="">
+  
+    <meta name="description" content="目录 一、为什么需要声明式 二、声明式总览：两种实现方式 三、方式一：基于 @Bean + 配置类 四、方式二：基于 @RabbitListener 注解 五、核心参数详解（重要） 六、两种方式对比选型 七、常见坑与注意事项 八、总结与速记   一、为什么需要声明式 ⭐ 声明式 &#x3D; 幂等保证：在程序启动时，把「我要用的队列、交换机、绑定关系及它们的属性」告诉 RabbitMQ，如果不存在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RabbitMQ05：声明队列和交换机">
+<meta property="og:url" content="http://zl1nq.github.io/2026/08/07/RabbitMQ05/index.html">
+<meta property="og:site_name" content="Blog">
+<meta property="og:description" content="目录 一、为什么需要声明式 二、声明式总览：两种实现方式 三、方式一：基于 @Bean + 配置类 四、方式二：基于 @RabbitListener 注解 五、核心参数详解（重要） 六、两种方式对比选型 七、常见坑与注意事项 八、总结与速记   一、为什么需要声明式 ⭐ 声明式 &#x3D; 幂等保证：在程序启动时，把「我要用的队列、交换机、绑定关系及它们的属性」告诉 RabbitMQ，如果不存在">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2026-08-07T09:38:25.000Z">
+<meta property="article:modified_time" content="2026-08-09T02:33:27.425Z">
+<meta property="article:author" content="zl1nq">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="消息队列">
+<meta name="twitter:card" content="summary_large_image">
+  
+  
+  
+  <title>RabbitMQ05：声明队列和交换机 - Blog</title>
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
+
+
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/hint.css/2.7.0/hint.min.css" />
+
+  <link  rel="stylesheet" href="https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+<!-- Do not modify the link that theme dependent icons -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1749284_5i9bdhy70f8.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/c/font_1736178_k526ubmyhba.css">
+
+
+<link  rel="stylesheet" href="/css/main.css" />
+
+
+  <link id="highlight-css" rel="stylesheet" href="/css/highlight.css" />
+  
+    <link id="highlight-css-dark" rel="stylesheet" href="/css/highlight-dark.css" />
+  
+
+
+
+
+  <script id="fluid-configs">
+    var Fluid = window.Fluid || {};
+    Fluid.ctx = Object.assign({}, Fluid.ctx)
+    var CONFIG = {"hostname":"zl1nq.github.io","root":"/","version":"1.9.9","typing":{"enable":true,"typeSpeed":70,"cursorChar":"_","loop":false,"scope":[]},"anchorjs":{"enable":true,"element":"h1,h2,h3,h4,h5,h6","placement":"left","visible":"hover","icon":""},"progressbar":{"enable":true,"height_px":3,"color":"#29d","options":{"showSpinner":false,"trickleSpeed":100}},"code_language":{"enable":true,"default":"TEXT"},"copy_btn":true,"image_caption":{"enable":true},"image_zoom":{"enable":true,"img_url_replace":["",""]},"toc":{"enable":true,"expand_all":true,"placement":"right","headingSelector":"h1,h2,h3,h4,h5,h6","collapseDepth":0},"lazyload":{"enable":true,"loading_img":"/img/loading.gif","onlypost":false,"offset_factor":2},"web_analytics":{"enable":false,"follow_dnt":true,"baidu":null,"google":{"measurement_id":null},"tencent":{"sid":null,"cid":null},"leancloud":{"app_id":null,"app_key":null,"server_url":null,"path":"window.location.pathname","ignore_local":false},"openkounter":{"server_url":"https://open-kounter.mintimate.cn","path":"window.location.pathname","ignore_local":false},"umami":{"src":null,"website_id":null,"domains":null,"start_time":"2024-01-01T00:00:00.000Z","token":null,"api_server":null}},"search_path":"/local-search.xml","include_content_in_search":true};
+
+    if (CONFIG.web_analytics.follow_dnt) {
+      var dntVal = navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack;
+      Fluid.ctx.dnt = dntVal && (dntVal.startsWith('1') || dntVal.startsWith('yes') || dntVal.startsWith('on'));
+    }
+  </script>
+  <script  src="/js/utils.js" ></script>
+  <script  src="/js/color-schema.js" ></script>
+  
+
+
+  
+<meta name="generator" content="Hexo 8.1.2"></head>
+
+
+<body>
+  
+
+  <header>
+    
+
+<div class="header-inner" style="height: 70vh;">
+  <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand" href="/">
+      <strong>Blog</strong>
+    </a>
+
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
+
+    <!-- Collapsible content (desktop) -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/" target="_self">
+                <i class="iconfont icon-home-fill"></i>
+                <span>首页</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/archives/" target="_self">
+                <i class="iconfont icon-archive-fill"></i>
+                <span>归档</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/categories/" target="_self">
+                <i class="iconfont icon-category-fill"></i>
+                <span>分类</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/tags/" target="_self">
+                <i class="iconfont icon-tags-fill"></i>
+                <span>标签</span>
+              </a>
+            </li>
+          
+        
+          
+          
+          
+          
+            <li class="nav-item">
+              <a class="nav-link" href="/links/" target="_self">
+                <i class="iconfont icon-link-fill"></i>
+                <span>友链</span>
+              </a>
+            </li>
+          
+        
+        
+        
+          <li class="nav-item" id="color-toggle-btn">
+            <a class="nav-link" target="_self" href="javascript:;" aria-label="Color Toggle">
+              <i class="iconfont icon-dark" id="color-toggle-icon"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile grid menu overlay -->
+<div id="mobile-grid-menu" class="d-lg-none">
+  <div class="mobile-grid-menu-inner">
+    <div class="container">
+      <div class="row">
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-home-fill"></i>
+                  <span>首页</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/archives/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-archive-fill"></i>
+                  <span>归档</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/categories/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-category-fill"></i>
+                  <span>分类</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/tags/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-tags-fill"></i>
+                  <span>标签</span>
+                </div>
+              </a>
+            </div>
+          
+        
+          
+          
+          
+          
+            <div class="col-4 mobile-grid-cell">
+              <a href="/links/" target="_self">
+                <div class="mobile-grid-item">
+                  <i class="iconfont icon-link-fill"></i>
+                  <span>友链</span>
+                </div>
+              </a>
+            </div>
+          
+        
+        
+        
+          <div class="col-4 mobile-grid-cell" id="mobile-color-toggle-btn"
+               data-label-light="开灯"
+               data-label-dark="关灯">
+            <a href="javascript:;" aria-label="Color Toggle">
+              <div class="mobile-grid-item">
+                <i class="iconfont icon-dark" id="mobile-color-toggle-icon"></i>
+                <span id="mobile-color-toggle-label">关灯</span>
+              </div>
+            </a>
+          </div>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+  
+
+<div id="banner" class="banner" parallax=true
+     style="background: url('/img/2.png') no-repeat center center; background-size: cover;">
+  <div class="full-bg-img">
+    <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+      <div class="banner-text text-center fade-in-up">
+        <div class="h2">
+          
+            <span id="subtitle" data-typed-text="RabbitMQ05：声明队列和交换机"></span>
+          
+        </div>
+
+        
+          
+  <div class="mt-3">
+    
+    
+      <span class="post-meta">
+        <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+        <time datetime="2026-08-07 17:38" pubdate>
+          2026年8月7日 下午
+        </time>
+      </span>
+    
+  </div>
+
+  <div class="mt-1">
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-chart"></i>
+        
+          6.3k 字
+        
+      </span>
+    
+
+    
+      <span class="post-meta mr-2">
+        <i class="iconfont icon-clock-fill"></i>
+        
+        
+        
+          53 分钟
+        
+      </span>
+    
+
+    
+    
+  </div>
+
+
+        
+      </div>
+
+      
+    </div>
+  </div>
+</div>
+
+
+
+</div>
+
+  </header>
+
+  <main>
+    
+      
+
+<div class="container-fluid nopadding-x">
+  <div class="row nomargin-x">
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+
+    </div>
+
+    <div class="col-lg-8 nopadding-x-md">
+      <div class="container nopadding-x-md" id="board-ctn">
+        <div id="board">
+          <article class="post-content mx-auto">
+            <h1 id="seo-header">RabbitMQ05：声明队列和交换机</h1>
+            
+            
+              <div class="markdown-body">
+                
+                <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
+<li><a href="#%E4%B8%80%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%A3%B0%E6%98%8E%E5%BC%8F">一、为什么需要声明式</a></li>
+<li><a href="#%E4%BA%8C%E5%A3%B0%E6%98%8E%E5%BC%8F%E6%80%BB%E8%A7%88%E4%B8%A4%E7%A7%8D%E5%AE%9E%E7%8E%B0%E6%96%B9%E5%BC%8F">二、声明式总览：两种实现方式</a></li>
+<li><a href="#%E4%B8%89%E6%96%B9%E5%BC%8F%E4%B8%80%E5%9F%BA%E4%BA%8E-bean--%E9%85%8D%E7%BD%AE%E7%B1%BB">三、方式一：基于 @Bean + 配置类</a></li>
+<li><a href="#%E5%9B%9B%E6%96%B9%E5%BC%8F%E4%BA%8C%E5%9F%BA%E4%BA%8E-rabbitlistener-%E6%B3%A8%E8%A7%A3">四、方式二：基于 @RabbitListener 注解</a></li>
+<li><a href="#%E4%BA%94%E6%A0%B8%E5%BF%83%E5%8F%82%E6%95%B0%E8%AF%A6%E8%A7%A3%E9%87%8D%E8%A6%81">五、核心参数详解（重要）</a></li>
+<li><a href="#%E5%85%AD%E4%B8%A4%E7%A7%8D%E6%96%B9%E5%BC%8F%E5%AF%B9%E6%AF%94%E9%80%89%E5%9E%8B">六、两种方式对比选型</a></li>
+<li><a href="#%E4%B8%83%E5%B8%B8%E8%A7%81%E5%9D%91%E4%B8%8E%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">七、常见坑与注意事项</a></li>
+<li><a href="#%E5%85%AB%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%9F%E8%AE%B0">八、总结与速记</a></li>
+</ul>
+<hr>
+<h2 id="一、为什么需要声明式"><a href="#一、为什么需要声明式" class="headerlink" title="一、为什么需要声明式"></a>一、为什么需要声明式</h2><blockquote>
+<p>⭐ <strong>声明式 &#x3D; 幂等保证</strong>：在程序启动时，把「我要用的队列、交换机、绑定关系及它们的属性」告诉 RabbitMQ，如果不存在就自动创建；如果已存在且属性一致，则什么也不做（幂等）。</p>
+</blockquote>
+<h3 id="1-手动控制台创建的痛点"><a href="#1-手动控制台创建的痛点" class="headerlink" title="1. 手动控制台创建的痛点"></a>1. 手动控制台创建的痛点</h3><table>
+<thead>
+<tr>
+<th>痛点</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>跨团队交接容易出错</strong></td>
+<td>程序员写代码定义了 10 个队列，交给运维在控制台手动创建，漏一个就报错</td>
+</tr>
+<tr>
+<td><strong>环境重复劳动</strong></td>
+<td>dev、test、prod 三套环境，每套都要手动在控制台创建一遍</td>
+</tr>
+<tr>
+<td><strong>属性不一致隐患</strong></td>
+<td>控制台手选的 durable &#x2F; exclusive &#x2F; autoDelete 属性与程序员预期不一致，运行时出诡异问题</td>
+</tr>
+</tbody></table>
+<h3 id="2-声明式的优势"><a href="#2-声明式的优势" class="headerlink" title="2. 声明式的优势"></a>2. 声明式的优势</h3><figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs awk">✅ 一次写代码，所有环境自动创建（dev<span class="hljs-regexp">/test/</span>prod 行为一致）<br>✅ 版本管理：队列/交换机定义在 Java 代码里，Git 可追溯<br>✅ 运维零依赖：项目启动即自动建，无需人工介入<br>✅ 幂等安全：不存在则建，已存在则校验（属性一致不动，不一致报错）<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 <strong>本质</strong>：把「在控制台手点鼠标创建」改为「代码声明自动创建」，从手工流程变成程序自动化流程。</p>
+</blockquote>
+<hr>
+<h2 id="二、声明式总览：两种实现方式"><a href="#二、声明式总览：两种实现方式" class="headerlink" title="二、声明式总览：两种实现方式"></a>二、声明式总览：两种实现方式</h2><p>Spring AMQP 提供了两种主流声明方式，<strong>最终效果完全等价</strong>（都会在启动时发 AMQP 的 declare 命令），只是写法和适用场景不同：</p>
+<table>
+<thead>
+<tr>
+<th>方式</th>
+<th>写法</th>
+<th>核心类&#x2F;注解</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>方式一：@Bean + 配置类</strong></td>
+<td>写 <code>@Configuration</code> 类，用 <code>@Bean</code> 返回 Queue &#x2F; Exchange &#x2F; Binding 对象</td>
+<td><code>ExchangeBuilder</code> <code>QueueBuilder</code> <code>BindingBuilder</code></td>
+<td>需要在<strong>无消费者</strong>的公共模块 &#x2F; 多工程共用队列时</td>
+</tr>
+<tr>
+<td><strong>方式二：@RabbitListener 注解</strong></td>
+<td>在监听方法上用 <code>@QueueBinding</code> 声明</td>
+<td><code>@RabbitListener</code> + <code>@QueueBinding</code> + <code>@Queue</code> + <code>@Exchange</code></td>
+<td>有消费者时<strong>最常用</strong>，把监听+声明写在一起</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>🧠 <strong>两种方式可以混用</strong>：比如公共模块用方式一预先建基础队列，业务模块的消费者用方式二声明自己的专属队列。</p>
+</blockquote>
+<hr>
+<h2 id="三、方式一：基于-Bean-配置类"><a href="#三、方式一：基于-Bean-配置类" class="headerlink" title="三、方式一：基于 @Bean + 配置类"></a>三、方式一：基于 @Bean + 配置类</h2><p>适合集中式声明：把所有队列&#x2F;交换机定义在专门的 <code>Configuration</code> 类里。</p>
+<h3 id="1-完整-Fanout-示例"><a href="#1-完整-Fanout-示例" class="headerlink" title="1. 完整 Fanout 示例"></a>1. 完整 Fanout 示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Configuration</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">FanoutConfiguration</span> &#123;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 声明交换机：hmall.fanout 类型为 Fanout</span><br><span class="hljs-comment">     * ExchangeBuilder 支持链式调用，语义更清晰</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> FanoutExchange <span class="hljs-title function_">fanoutExchange</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 写法A：直接 new 构造器</span><br>        <span class="hljs-comment">// return new FanoutExchange(&quot;hmall.fanout&quot;);</span><br>        <span class="hljs-comment">// 写法B：Builder 模式（推荐，参数一目了然）</span><br>        <span class="hljs-keyword">return</span> ExchangeBuilder<br>            .fanoutExchange(<span class="hljs-string">&quot;hmall.fanout&quot;</span>)<br>            .durable(<span class="hljs-literal">true</span>)       <span class="hljs-comment">// 持久化（RabbitMQ重启后仍存在）</span><br>            .build();<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 声明队列 1：fanout.queue1</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> Queue <span class="hljs-title function_">fanoutQueue1</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// return new Queue(&quot;fanout.queue1&quot;);</span><br>        <span class="hljs-comment">// Builder 方式：durable → 持久化（默认 true）</span><br>        <span class="hljs-keyword">return</span> QueueBuilder<br>            .durable(<span class="hljs-string">&quot;fanout.queue1&quot;</span>)<br>            .build();<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 声明绑定：把 fanoutQueue1 绑定到 fanoutExchange</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> Binding <span class="hljs-title function_">fanoutQueue1Binding</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// BindingBuilder.bind(队列).to(交换机)</span><br>        <span class="hljs-keyword">return</span> BindingBuilder<br>            .bind(fanoutQueue1())<br>            .to(fanoutExchange());<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 声明队列 2：fanout.queue2</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> Queue <span class="hljs-title function_">fanoutQueue2</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> QueueBuilder.durable(<span class="hljs-string">&quot;fanout.queue2&quot;</span>).build();<br>    &#125;<br><br>    <span class="hljs-comment">/**</span><br><span class="hljs-comment">     * 绑定 fanoutQueue2 到 fanoutExchange</span><br><span class="hljs-comment">     */</span><br>    <span class="hljs-meta">@Bean</span><br>    <span class="hljs-keyword">public</span> Binding <span class="hljs-title function_">fanoutQueue2Binding</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-keyword">return</span> BindingBuilder<br>            .bind(fanoutQueue2())<br>            .to(fanoutExchange());<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-三种-Builder-速记"><a href="#2-三种-Builder-速记" class="headerlink" title="2. 三种 Builder 速记"></a>2. 三种 Builder 速记</h3><table>
+<thead>
+<tr>
+<th>Builder</th>
+<th>创建对象</th>
+<th>典型链式用法</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>ExchangeBuilder</code></td>
+<td>各类 Exchange</td>
+<td><code>ExchangeBuilder.fanoutExchange(name).durable(true).build()</code></td>
+</tr>
+<tr>
+<td><code>QueueBuilder</code></td>
+<td>Queue</td>
+<td><code>QueueBuilder.durable(name).build()</code></td>
+</tr>
+<tr>
+<td><code>BindingBuilder</code></td>
+<td>Binding</td>
+<td><code>BindingBuilder.bind(queue).to(exchange).with(&quot;routingKey&quot;)</code></td>
+</tr>
+</tbody></table>
+<h3 id="3-Direct-模式下的-Binding-带-RoutingKey"><a href="#3-Direct-模式下的-Binding-带-RoutingKey" class="headerlink" title="3. Direct 模式下的 Binding 带 RoutingKey"></a>3. Direct 模式下的 Binding 带 RoutingKey</h3><p>Fanout 不需要 key，但 Direct &#x2F; Topic 要指定 <code>with(...)</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Bean</span><br><span class="hljs-keyword">public</span> Binding <span class="hljs-title function_">directQueue1Binding</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">// with(&quot;red&quot;) = BindingKey = red</span><br>    <span class="hljs-keyword">return</span> BindingBuilder<br>        .bind(directQueue1())<br>        .to(directExchange())<br>        .with(<span class="hljs-string">&quot;red&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="四、方式二：基于-RabbitListener-注解"><a href="#四、方式二：基于-RabbitListener-注解" class="headerlink" title="四、方式二：基于 @RabbitListener 注解"></a>四、方式二：基于 @RabbitListener 注解</h2><blockquote>
+<p>⭐ <strong>生产环境最常用</strong>：把监听方法和声明绑定写在一起，省掉单独的 @Configuration 类。</p>
+</blockquote>
+<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p><code>@RabbitListener</code> 检测到方法上配置了 <code>@QueueBinding</code> 时，在应用启动监听之前，会先把「交换机 + 队列 + 绑定」一次性声明好，然后再开始消费。</p>
+<h3 id="1-Direct-模式示例"><a href="#1-Direct-模式示例" class="headerlink" title="1. Direct 模式示例"></a>1. Direct 模式示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-comment">/**</span><br><span class="hljs-comment"> * 声明 direct.queue1 + hmall.direct 交换机 + BindingKey: red, blue</span><br><span class="hljs-comment"> * 监听队列并消费消息 —— 一站式搞定</span><br><span class="hljs-comment"> */</span><br><span class="hljs-meta">@RabbitListener(bindings = @QueueBinding(</span><br><span class="hljs-meta">    value = @Queue(</span><br><span class="hljs-meta">        name = &quot;direct.queue1&quot;,</span><br><span class="hljs-meta">        durable = &quot;true&quot;        // 队列持久化</span><br><span class="hljs-meta">    ),</span><br><span class="hljs-meta">    exchange = @Exchange(</span><br><span class="hljs-meta">        name = &quot;hmall.direct&quot;,</span><br><span class="hljs-meta">        type = ExchangeTypes.DIRECT,  // 交换机类型：DIRECT / FANOUT / TOPIC</span><br><span class="hljs-meta">        durable = &quot;true&quot;</span><br><span class="hljs-meta">    ),</span><br><span class="hljs-meta">    key = &#123;&quot;red&quot;, &quot;blue&quot;&#125;        // BindingKey，可多个</span><br><span class="hljs-meta">))</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenDirectQueue1</span><span class="hljs-params">(String msg)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者收到 direct.queue1 消息: &#123;&#125;&quot;</span>, msg);<br>    <span class="hljs-comment">// 业务处理</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-Topic-模式示例"><a href="#2-Topic-模式示例" class="headerlink" title="2. Topic 模式示例"></a>2. Topic 模式示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@RabbitListener(bindings = @QueueBinding(</span><br><span class="hljs-meta">    value = @Queue(name = &quot;topic.queue1&quot;, durable = &quot;true&quot;),</span><br><span class="hljs-meta">    exchange = @Exchange(name = &quot;hmall.topic&quot;, type = ExchangeTypes.TOPIC),</span><br><span class="hljs-meta">    key = &quot;china.#&quot;         // 通配符 BindingKey</span><br><span class="hljs-meta">))</span><br><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">listenTopicQueue1</span><span class="hljs-params">(String msg)</span> &#123;<br>    log.info(<span class="hljs-string">&quot;消费者收到 topic.queue1 消息: &#123;&#125;&quot;</span>, msg);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 注解方式下 Fanout 模式就把 <code>type = ExchangeTypes.FANOUT</code>，<code>key</code> 不填或传空数组即可。</p>
+</blockquote>
+<hr>
+<h2 id="五、核心参数详解（重要）"><a href="#五、核心参数详解（重要）" class="headerlink" title="五、核心参数详解（重要）"></a>五、核心参数详解（重要）</h2><blockquote>
+<p>🧠 这些参数直接影响数据安全和行为，不管用哪种声明方式都必须理解！</p>
+</blockquote>
+<h3 id="1-交换机与队列共通参数"><a href="#1-交换机与队列共通参数" class="headerlink" title="1. 交换机与队列共通参数"></a>1. 交换机与队列共通参数</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>可选值</th>
+<th>默认值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>durable</code></td>
+<td>true &#x2F; false</td>
+<td><strong>true</strong>（大部分 Builder 默认）</td>
+<td><strong>持久化</strong>：RabbitMQ 重启后，这个交换机&#x2F;队列还在不在？true&#x3D;重启仍在，false&#x3D;重启丢失</td>
+</tr>
+<tr>
+<td><code>autoDelete</code></td>
+<td>true &#x2F; false</td>
+<td>false</td>
+<td><strong>自动删除</strong>：当最后一个消费者断开连接后，自动删除该队列&#x2F;交换机</td>
+</tr>
+</tbody></table>
+<h3 id="2-Queue-独有的重要参数"><a href="#2-Queue-独有的重要参数" class="headerlink" title="2. Queue 独有的重要参数"></a>2. Queue 独有的重要参数</h3><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>可选值</th>
+<th>默认值</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>exclusive</code></td>
+<td>true &#x2F; false</td>
+<td>false</td>
+<td><strong>排他队列</strong>：仅声明它的<strong>同一个连接</strong>可见；连接关闭（不管 durable 是什么）<strong>自动删除</strong>。常见于临时应答队列</td>
+</tr>
+<tr>
+<td><code>deadLetterExchange</code></td>
+<td>交换机名</td>
+<td>无</td>
+<td><strong>死信交换机</strong>：队列里消息过期或被 NACK 时，路由到这个交换机再处理（死信队列 DLQ 机制）</td>
+</tr>
+<tr>
+<td><code>maxLength</code></td>
+<td>数字</td>
+<td>无</td>
+<td>队列最大消息数，超过时按 <code>overflow</code> 策略处理</td>
+</tr>
+<tr>
+<td><code>messageTTL</code></td>
+<td>毫秒数</td>
+<td>无</td>
+<td>队列中消息的默认过期时间，超过自动丢弃或进死信</td>
+</tr>
+</tbody></table>
+<h3 id="3-durable-exclusive-autoDelete-组合理解"><a href="#3-durable-exclusive-autoDelete-组合理解" class="headerlink" title="3. durable &#x2F; exclusive &#x2F; autoDelete 组合理解"></a>3. durable &#x2F; exclusive &#x2F; autoDelete 组合理解</h3><blockquote>
+<p>🌰 <strong>场景化理解</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>组合</th>
+<th>典型用途</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>durable&#x3D;true, exclusive&#x3D;false, autoDelete&#x3D;false</td>
+<td><strong>业务核心队列</strong>：重启不丢、多消费者共用、不自动删</td>
+</tr>
+<tr>
+<td>durable&#x3D;false, exclusive&#x3D;true, autoDelete&#x3D;true</td>
+<td><strong>临时 RPC 应答队列</strong>：用完即扔，连接断开就删</td>
+</tr>
+</tbody></table>
+</blockquote>
+<h3 id="4-Builder-方式中配置这些参数"><a href="#4-Builder-方式中配置这些参数" class="headerlink" title="4. Builder 方式中配置这些参数"></a>4. Builder 方式中配置这些参数</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">return</span> QueueBuilder<br>    .durable(<span class="hljs-string">&quot;business.queue&quot;</span>)        <span class="hljs-comment">// durable=true</span><br>    .withArgument(<span class="hljs-string">&quot;x-dead-letter-exchange&quot;</span>, <span class="hljs-string">&quot;dlx.exchange&quot;</span>)  <span class="hljs-comment">// 死信交换机</span><br>    .withArgument(<span class="hljs-string">&quot;x-message-ttl&quot;</span>, <span class="hljs-number">60000</span>)                     <span class="hljs-comment">// 消息 60s 过期</span><br>    .build();<br></code></pre></td></tr></table></figure>
+
+<h3 id="5-注解方式中配置"><a href="#5-注解方式中配置" class="headerlink" title="5. 注解方式中配置"></a>5. 注解方式中配置</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Queue(</span><br><span class="hljs-meta">    name = &quot;business.queue&quot;,</span><br><span class="hljs-meta">    durable = &quot;true&quot;,</span><br><span class="hljs-meta">    exclusive = &quot;false&quot;,</span><br><span class="hljs-meta">    autoDelete = &quot;false&quot;,</span><br><span class="hljs-meta">    arguments = &#123;</span><br><span class="hljs-meta">        @Argument(name = &quot;x-message-ttl&quot;, value = &quot;60000&quot;, type = &quot;java.lang.Integer&quot;)</span><br><span class="hljs-meta">    &#125;</span><br><span class="hljs-meta">)</span><br></code></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="六、两种方式对比选型"><a href="#六、两种方式对比选型" class="headerlink" title="六、两种方式对比选型"></a>六、两种方式对比选型</h2><table>
+<thead>
+<tr>
+<th>维度</th>
+<th>@Bean + @Configuration</th>
+<th>@RabbitListener + @QueueBinding</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>代码组织</strong></td>
+<td>集中在配置类里，统一管理</td>
+<td>分散在各消费者监听方法旁边</td>
+</tr>
+<tr>
+<td><strong>消费者依赖</strong></td>
+<td>不需要有消费者，纯声明也能生效</td>
+<td>必须配合消费者监听</td>
+</tr>
+<tr>
+<td><strong>复杂属性配置</strong></td>
+<td>Builder 链式，类型安全、方便写 arguments</td>
+<td>注解写 arguments 略繁琐（要写 @Argument type）</td>
+</tr>
+<tr>
+<td><strong>公共模块场景</strong></td>
+<td>✅ 适合：比如 common 模块提前建共享队列</td>
+<td>❌ 不合适：公共模块没消费者</td>
+</tr>
+<tr>
+<td><strong>业务开发场景</strong></td>
+<td>略啰嗦，要写好几个 Bean</td>
+<td>✅ 最简洁：监听+声明一体</td>
+</tr>
+<tr>
+<td><strong>新手上手难度</strong></td>
+<td>Bean 依赖注入容易搞混（bind时引用方法）</td>
+<td>注解一站式，简单直观</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>🧠 <strong>选型建议</strong>：</p>
+<ul>
+<li>业务开发，有消费者 → <strong>优先方式二（@QueueBinding）</strong>，代码最少最清爽</li>
+<li>公共模块建共享队列、死信交换机等高级配置 → <strong>方式一（@Bean）</strong>，更灵活</li>
+<li>两者可以共存不冲突</li>
+</ul>
+</blockquote>
+<hr>
+<h2 id="七、常见坑与注意事项"><a href="#七、常见坑与注意事项" class="headerlink" title="七、常见坑与注意事项"></a>七、常见坑与注意事项</h2><h3 id="坑-1：属性不一致导致启动失败-❌"><a href="#坑-1：属性不一致导致启动失败-❌" class="headerlink" title="坑 1：属性不一致导致启动失败 ❌"></a>坑 1：属性不一致导致启动失败 ❌</h3><blockquote>
+<p>⚠️ <strong>幂等的前提是属性一致</strong>。</p>
+<p>如果控制台里已经建了一个 <code>simple.queue</code>，设置的是 <code>durable=false</code>；而代码里声明为 <code>durable=true</code> → <strong>属性冲突 → 应用启动直接抛异常 <code>IOException: channel error; PRECONDITION_FAILED</code>！</strong></p>
+<p>解决：要么删了队列让代码重建，要么代码声明和控制台保持完全一致。</p>
+</blockquote>
+<h3 id="坑-2：忘记加-Component-Configuration-❌"><a href="#坑-2：忘记加-Component-Configuration-❌" class="headerlink" title="坑 2：忘记加 @Component &#x2F; @Configuration ❌"></a>坑 2：忘记加 @Component &#x2F; @Configuration ❌</h3><ul>
+<li>方式一的 <code>@Configuration</code> 类必须能被 Spring 扫描到（在启动类子包下）</li>
+<li>方式二的 <code>@RabbitListener</code> 所在类必须加 <code>@Component</code> 交给 Spring 管理</li>
+<li>不加的话声明和监听都完全不生效，且<strong>没有明显报错</strong>，调试很坑</li>
+</ul>
+<h3 id="坑-3：-Bean-绑定方法直接调用-Bean-方法-❓"><a href="#坑-3：-Bean-绑定方法直接调用-Bean-方法-❓" class="headerlink" title="坑 3：@Bean 绑定方法直接调用 Bean 方法 ❓"></a>坑 3：@Bean 绑定方法直接调用 Bean 方法 ❓</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-meta">@Bean</span><br><span class="hljs-keyword">public</span> Binding <span class="hljs-title function_">binding</span><span class="hljs-params">()</span> &#123;<br>    <span class="hljs-comment">// 这是 Spring 的 @Configuration 代理机制：方法上有 @Bean 再调用不会重复建</span><br>    <span class="hljs-keyword">return</span> BindingBuilder.bind(fanoutQueue1()).to(fanoutExchange());<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>✅ <strong>安全的</strong>：Spring 的 <code>@Configuration</code> 类是 CGLIB 代理的，同一个配置类内调用其他 @Bean 方法不会重复创建对象，而是从容器拿单例。但如果换别的配置类调用，要用参数注入 <code>@Autowired Queue fanoutQueue1</code> 再传。</p>
+</blockquote>
+<h3 id="坑-4：默认-durable-不设置-❌"><a href="#坑-4：默认-durable-不设置-❌" class="headerlink" title="坑 4：默认 durable 不设置 ❌"></a>坑 4：默认 durable 不设置 ❌</h3><p><code>new Queue(&quot;xxx&quot;)</code> 默认 durable&#x3D;true（和 RabbitMQ 协议一致），但 <code>QueueBuilder</code> 的 <code>durable()</code> 明确写了更清晰，推荐用 Builder 方式把重要参数写出来，方便阅读。</p>
+<hr>
+<h2 id="八、总结与速记"><a href="#八、总结与速记" class="headerlink" title="八、总结与速记"></a>八、总结与速记</h2><h3 id="1-声明式核心"><a href="#1-声明式核心" class="headerlink" title="1. 声明式核心"></a>1. 声明式核心</h3><figure class="highlight abnf"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs abnf">程序启动自动 declare：存在<span class="hljs-operator">=</span>跳过，不存在<span class="hljs-operator">=</span>创建，属性冲突<span class="hljs-operator">=</span>报错<br></code></pre></td></tr></table></figure>
+
+<h3 id="2-三步声明公式（任意方式）"><a href="#2-三步声明公式（任意方式）" class="headerlink" title="2. 三步声明公式（任意方式）"></a>2. 三步声明公式（任意方式）</h3><p>不管哪种方式，一次完整声明都包含三部分：</p>
+<table>
+<thead>
+<tr>
+<th>顺序</th>
+<th>对象</th>
+<th>代码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>①</td>
+<td>交换机</td>
+<td><code>ExchangeBuilder</code> 或 <code>@Exchange</code></td>
+</tr>
+<tr>
+<td>②</td>
+<td>队列</td>
+<td><code>QueueBuilder</code> 或 <code>@Queue</code></td>
+</tr>
+<tr>
+<td>③</td>
+<td>绑定关系</td>
+<td><code>BindingBuilder.bind(q).to(e).with(key)</code> 或 <code>@QueueBinding(key=)</code></td>
+</tr>
+</tbody></table>
+
+                
+              </div>
+            
+            <hr/>
+            <div>
+              <div class="post-metas my-3">
+  
+    <div class="post-meta mr-3 d-flex align-items-center">
+      <i class="iconfont icon-category"></i>
+      
+
+<span class="category-chains">
+  
+  
+    
+      <span class="category-chain">
+        
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="category-chain-item">中间件</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="category-chain-item">消息队列</a>
+  
+  
+    <span>></span>
+    
+  <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/RabbitMQ/" class="category-chain-item">RabbitMQ</a>
+  
+  
+
+  
+
+  
+
+      </span>
+    
+  
+</span>
+
+    </div>
+  
+  
+    <div class="post-meta">
+      <i class="iconfont icon-tags"></i>
+      
+        <a href="/tags/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97/" class="print-no-link">#消息队列</a>
+      
+        <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" class="print-no-link">#中间件</a>
+      
+    </div>
+  
+</div>
+
+
+              
+  
+
+  <div class="license-box my-3">
+    <div class="license-title">
+      <div>RabbitMQ05：声明队列和交换机</div>
+      <div>http://zl1nq.github.io/2026/08/07/RabbitMQ05/</div>
+    </div>
+    <div class="license-meta">
+      
+        <div class="license-meta-item">
+          <div>作者</div>
+          <div>zl1nq</div>
+        </div>
+      
+      
+        <div class="license-meta-item license-meta-date">
+          <div>发布于</div>
+          <div>2026年8月7日</div>
+        </div>
+      
+      
+      
+        <div class="license-meta-item">
+          <div>许可协议</div>
+          <div>
+            
+              
+              
+                <a class="print-no-link" target="_blank" href="https://creativecommons.org/licenses/by/4.0/">
+                  <span class="hint--top hint--rounded" aria-label="BY - 署名">
+                    <i class="iconfont icon-cc-by"></i>
+                  </span>
+                </a>
+              
+            
+          </div>
+        </div>
+      
+    </div>
+    <div class="license-icon iconfont"></div>
+  </div>
+
+
+
+              
+                <div class="post-prevnext my-3">
+                  <article class="post-prev col-6">
+                    
+                    
+                      <a href="/2026/08/08/RabbitMQ06/" title="RabbitMQ06：消息转换器">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">RabbitMQ06：消息转换器</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </article>
+                  <article class="post-next col-6">
+                    
+                    
+                      <a href="/2026/08/07/RabbitMQ04/" title="RabbitMQ04：交换机">
+                        <span class="hidden-mobile">RabbitMQ04：交换机</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </article>
+                </div>
+              
+            </div>
+
+            
+          </article>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col d-none d-lg-block col-lg-2">
+      
+  <aside class="sidebar" style="margin-left: -1rem">
+    <div id="toc">
+  <p class="toc-header">
+    <i class="iconfont icon-list"></i>
+    <span>目录</span>
+  </p>
+  <div class="toc-body" id="toc-body"></div>
+</div>
+
+
+
+  </aside>
+
+
+    </div>
+  </div>
+</div>
+
+
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+    
+
+    
+      <a id="scroll-top-button" aria-label="TOP" href="#" role="button">
+        <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+      </a>
+    
+
+    
+
+    
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+  
+    <div class="footer-content">
+       <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a> <i class="iconfont icon-love"></i> <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Blog</span></a> 
+    </div>
+  
+  
+  
+</div>
+
+  </footer>
+
+  <!-- Scripts -->
+  
+  <script  src="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.js" ></script>
+  <link  rel="stylesheet" href="https://lib.baomitu.com/nprogress/0.2.0/nprogress.min.css" />
+
+  <script>
+    NProgress.configure({"showSpinner":false,"trickleSpeed":100})
+    NProgress.start()
+    window.addEventListener('load', function() {
+      NProgress.done();
+    })
+  </script>
+
+
+<script  src="https://lib.baomitu.com/jquery/3.6.4/jquery.min.js" ></script>
+<script  src="https://lib.baomitu.com/twitter-bootstrap/4.6.1/js/bootstrap.min.js" ></script>
+<script  src="/js/events.js" ></script>
+<script  src="/js/plugins.js" ></script>
+
+
+  <script  src="https://lib.baomitu.com/typed.js/2.0.12/typed.min.js" ></script>
+  <script>
+    (function (window, document) {
+      var typing = Fluid.plugins.typing;
+      var subtitle = document.getElementById('subtitle');
+      if (!subtitle || !typing) {
+        return;
+      }
+      var text = subtitle.getAttribute('data-typed-text');
+      
+        typing(text);
+      
+    })(window, document);
+  </script>
+
+
+
+
+  
+    <script  src="/js/img-lazyload.js" ></script>
+  
+
+
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/tocbot/4.20.1/tocbot.min.js', function() {
+    var toc = jQuery('#toc');
+    if (toc.length === 0 || !window.tocbot) { return; }
+    var boardCtn = jQuery('#board-ctn');
+    var boardTop = boardCtn.offset().top;
+
+    function isExpandAllEnabled() {
+      return CONFIG.toc && CONFIG.toc.expand_all === true;
+    }
+    function expandAllToc() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .tocbot-is-collapsed').removeClass('tocbot-is-collapsed');
+    }
+    function updateTocToggle($li, $childList) {
+      var $toggle = $li.children('.toc-toggle');
+      if ($toggle.length === 0) { return; }
+      var collapsed = $childList.hasClass('tocbot-is-collapsed');
+      $toggle
+        .toggleClass('toc-toggle-collapsed', collapsed)
+        .toggleClass('toc-toggle-expanded', !collapsed);
+    }
+    function bindTocToggle() {
+      if (!isExpandAllEnabled()) { return; }
+      jQuery('#toc-body .toc-list-item').each(function() {
+        var $li = jQuery(this);
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) {
+          if ($li.children('.toc-toggle').length === 0) {
+            $li.prepend('<span class="toc-toggle toc-toggle-placeholder" aria-hidden="true">›</span>');
+          }
+          return;
+        }
+
+        if ($li.children('.toc-toggle').length === 0) {
+          $li.prepend('<span class="toc-toggle toc-toggle-expanded" aria-hidden="true">›</span>');
+        }
+        updateTocToggle($li, $childList);
+      });
+      jQuery('#toc-body').off('click.tocToggle').on('click.tocToggle', '.toc-toggle', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $li = jQuery(this).parent('.toc-list-item');
+        var $childList = $li.children('ol');
+        if ($childList.length === 0) { return; }
+        $childList.toggleClass('tocbot-is-collapsed');
+        updateTocToggle($li, $childList);
+      });
+      if (!window.__tocToggleObserver) {
+        window.__tocToggleObserver = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') { return; }
+            var $list = jQuery(mutation.target);
+            var $li = $list.parent('.toc-list-item');
+            if ($li.length === 0) { return; }
+            updateTocToggle($li, $list);
+          });
+        });
+        jQuery('#toc-body ol').each(function() {
+          window.__tocToggleObserver.observe(this, { attributes: true });
+        });
+      }
+    }
+    var tocConfig = Object.assign({
+      tocSelector     : '#toc-body',
+      contentSelector : '.markdown-body',
+      linkClass       : 'tocbot-link',
+      activeLinkClass : 'tocbot-active-link',
+      listClass       : 'tocbot-list',
+      isCollapsedClass: 'tocbot-is-collapsed',
+      collapsibleClass: 'tocbot-is-collapsible',
+      scrollSmooth    : true,
+      includeTitleTags: true,
+      headingsOffset  : -boardTop,
+    }, CONFIG.toc);
+    if (isExpandAllEnabled()) {
+      tocConfig.collapseDepth = 6;
+    }
+    window.tocbot.init(tocConfig);
+    if (toc.find('.toc-list-item').length > 0) {
+      toc.css('visibility', 'visible');
+    }
+    expandAllToc();
+    bindTocToggle();
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('tocbot' in window) {
+        tocbot.refresh();
+        var toc = jQuery('#toc');
+        if (toc.length === 0 || !tocbot) {
+          return;
+        }
+        if (toc.find('.toc-list-item').length > 0) {
+          toc.css('visibility', 'visible');
+        }
+        expandAllToc();
+        bindTocToggle();
+      }
+    });
+  });
+</script>
+
+
+  <script src=https://lib.baomitu.com/clipboard.js/2.0.11/clipboard.min.js></script>
+
+  <script>Fluid.plugins.codeWidget();</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/anchor-js/5.0.0/anchor.min.js', function() {
+    window.anchors.options = {
+      placement: CONFIG.anchorjs.placement,
+      visible  : CONFIG.anchorjs.visible
+    };
+    if (CONFIG.anchorjs.icon) {
+      window.anchors.options.icon = CONFIG.anchorjs.icon;
+    }
+    var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+    var res = [];
+    for (var item of el) {
+      res.push('.markdown-body > ' + item.trim());
+    }
+    if (CONFIG.anchorjs.placement === 'left') {
+      window.anchors.options.class = 'anchorjs-link-left';
+    }
+    window.anchors.add(res.join(', '));
+
+    Fluid.events.registerRefreshCallback(function() {
+      if ('anchors' in window) {
+        anchors.removeAll();
+        var el = (CONFIG.anchorjs.element || 'h1,h2,h3,h4,h5,h6').split(',');
+        var res = [];
+        for (var item of el) {
+          res.push('.markdown-body > ' + item.trim());
+        }
+        if (CONFIG.anchorjs.placement === 'left') {
+          anchors.options.class = 'anchorjs-link-left';
+        }
+        anchors.add(res.join(', '));
+      }
+    });
+  });
+</script>
+
+
+  
+<script>
+  Fluid.utils.createScript('https://lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js', function() {
+    Fluid.plugins.fancyBox();
+  });
+</script>
+
+
+  <script>Fluid.plugins.imageCaption();</script>
+
+
+
+
+
+<!-- 主题的启动项，将它保持在最底部 -->
+<!-- the boot of the theme, keep it at the bottom -->
+<script  src="/js/boot.js" ></script>
+
+
+  
+
+  <noscript>
+    <div class="noscript-warning">博客在允许 JavaScript 运行的环境下浏览效果更佳</div>
+  </noscript>
+</body>
+</html>
