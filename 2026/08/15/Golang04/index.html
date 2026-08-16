@@ -19,15 +19,15 @@
   <meta name="author" content="zl1nq">
   <meta name="keywords" content="">
   
-    <meta name="description" content="目录 Map 基础 创建 Map 的三种方式 判断 key 是否存在 删除元素 Map 是引用类型 总结与速记   Map 基础 ⭐ Map（映射） &#x3D; 键值对（key-value）类型，通过 key 快速查找对应的 value。  1. 声明与初始化123456&#x2F;&#x2F; 声明：map[key类型]value类型var m map[string]int     &#x2F;&#x2F; 声明m &#x3D; make(m">
+    <meta name="description" content="目录 函数声明与调用 参数传递机制 多返回值 命名返回值 函数作为变量（匿名函数） 总结与速记   函数声明与调用 ⭐ Go 中函数通过 func 关键字声明，基本语法：func 函数名(参数列表) 返回值类型  123func add(a int, b int) int &#123;    return a + b&#125;  12var result &#x3D; add(10, 20)fmt.Pri">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Golang：Map">
-<meta property="og:url" content="http://zl1nq.github.io/2026/08/10/Golang03/index.html">
+<meta property="og:title" content="Golang：函数">
+<meta property="og:url" content="http://zl1nq.github.io/2026/08/15/Golang04/index.html">
 <meta property="og:site_name" content="Blog">
-<meta property="og:description" content="目录 Map 基础 创建 Map 的三种方式 判断 key 是否存在 删除元素 Map 是引用类型 总结与速记   Map 基础 ⭐ Map（映射） &#x3D; 键值对（key-value）类型，通过 key 快速查找对应的 value。  1. 声明与初始化123456&#x2F;&#x2F; 声明：map[key类型]value类型var m map[string]int     &#x2F;&#x2F; 声明m &#x3D; make(m">
+<meta property="og:description" content="目录 函数声明与调用 参数传递机制 多返回值 命名返回值 函数作为变量（匿名函数） 总结与速记   函数声明与调用 ⭐ Go 中函数通过 func 关键字声明，基本语法：func 函数名(参数列表) 返回值类型  123func add(a int, b int) int &#123;    return a + b&#125;  12var result &#x3D; add(10, 20)fmt.Pri">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2026-08-10T15:26:28.000Z">
-<meta property="article:modified_time" content="2026-08-10T15:27:47.383Z">
+<meta property="article:published_time" content="2026-08-15T13:58:42.000Z">
+<meta property="article:modified_time" content="2026-08-15T14:02:11.906Z">
 <meta property="article:author" content="zl1nq">
 <meta property="article:tag" content="Golang">
 <meta property="article:tag" content="语言基础">
@@ -35,7 +35,7 @@
   
   
   
-  <title>Golang：Map - Blog</title>
+  <title>Golang：函数 - Blog</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -288,7 +288,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="Golang：Map"></span>
+            <span id="subtitle" data-typed-text="Golang：函数"></span>
           
         </div>
 
@@ -299,8 +299,8 @@
     
       <span class="post-meta">
         <i class="iconfont icon-date-fill" aria-hidden="true"></i>
-        <time datetime="2026-08-10 23:26" pubdate>
-          2026年8月10日 晚上
+        <time datetime="2026-08-15 21:58" pubdate>
+          2026年8月15日 晚上
         </time>
       </span>
     
@@ -311,7 +311,7 @@
       <span class="post-meta mr-2">
         <i class="iconfont icon-chart"></i>
         
-          2k 字
+          1.9k 字
         
       </span>
     
@@ -322,7 +322,7 @@
         
         
         
-          17 分钟
+          16 分钟
         
       </span>
     
@@ -361,106 +361,114 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">Golang：Map</h1>
+            <h1 id="seo-header">Golang：函数</h1>
             
             
               <div class="markdown-body">
                 
                 <h2 id="目录"><a href="#目录" class="headerlink" title="目录"></a>目录</h2><ul>
-<li><a href="#map-%E5%9F%BA%E7%A1%80">Map 基础</a></li>
-<li><a href="#%E5%88%9B%E5%BB%BA-map-%E7%9A%84%E4%B8%89%E7%A7%8D%E6%96%B9%E5%BC%8F">创建 Map 的三种方式</a></li>
-<li><a href="#%E5%88%A4%E6%96%AD-key-%E6%98%AF%E5%90%A6%E5%AD%98%E5%9C%A8">判断 key 是否存在</a></li>
-<li><a href="#%E5%88%A0%E9%99%A4%E5%85%83%E7%B4%A0">删除元素</a></li>
-<li><a href="#map-%E6%98%AF%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B">Map 是引用类型</a></li>
+<li><a href="#%E5%87%BD%E6%95%B0%E5%A3%B0%E6%98%8E%E4%B8%8E%E8%B0%83%E7%94%A8">函数声明与调用</a></li>
+<li><a href="#%E5%8F%82%E6%95%B0%E4%BC%A0%E9%80%92%E6%9C%BA%E5%88%B6">参数传递机制</a></li>
+<li><a href="#%E5%A4%9A%E8%BF%94%E5%9B%9E%E5%80%BC">多返回值</a></li>
+<li><a href="#%E5%91%BD%E5%90%8D%E8%BF%94%E5%9B%9E%E5%80%BC">命名返回值</a></li>
+<li><a href="#%E5%87%BD%E6%95%B0%E4%BD%9C%E4%B8%BA%E5%8F%98%E9%87%8F%E5%8C%BF%E5%90%8D%E5%87%BD%E6%95%B0">函数作为变量（匿名函数）</a></li>
 <li><a href="#%E6%80%BB%E7%BB%93%E4%B8%8E%E9%80%9F%E8%AE%B0">总结与速记</a></li>
 </ul>
 <hr>
-<h2 id="Map-基础"><a href="#Map-基础" class="headerlink" title="Map 基础"></a>Map 基础</h2><blockquote>
-<p>⭐ <strong>Map（映射）</strong> &#x3D; 键值对（key-value）类型，通过 key 快速查找对应的 value。</p>
+<h2 id="函数声明与调用"><a href="#函数声明与调用" class="headerlink" title="函数声明与调用"></a>函数声明与调用</h2><blockquote>
+<p>⭐ Go 中函数通过 <code>func</code> 关键字声明，基本语法：<code>func 函数名(参数列表) 返回值类型</code></p>
 </blockquote>
-<h3 id="1-声明与初始化"><a href="#1-声明与初始化" class="headerlink" title="1. 声明与初始化"></a>1. 声明与初始化</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">// 声明：map[key类型]value类型</span><br><span class="hljs-keyword">var</span> m <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]<span class="hljs-type">int</span>     <span class="hljs-comment">// 声明</span><br>m = <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]<span class="hljs-type">int</span>) <span class="hljs-comment">// 初始化</span><br>m[<span class="hljs-string">&quot;a&quot;</span>] = <span class="hljs-number">1</span><br>fmt.Println(m)        <span class="hljs-comment">// map[a:1]</span><br>fmt.Println(m[<span class="hljs-string">&quot;a&quot;</span>])   <span class="hljs-comment">// 1</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">add</span><span class="hljs-params">(a <span class="hljs-type">int</span>, b <span class="hljs-type">int</span>)</span></span> <span class="hljs-type">int</span> &#123;<br>    <span class="hljs-keyword">return</span> a + b<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> result = add(<span class="hljs-number">10</span>, <span class="hljs-number">20</span>)<br>fmt.Println(result) <span class="hljs-comment">// 30</span><br></code></pre></td></tr></table></figure>
 
 <blockquote>
-<p>⚠️ <strong>重要</strong>：<code>var m map[string]int</code> 仅声明后 m 是 <strong>nil</strong>，<strong>不能直接写入</strong>（会 panic），必须用 <code>make</code> 初始化后才能赋值。</p>
-</blockquote>
-<h3 id="2-访问不存在的-key"><a href="#2-访问不存在的-key" class="headerlink" title="2. 访问不存在的 key"></a>2. 访问不存在的 key</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">fmt.Println(m[<span class="hljs-string">&quot;asd&quot;</span>]) <span class="hljs-comment">// 0</span><br></code></pre></td></tr></table></figure>
-
-<blockquote>
-<p>💡 访问不存在的 key <strong>不会报错</strong>，而是返回 value 对应类型的<strong>零值</strong>（int 类型就是 0）。</p>
+<p>💡 当多个参数类型相同时，可以简写：<code>func add(a, b int) int</code>，只在末尾写一次类型。</p>
 </blockquote>
 <hr>
-<h2 id="创建-Map-的三种方式"><a href="#创建-Map-的三种方式" class="headerlink" title="创建 Map 的三种方式"></a>创建 Map 的三种方式</h2><table>
+<h2 id="参数传递机制"><a href="#参数传递机制" class="headerlink" title="参数传递机制"></a>参数传递机制</h2><blockquote>
+<p>🧠 Go 中<strong>所有参数传递都是值传递</strong>（pass by value），没有引用传递。</p>
+</blockquote>
+<p>但根据参数类型的不同，效果有区别：</p>
+<table>
 <thead>
 <tr>
-<th>方式</th>
-<th>语法</th>
-<th>说明</th>
+<th>参数类型</th>
+<th>传递的内容</th>
+<th>修改底层数据是否影响调用方</th>
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>make</strong></td>
-<td><code>make(map[K]V)</code></td>
-<td>最常用，创建空 map</td>
+<td><strong>基本类型</strong>（int、string、bool 等）</td>
+<td>值的副本</td>
+<td>❌ 不影响</td>
 </tr>
 <tr>
-<td><strong>make + 容量</strong></td>
-<td><code>make(map[K]V, cap)</code></td>
-<td>可预分配容量（可选）</td>
-</tr>
-<tr>
-<td><strong>字面量</strong></td>
-<td><code>map[K]V{...}</code></td>
-<td>声明时直接初始化键值对</td>
+<td><strong>引用类型</strong>（slice、map、channel、指针等）</td>
+<td>引用（指针）的副本</td>
+<td>✅ 影响（指向同一块底层数据）</td>
 </tr>
 </tbody></table>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">// 方式一：make 创建</span><br>m1 := <span class="hljs-built_in">make</span>(<span class="hljs-keyword">map</span>[<span class="hljs-type">int</span>]<span class="hljs-type">int</span>)<br>fmt.Println(m1) <span class="hljs-comment">// map[]</span><br><br><span class="hljs-comment">// 方式二：字面量初始化</span><br>m2 := <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]<span class="hljs-type">int</span>&#123;<br>    <span class="hljs-string">&quot;张三&quot;</span>:  <span class="hljs-number">18</span>,<br>    <span class="hljs-string">&quot;lisi&quot;</span>: <span class="hljs-number">20</span>, <span class="hljs-comment">// ⚠️ 这个逗号不能省略</span><br>&#125;<br>fmt.Println(m2) <span class="hljs-comment">// map[lisi:20 张三:18]</span><br></code></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-comment">// 基本类型：值拷贝，原变量不受影响</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">modifyInt</span><span class="hljs-params">(x <span class="hljs-type">int</span>)</span></span> &#123;<br>    x = <span class="hljs-number">100</span><br>&#125;<br>n := <span class="hljs-number">1</span><br>modifyInt(n)<br>fmt.Println(n) <span class="hljs-comment">// 1，不变</span><br><br><span class="hljs-comment">// 引用类型（map）：引用拷贝，指向同一块地址空间，原数据受影响</span><br><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">modifyMap</span><span class="hljs-params">(m <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]<span class="hljs-type">int</span>)</span></span> &#123;<br>    m[<span class="hljs-string">&quot;a&quot;</span>] = <span class="hljs-number">100</span><br>&#125;<br>m := <span class="hljs-keyword">map</span>[<span class="hljs-type">string</span>]<span class="hljs-type">int</span>&#123;<span class="hljs-string">&quot;a&quot;</span>: <span class="hljs-number">1</span>&#125;<br>modifyMap(m)<br>fmt.Println(m[<span class="hljs-string">&quot;a&quot;</span>]) <span class="hljs-comment">// 100，被修改了</span><br></code></pre></td></tr></table></figure>
 
 <blockquote>
-<p>⚠️ <strong>易错</strong>：使用字面量初始化 map 时，最后一个元素的<strong>逗号不能省略</strong>，否则编译报错。</p>
+<p>⚠️ 注意：引用类型传递的是引用的<strong>副本</strong>。通过它修改底层数据可见，但如果在函数内<strong>重新赋值</strong>这个引用本身（指向新对象），调用方不可见。</p>
 </blockquote>
 <hr>
-<h2 id="判断-key-是否存在"><a href="#判断-key-是否存在" class="headerlink" title="判断 key 是否存在"></a>判断 key 是否存在</h2><blockquote>
-<p>🧠 由于访问不存在的 key 只返回零值（不报错），无法区分「key 存在且值为 0」和「key 不存在」。因此 Go 提供了 <strong>comma-ok 模式</strong>。</p>
+<h2 id="多返回值"><a href="#多返回值" class="headerlink" title="多返回值"></a>多返回值</h2><blockquote>
+<p>⭐ Go 支持函数返回多个值，用括号包裹多个返回值类型。</p>
 </blockquote>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><code class="hljs go">value, ok := m2[<span class="hljs-string">&quot;lisi&quot;</span>] <span class="hljs-comment">// ok 用来判断 key 是否存在</span><br><span class="hljs-keyword">if</span> ok &#123;<br>    fmt.Println(value)   <span class="hljs-comment">// key 存在，输出对应值</span><br>&#125; <span class="hljs-keyword">else</span> &#123;<br>    fmt.Println(<span class="hljs-string">&quot;key不存在&quot;</span>) <span class="hljs-comment">// key 不存在</span><br>&#125;<br></code></pre></td></tr></table></figure>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">doSomething</span><span class="hljs-params">(a, b <span class="hljs-type">int</span>)</span></span> (<span class="hljs-type">int</span>, <span class="hljs-type">int</span>) &#123;<br>    <span class="hljs-keyword">return</span> a + b, a - b<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">fmt.Println(doSomething(result, result)) <span class="hljs-comment">// 30 0</span><br></code></pre></td></tr></table></figure>
+
+<blockquote>
+<p>💡 多返回值是 Go 的特色，常用于返回「结果 + 错误」模式：<code>func foo() (result, error)</code></p>
+</blockquote>
+<hr>
+<h2 id="命名返回值"><a href="#命名返回值" class="headerlink" title="命名返回值"></a>命名返回值</h2><blockquote>
+<p>⭐ 命名返回值就是在返回值类型前给返回值起一个名字，在函数体内可以直接使用该变量。</p>
+</blockquote>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">add1</span><span class="hljs-params">(a, b <span class="hljs-type">int</span>)</span></span> (res <span class="hljs-type">int</span>) &#123;<br>    res = a + b<br>    <span class="hljs-keyword">return</span> <span class="hljs-comment">// 裸 return，自动返回命名的返回值变量</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs go">fmt.Println(add1(<span class="hljs-number">15</span>, <span class="hljs-number">15</span>)) <span class="hljs-comment">// 30</span><br></code></pre></td></tr></table></figure>
 
 <table>
 <thead>
 <tr>
-<th>返回值</th>
-<th>含义</th>
+<th>特性</th>
+<th>说明</th>
 </tr>
 </thead>
 <tbody><tr>
-<td><code>value</code></td>
-<td>key 对应的值（不存在则为零值）</td>
+<td><strong>命名返回值</strong></td>
+<td>在返回值类型前加变量名，如 <code>(res int)</code></td>
 </tr>
 <tr>
-<td><code>ok</code></td>
-<td><code>true</code> 表示 key 存在，<code>false</code> 表示不存在</td>
+<td><strong>默认值</strong></td>
+<td>命名返回值变量自动初始化为零值</td>
+</tr>
+<tr>
+<td><strong>裸 return</strong></td>
+<td>函数体末尾直接 <code>return</code>，无需指定返回值，自动返回命名变量</td>
 </tr>
 </tbody></table>
 <blockquote>
-<p>💡 这就是 Go 中经典的 <strong>comma-ok（逗号 ok）模式</strong>，在类型断言、通道接收等场景也会用到。</p>
+<p>⚠️ 命名返回值在函数体较短时方便，但在长函数中使用裸 return 可能降低可读性（不易看出返回了什么）。</p>
 </blockquote>
 <hr>
-<h2 id="删除元素"><a href="#删除元素" class="headerlink" title="删除元素"></a>删除元素</h2><p>使用内置函数 <code>delete</code> 删除指定 key：</p>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-built_in">delete</span>(m2, <span class="hljs-string">&quot;lisi&quot;</span>) <span class="hljs-comment">// 删除操作</span><br>_, ok = m2[<span class="hljs-string">&quot;lisi&quot;</span>] <span class="hljs-comment">// key 不存在</span><br><span class="hljs-keyword">if</span> ok &#123;<br>    fmt.Println(value)<br>&#125; <span class="hljs-keyword">else</span> &#123;<br>    fmt.Println(<span class="hljs-string">&quot;key不存在&quot;</span>)<br>&#125;<br></code></pre></td></tr></table></figure>
+<h2 id="函数作为变量（匿名函数）"><a href="#函数作为变量（匿名函数）" class="headerlink" title="函数作为变量（匿名函数）"></a>函数作为变量（匿名函数）</h2><blockquote>
+<p>⭐ 在 Go 中，函数是<strong>一等公民</strong>（first-class citizen）：可以赋值给变量、作为参数传递、作为返回值返回。</p>
+</blockquote>
+<h3 id="1-赋值给变量"><a href="#1-赋值给变量" class="headerlink" title="1. 赋值给变量"></a>1. 赋值给变量</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs go"><span class="hljs-keyword">var</span> x <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">()</span></span> <span class="hljs-comment">// 声明一个函数类型变量</span><br>x = <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">()</span></span> &#123; <span class="hljs-comment">// 赋值一个匿名函数</span><br>    fmt.Println(<span class="hljs-string">&quot;aaa&quot;</span>)<br>&#125;<br>x() <span class="hljs-comment">// 调用：aaa</span><br></code></pre></td></tr></table></figure>
+
+<h3 id="2-短变量声明-匿名函数"><a href="#2-短变量声明-匿名函数" class="headerlink" title="2. 短变量声明 + 匿名函数"></a>2. 短变量声明 + 匿名函数</h3><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><code class="hljs go">y := <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(a, b <span class="hljs-type">int</span>)</span></span> <span class="hljs-type">int</span> &#123;<br>    <span class="hljs-keyword">return</span> a + b<br>&#125;<br>result1 := y(<span class="hljs-number">30</span>, <span class="hljs-number">30</span>)<br>fmt.Println(result1) <span class="hljs-comment">// 60</span><br></code></pre></td></tr></table></figure>
 
 <blockquote>
-<p>💡 <code>delete(map, key)</code> 删除指定 key。如果 key 不存在，<strong>不会报错</strong>，也没有任何副作用。</p>
+<p>💡 匿名函数没有函数名，通过 <code>func(参数) 返回值 { 函数体 }</code> 定义，常用于赋值给变量或立即调用（IIFE）。</p>
 </blockquote>
 <hr>
-<h2 id="Map-是引用类型"><a href="#Map-是引用类型" class="headerlink" title="Map 是引用类型"></a>Map 是引用类型</h2><blockquote>
-<p>⭐ <strong>关键特性</strong>：Map 是<strong>引用类型</strong>，赋值时共享底层数据，修改会相互影响。</p>
-</blockquote>
-<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><code class="hljs go">m3 := m2 <span class="hljs-comment">// 引用类型，底层是同一块空间</span><br>fmt.Println(m2) <span class="hljs-comment">// map[张三:18]</span><br>fmt.Println(m3) <span class="hljs-comment">// map[张三:18]</span><br><br>m3[<span class="hljs-string">&quot;lisi&quot;</span>] = <span class="hljs-number">12</span><br>fmt.Println(m2) <span class="hljs-comment">// map[lisi:12 张三:18]  m2 也被改变了！</span><br>fmt.Println(m3) <span class="hljs-comment">// map[lisi:12 张三:18]</span><br></code></pre></td></tr></table></figure>
-
-<blockquote>
-<p>❌ Map 和切片一样是引用类型，赋值 &#x2F; 传参<strong>不会复制数据</strong>，而是共享底层哈希表。修改一个会影响另一个。</p>
-</blockquote>
-<hr>
-<h2 id="总结与速记"><a href="#总结与速记" class="headerlink" title="总结与速记"></a>总结与速记</h2><h3 id="1-Map-核心知识点"><a href="#1-Map-核心知识点" class="headerlink" title="1. Map 核心知识点"></a>1. Map 核心知识点</h3><table>
+<h2 id="总结与速记"><a href="#总结与速记" class="headerlink" title="总结与速记"></a>总结与速记</h2><h3 id="1-函数核心知识点"><a href="#1-函数核心知识点" class="headerlink" title="1. 函数核心知识点"></a>1. 函数核心知识点</h3><table>
 <thead>
 <tr>
 <th>维度</th>
@@ -468,39 +476,38 @@
 </tr>
 </thead>
 <tbody><tr>
-<td><strong>本质</strong></td>
-<td>键值对（key-value）映射，通过 key 快速查找 value</td>
+<td><strong>声明语法</strong></td>
+<td><code>func 函数名(参数列表) 返回值类型</code></td>
 </tr>
 <tr>
-<td><strong>声明</strong></td>
-<td><code>var m map[K]V</code>（声明后是 nil，需 make 初始化才能写入）</td>
+<td><strong>参数简写</strong></td>
+<td>同类型参数可合并：<code>func f(a, b int)</code></td>
 </tr>
 <tr>
-<td><strong>初始化</strong></td>
-<td><code>make(map[K]V)</code> 或字面量 <code>map[K]V{...}</code></td>
+<td><strong>传递机制</strong></td>
+<td>始终值传递；基本类型拷贝值，引用类型拷贝引用（指向同一底层数据）</td>
 </tr>
 <tr>
-<td><strong>引用类型</strong></td>
-<td>赋值 &#x2F; 传参共享底层数据，修改相互影响</td>
+<td><strong>多返回值</strong></td>
+<td><code>(int, int)</code> 括号包裹多个返回值类型</td>
 </tr>
 <tr>
-<td><strong>零值访问</strong></td>
-<td>不存在的 key 返回零值，不报错</td>
+<td><strong>命名返回值</strong></td>
+<td><code>(res int)</code>，自动初始化零值，支持裸 return</td>
 </tr>
 <tr>
-<td><strong>判断存在</strong></td>
-<td>comma-ok 模式：<code>value, ok := m[key]</code></td>
+<td><strong>一等公民</strong></td>
+<td>函数可赋值给变量、作为参数 &#x2F; 返回值传递</td>
 </tr>
 <tr>
-<td><strong>删除</strong></td>
-<td><code>delete(m, key)</code>，key 不存在也不报错</td>
+<td><strong>匿名函数</strong></td>
+<td><code>func(参数) 返回值 { 函数体 }</code>，无函数名</td>
 </tr>
 </tbody></table>
 <h3 id="2-易错点提醒"><a href="#2-易错点提醒" class="headerlink" title="2. 易错点提醒"></a>2. 易错点提醒</h3><blockquote>
-<p>❌ <code>var m map[string]int</code> 声明后是 nil，<strong>必须 make 初始化</strong>才能写入，否则 panic。</p>
-<p>❌ 字面量初始化时最后一个元素的<strong>逗号不能省略</strong>。</p>
-<p>❌ 访问不存在的 key 返回<strong>零值</strong>而非报错，需用 comma-ok 模式区分「值为零值」和「key 不存在」。</p>
-<p>❌ Map 是引用类型，赋值 &#x2F; 传参<strong>共享底层数据</strong>，修改会相互影响。</p>
+<p>❌ Go <strong>没有引用传递</strong>，只有值传递。引用类型传参传递的是引用的<strong>副本</strong>，修改底层数据可见，但重新赋值引用本身不可见。</p>
+<p>❌ 命名返回值的裸 return 会自动返回命名变量，不要在长函数中滥用以免降低可读性。</p>
+<p>❌ <code>var x func()</code> 声明后 x 是 nil，<strong>不能直接调用</strong>（会 panic），必须先赋值。</p>
 </blockquote>
 
                 
@@ -549,8 +556,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>Golang：Map</div>
-      <div>http://zl1nq.github.io/2026/08/10/Golang03/</div>
+      <div>Golang：函数</div>
+      <div>http://zl1nq.github.io/2026/08/15/Golang04/</div>
     </div>
     <div class="license-meta">
       
@@ -562,7 +569,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2026年8月10日</div>
+          <div>2026年8月15日</div>
         </div>
       
       
@@ -594,9 +601,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/2026/08/12/Springboot/" title="SpringBoot">
+                      <a href="/2026/08/16/Meaven/" title="Maven">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">SpringBoot</span>
+                        <span class="hidden-mobile">Maven</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -604,8 +611,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/2026/08/10/RabbitMQ10/" title="RabbitMQ10：延迟消息">
-                        <span class="hidden-mobile">RabbitMQ10：延迟消息</span>
+                      <a href="/2026/08/12/Springboot/" title="SpringBoot">
+                        <span class="hidden-mobile">SpringBoot</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
